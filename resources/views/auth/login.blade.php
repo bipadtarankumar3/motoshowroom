@@ -38,6 +38,7 @@
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Password</label>
+                            <a href="{{ route('password.request') }}" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Forgot password?</a>
                         </div>
                         <input type="password" name="password" id="password" required
                                class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border @error('password') border-rose-500 @else border-slate-700/80 @enderror text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm transition"
@@ -61,6 +62,26 @@
                         Sign In to Your Account
                     </button>
                 </form>
+
+                <!-- Google OAuth Divider -->
+                <div class="mt-6 relative flex items-center justify-center">
+                    <div class="border-t border-slate-800 w-full"></div>
+                    <span class="bg-slate-950 px-3 text-[11px] uppercase tracking-wider text-slate-500 font-bold absolute">Or continue with</span>
+                </div>
+
+                <!-- Google Login Button -->
+                <div class="mt-6">
+                    <a href="{{ route('auth.google') }}" id="btn-google-login"
+                       class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-850 text-white font-semibold text-sm border border-slate-700/80 hover:border-slate-600 flex items-center justify-center gap-3 transition shadow-md">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.4l3.7 2.9C6.5 7.4 9 5 12 5z"/>
+                            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+                            <path fill="#FBBC05" d="M5.6 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.9 6.4C.7 8.8 0 10.8 0 12s.7 3.2 1.9 5.6l3.7-2.9z"/>
+                            <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 16.4C3.7 20.2 7.5 23 12 23z"/>
+                        </svg>
+                        <span>Sign in with Google</span>
+                    </a>
+                </div>
 
                 <!-- Quick Seed Credentials Helper (For convenient testing) -->
                 <div class="mt-6 p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400">

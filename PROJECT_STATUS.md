@@ -11,36 +11,35 @@
 ---
 
 ## 2. Current Status
-* **Current Phase**: **User Roles (`admin` & `user`), Admin Creation & Personal Details Page** (COMPLETED)
+* **Current Phase**: **Phase 2: Authentication & Multi-Tenant Isolation** (COMPLETED)
 * **Completed Features**:
   * [x] Project workspace initialized with Laravel 13 & PHP 8.5
   * [x] MySQL 8.0 database created and migrations applied on port 3306
-  * [x] Livewire 4.4, Socialite 5.31, and Razorpay 2.9 dependencies installed & registered
-  * [x] NPM packages, Tailwind CSS 4, and Three.js installed; Vite production build verified
   * [x] Full documentation suite delivered in `docs/` and `README.md`
-  * [x] Multi-tenancy architectural core (`TenantContext`, `TenantScope`, `BelongsToTenant`)
-  * [x] Typed PHP 8.5 domain enums (`UserRole`, `SubscriptionStatus`, `PaymentStatus`, etc.)
-  * [x] Two User Types implemented:
-    * `admin`: Platform Administrator with privileges to manage, create, and view any user.
-    * `user`: Standard showroom partner/customer who can self-register and manage their own details.
-  * [x] Registration & Authentication Flow:
-    * Public self-registration (`/register`) with name, email, phone, city, password.
-    * Auto-login and immediate redirection to their dedicated details page.
-    * Secure login (`/login`) with session regeneration and remember-me support.
-    * Logout (`/logout`) with session invalidation.
-  * [x] User Details Page:
-    * Every user has their own dedicated page with complete details (`/users/{user}` and `/profile`).
-    * Displays profile avatar, name, email, role badge (`Admin`/`User`), account status badge, phone, city, address, bio/showroom notes, and account timestamp metadata.
-    * Self-editing support (`/users/{user}/edit`) with security protection preventing privilege escalation.
-    * Strict authorization preventing standard users from viewing other users' private detail pages (HTTP 403).
-  * [x] Admin User Management:
-    * Admin user directory (`/admin/users`) with search, role filters, status filters, and metric statistic cards.
-    * Admin user creation workflow (`/admin/users/create`) with ability to provision both `admin` and `user` accounts with custom details.
-    * `EnsureAdmin` middleware protecting administrative routes.
-  * [x] Database Seeder with default demo accounts:
-    * Admin: `admin@motoshowroom.example` / `Password123!`
-    * User: `user@motoshowroom.example` / `Password123!`
-  * [x] Automated PHPUnit test suite passing (14 tests, 66 assertions, 0 failures)
+  * [x] Two User Types (`admin` & `user`), user self-registration, and dedicated user details pages
+  * [x] Multi-tenancy Core Engine:
+    * `showrooms` table and model with dynamic brand colors (`brand_color_primary`, `brand_color_accent`), slugs, custom domains, and status.
+    * `showroom_memberships` table and model linking users to showrooms with departmental roles (`owner`, `sales_manager`, etc.) and granular permissions.
+    * `social_accounts` table and model for Google OAuth identity mapping.
+  * [x] Tenancy Middleware & Security:
+    * `EnsureTenantContext` middleware resolving active showroom via route slug, domain, or custom domain.
+    * `VerifyShowroomMembership` middleware enforcing strict cross-tenant isolation on showroom back-office management.
+    * Super Admin universal platform oversight.
+  * [x] Google OAuth Integration:
+    * Laravel Socialite integration with secure callback handling.
+    * Mandatory security check preventing privilege escalation (Google public registrations strictly assigned `user` role).
+  * [x] Password Reset Lifecycle:
+    * Request reset token form (`/forgot-password`).
+    * Secure hashed token storage in `password_reset_tokens` with 60-minute expiry validation.
+    * Password update submission (`/reset-password`).
+  * [x] Showroom Storefront & Back-Office Shells:
+    * Public showroom website (`/showrooms/{showroom}`) with dynamic showroom CSS branding.
+    * Showroom staff back-office (`/showrooms/{showroom}/manage`) with tenant authorization checks.
+  * [x] Database Seeder with multiple isolated showrooms:
+    * Showroom A: Apex Moto Hub (`apex-moto`), owned by Rajesh (`rajesh@apex.example`)
+    * Showroom B: Velocity Superbikes (`velocity-superbikes`), owned by Vikram (`vikram@velocity.example`)
+    * Super Admin: `admin@motoshowroom.example`
+  * [x] Automated PHPUnit test suite passing (26 tests, 100 assertions, 0 failures)
   * [x] Code formatted with Laravel Pint
 
 ---
@@ -51,8 +50,8 @@
 |---|---|---|
 | **Phase 1** | Laravel Foundation & Core Structure | ✅ COMPLETED |
 | **Phase 1.5** | User Roles (`admin` & `user`), Admin Creation & Personal Details Page | ✅ COMPLETED |
-| **Phase 2** | Authentication & Multi-Tenant Isolation | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 3** | Super Admin Dashboard | ⏳ PENDING |
+| **Phase 2** | Authentication & Multi-Tenant Isolation | ✅ COMPLETED |
+| **Phase 3** | Super Admin Dashboard | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 4** | Subscription Management & Entitlements | ⏳ PENDING |
 | **Phase 5** | Showroom Dashboard & Website Builder | ⏳ PENDING |
 | **Phase 6** | Motorcycle Inventory Management | ⏳ PENDING |
@@ -70,6 +69,6 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 14 tests, 66 assertions, 0 failures (100% passing).
-* **Coverage**: Registration, login, logout, user details page, user profile editing, cross-user authorization boundaries, admin user creation, admin user management, and middleware access control.
+* **PHPUnit Suite**: 26 tests, 100 assertions, 0 failures (100% passing).
+* **Coverage**: Tenant isolation, cross-tenant 403 enforcement, public website resolution, user roles & details pages, admin user provisioning, password reset lifecycle, Google OAuth integration, and base foundation.
 * **Code Styling**: Formatted with `vendor/bin/pint --format agent`.

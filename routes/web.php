@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\UserController;
+use App\Models\Showroom;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,10 +20,21 @@ Route::get('/', function () {
 
 // Guest Authentication Routes
 Route::middleware('guest')->group(function () {
+    // Standard Registration & Login
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+
+    // Google OAuth
+    Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
+    // Password Reset
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'updatePassword'])->name('password.update');
 });
 
 // Authenticated User Routes
@@ -42,4 +56,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
     });
+});
+
+// Public Showroom Storefront Route (Tenant-resolved via EnsureTenantContext)
+Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
+    Route::get('/', function (Showroom $showroom) {
+        return view('showrooms.public', compact('showroom'));
+    })->name('showrooms.show');
+
+    // Authenticated Showroom Back-Office (Tenant isolation enforced via VerifyShowroomMembership)
+    Route::middleware(['auth', 'tenant.member'])->get('/manage', function (Showroom $showroom) {
+        return view('showrooms.manage', compact('showroom'));
+    })->name('showrooms.manage');
 });

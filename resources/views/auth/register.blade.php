@@ -93,6 +93,26 @@
                     </button>
                 </form>
 
+                <!-- Google OAuth Divider -->
+                <div class="mt-6 relative flex items-center justify-center">
+                    <div class="border-t border-slate-800 w-full"></div>
+                    <span class="bg-slate-950 px-3 text-[11px] uppercase tracking-wider text-slate-500 font-bold absolute">Or register with</span>
+                </div>
+
+                <!-- Google Register Button -->
+                <div class="mt-6">
+                    <a href="{{ route('auth.google') }}" id="btn-google-register"
+                       class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-850 text-white font-semibold text-sm border border-slate-700/80 hover:border-slate-600 flex items-center justify-center gap-3 transition shadow-md">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.4l3.7 2.9C6.5 7.4 9 5 12 5z"/>
+                            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+                            <path fill="#FBBC05" d="M5.6 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.9 6.4C.7 8.8 0 10.8 0 12s.7 3.2 1.9 5.6l3.7-2.9z"/>
+                            <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 16.4C3.7 20.2 7.5 23 12 23z"/>
+                        </svg>
+                        <span>Sign up with Google</span>
+                    </a>
+                </div>
+
                 <div class="mt-6 text-center text-sm text-slate-400 border-t border-slate-800 pt-5">
                     Already registered?
                     <a href="{{ route('login') }}" class="font-semibold text-rose-400 hover:text-rose-300 ml-1">Sign in here</a>
