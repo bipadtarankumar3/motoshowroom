@@ -1,4 +1,5 @@
 <x-showroom-layout :showroom="$showroom" :title="'Subscription & Billing - ' . $showroom->name">
+    @include('showrooms.partials.manage-nav')
     <div class="max-w-7xl mx-auto space-y-8 py-8 px-4 sm:px-6 lg:px-8">
 
         <!-- Breadcrumb & Top Bar -->
@@ -248,4 +249,5 @@
         </div>
 
     </div>
+    @include('showrooms.partials.manage-nav-close')
 </x-showroom-layout>

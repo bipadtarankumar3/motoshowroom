@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 text-slate-900 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+<div class="min-h-screen bg-slate-50 text-slate-900">
+    @include('showrooms.partials.manage-nav')
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
         <!-- Breadcrumbs -->
         <div class="flex items-center gap-2 text-xs text-slate-500">
@@ -202,5 +203,6 @@
         </div>
 
     </div>
+    @include('showrooms.partials.manage-nav-close')
 </div>
 @endsection

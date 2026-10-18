@@ -376,5 +376,6 @@
         @endif
 
     </main>
+    @include('showrooms.partials.manage-nav-close')
 </div>
 @endsection

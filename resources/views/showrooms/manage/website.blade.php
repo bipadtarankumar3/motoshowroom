@@ -212,5 +212,5 @@
 
         </div>
     </div>
-    ("showrooms.partials.manage-nav-close")
+    @include('showrooms.partials.manage-nav-close')
 </x-app-layout>

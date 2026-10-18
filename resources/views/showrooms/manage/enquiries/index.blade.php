@@ -268,5 +268,6 @@
             @endif
         </div>
     </main>
+    @include('showrooms.partials.manage-nav-close')
 </div>
 @endsection
