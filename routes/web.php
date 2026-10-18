@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Showroom\BillingController;
+use App\Http\Controllers\Showroom\SettingController;
+use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\UserController;
 use App\Models\Showroom;
@@ -114,7 +116,15 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     });
 
     // Authenticated Showroom Back-Office (Tenant isolation + Active Subscription check)
-    Route::middleware(['auth', 'tenant.member', 'subscription.active'])->get('/manage', function (Showroom $showroom) {
-        return view('showrooms.manage', compact('showroom'));
-    })->name('showrooms.manage');
+    Route::middleware(['auth', 'tenant.member', 'subscription.active'])->group(function () {
+        Route::get('/manage', [App\Http\Controllers\Showroom\DashboardController::class, 'index'])->name('showrooms.manage');
+
+        // Website Builder & Storefront Customizer
+        Route::get('/manage/website', [WebsiteBuilderController::class, 'edit'])->name('showrooms.manage.website');
+        Route::put('/manage/website', [WebsiteBuilderController::class, 'update'])->name('showrooms.manage.website.update');
+
+        // Showroom Settings & Profile
+        Route::get('/manage/settings', [SettingController::class, 'edit'])->name('showrooms.manage.settings');
+        Route::put('/manage/settings', [SettingController::class, 'update'])->name('showrooms.manage.settings.update');
+    });
 });
