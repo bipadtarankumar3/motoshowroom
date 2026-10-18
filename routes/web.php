@@ -130,9 +130,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
         Route::post('/users/bulk-delete', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
         Route::post('/users/bulk-destroy-alias', [UserController::class, 'bulkDestroy'])->name('users.bulk-delete');
-        Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
     });

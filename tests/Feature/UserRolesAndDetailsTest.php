@@ -375,4 +375,81 @@ class UserRolesAndDetailsTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user1->id]);
         $this->assertDatabaseMissing('users', ['id' => $user2->id]);
     }
+
+    /**
+     * Test admin can filter users by presets like today, week, month, expired, recently paid.
+     */
+    public function test_admin_can_filter_users_by_presets(): void
+    {
+        $admin = User::create([
+            'name' => 'Admin Filterer',
+            'email' => 'filteradmin@example.com',
+            'password' => 'AdminPass123!',
+            'role' => 'admin',
+            'status' => 'active',
+        ]);
+
+        $todayUser = User::create([
+            'name' => 'Today Registered',
+            'email' => 'today@example.com',
+            'password' => 'Password123!',
+            'role' => 'user',
+            'status' => 'active',
+        ]);
+
+        $expiredUser = User::create([
+            'name' => 'Expired User',
+            'email' => 'expired@example.com',
+            'password' => 'Password123!',
+            'role' => 'user',
+            'status' => 'suspended',
+        ]);
+
+        $this->actingAs($admin);
+
+        // Filter by today
+        $responseToday = $this->get(route('admin.users.index', ['preset' => 'today']));
+        $responseToday->assertStatus(200);
+        $responseToday->assertSee('Today Registered');
+
+        // Filter by expired
+        $responseExpired = $this->get(route('admin.users.index', ['preset' => 'expired']));
+        $responseExpired->assertStatus(200);
+        $responseExpired->assertSee('Expired User');
+    }
+
+    /**
+     * Test admin can view enriched user details page with telemetry and tabs.
+     */
+    public function test_admin_can_view_enriched_user_details_page(): void
+    {
+        $admin = User::create([
+            'name' => 'Admin Viewer',
+            'email' => 'vieweradmin@example.com',
+            'password' => 'AdminPass123!',
+            'role' => 'admin',
+            'status' => 'active',
+        ]);
+
+        $targetUser = User::create([
+            'name' => 'Bikester Pro',
+            'email' => 'bikester@example.com',
+            'password' => 'Password123!',
+            'role' => 'user',
+            'status' => 'active',
+            'city' => 'Bangalore',
+            'phone' => '+91 9888877777',
+        ]);
+
+        $this->actingAs($admin);
+
+        $response = $this->get(route('admin.users.show', $targetUser));
+        $response->assertStatus(200);
+        $response->assertSee('Bikester Pro');
+        $response->assertSee('bikester@example.com');
+        $response->assertSee('Bangalore');
+        $response->assertSeeText('Showroom Dealerships');
+        $response->assertSeeText('Billing & Payments');
+        $response->assertSeeText('Workshop Bookings');
+    }
 }

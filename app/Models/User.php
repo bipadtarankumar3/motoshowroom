@@ -82,6 +82,38 @@ class User extends Authenticatable
     }
 
     /**
+     * All payment transactions processed by this user.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * All test ride and purchase enquiries submitted by this user.
+     */
+    public function enquiries(): HasMany
+    {
+        return $this->hasMany(Enquiry::class, 'user_id');
+    }
+
+    /**
+     * All workshop service appointments booked by this user.
+     */
+    public function serviceBookings(): HasMany
+    {
+        return $this->hasMany(ServiceBooking::class, 'user_id');
+    }
+
+    /**
+     * System activity and security audit trail for this user.
+     */
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'user_id');
+    }
+
+    /**
      * Check if the user has an admin role.
      */
     public function isAdmin(): bool

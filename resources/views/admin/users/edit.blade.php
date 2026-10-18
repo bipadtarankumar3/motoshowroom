@@ -1,19 +1,25 @@
 <x-app-layout :title="'Edit ' . $user->name . ' - User Details | MotoShowroom SaaS'">
+    @if(auth()->check() && auth()->user()->isAdmin())
+        @include('admin.partials.nav')
+    @endif
     <div class="min-h-screen bg-slate-50 text-slate-900 py-8 px-4 sm:px-6 lg:px-8 xl:px-10">
         <div class="w-full space-y-8">
 
-            <!-- Breadcrumbs / Top Navigation -->
-            <div class="flex items-center justify-between">
-                <a href="{{ route('users.show', $user) }}" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    <span>Back to {{ $user->name }}'s Details</span>
-                </a>
-
+            <!-- Breadcrumbs -->
+            <div class="flex items-center gap-2 text-xs text-slate-500">
                 @if (auth()->user()->isAdmin())
-                    <a href="{{ route('admin.users.index') }}" class="text-xs text-rose-600 hover:text-rose-700 font-semibold">
-                        All Users
-                    </a>
+                    <a href="{{ route('admin.dashboard') }}" class="hover:text-slate-900 transition">Admin</a>
+                    <span>/</span>
+                    <a href="{{ route('admin.users.index') }}" class="hover:text-slate-900 transition">Users</a>
+                @else
+                    <a href="{{ route('dashboard') }}" class="hover:text-slate-900 transition">Dashboard</a>
+                    <span>/</span>
+                    <span class="text-slate-600">My Profile</span>
                 @endif
+                <span>/</span>
+                <a href="{{ auth()->user()->isAdmin() ? route('admin.users.show', $user) : route('users.show', $user) }}" class="hover:text-slate-900 transition">{{ $user->name }}</a>
+                <span>/</span>
+                <span class="text-rose-600 font-semibold">Edit</span>
             </div>
 
             <!-- Edit Form Card -->
@@ -138,7 +144,7 @@
 
                     <!-- Submit & Cancel Buttons -->
                     <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                        <a href="{{ route('users.show', $user) }}" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition border border-slate-300 shadow-2xs">
+                        <a href="{{ auth()->user()->isAdmin() ? route('admin.users.show', $user) : route('users.show', $user) }}" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition border border-slate-300 shadow-2xs">
                             Cancel
                         </a>
                         <button type="submit" id="btn-save-user-details"
@@ -151,4 +157,7 @@
 
         </div>
     </div>
+    @if(auth()->check() && auth()->user()->isAdmin())
+        @include('admin.partials.nav-close')
+    @endif
 </x-app-layout>

@@ -3,7 +3,16 @@
     <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8 xl:px-10">
         <div class="w-full space-y-8">
 
-            <!-- Breadcrumbs / Top Navigation -->
+            <!-- Breadcrumbs -->
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+                <a href="{{ route('admin.dashboard') }}" class="hover:text-slate-900 transition">Admin</a>
+                <span>/</span>
+                <a href="{{ route('admin.users.index') }}" class="hover:text-slate-900 transition">Users</a>
+                <span>/</span>
+                <span class="text-rose-600 font-semibold">Create</span>
+            </div>
+
+            <!-- Top Navigation -->
             <div class="flex items-center justify-between">
                 <a href="{{ route('admin.users.index') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
