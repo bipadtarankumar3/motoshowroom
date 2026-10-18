@@ -11,33 +11,36 @@
 ---
 
 ## 2. Current Status
-* **Current Phase**: **Phase 1: Laravel Foundation & Environment Setup** (COMPLETED)
+* **Current Phase**: **User Roles (`admin` & `user`), Admin Creation & Personal Details Page** (COMPLETED)
 * **Completed Features**:
   * [x] Project workspace initialized with Laravel 13 & PHP 8.5
   * [x] MySQL 8.0 database created and migrations applied on port 3306
   * [x] Livewire 4.4, Socialite 5.31, and Razorpay 2.9 dependencies installed & registered
   * [x] NPM packages, Tailwind CSS 4, and Three.js installed; Vite production build verified
-  * [x] Full documentation suite delivered:
-    * `README.md`
-    * `PROJECT_STATUS.md`
-    * `docs/ARCHITECTURE.md`
-    * `docs/DATABASE_SCHEMA.md`
-    * `docs/SECURITY.md`
-    * `docs/SUBSCRIPTIONS.md`
-    * `docs/PAYMENTS.md`
-    * `docs/EMAILS.md`
-    * `docs/TESTING.md`
-    * `docs/DEPLOYMENT.md`
-    * `docs/BACKUPS.md`
-    * `docs/KNOWN_LIMITATIONS.md`
-  * [x] Multi-tenancy architectural core:
-    * `TenantContext` service registered as container singleton
-    * `TenantScope` global Eloquent scope
-    * `BelongsToTenant` model trait with automatic `tenant_id` injection and bypass controls
-  * [x] Typed PHP 8.5 domain enums (`UserRole`, `SubscriptionStatus`, `PaymentStatus`, `EnquiryStatus`, `BookingStatus`) with TitleCase keys and Tailwind badge helpers
-  * [x] Blade layouts created: `layouts/guest.blade.php`, `layouts/app.blade.php`, and `layouts/showroom.blade.php` with dynamic CSS variable branding
-  * [x] Premium SaaS landing page (`welcome.blade.php`) with modern dark aesthetics, hero section, module showcases, and pricing tiers
-  * [x] Automated feature tests created and passing (7 tests, 25 assertions, 0 failures)
+  * [x] Full documentation suite delivered in `docs/` and `README.md`
+  * [x] Multi-tenancy architectural core (`TenantContext`, `TenantScope`, `BelongsToTenant`)
+  * [x] Typed PHP 8.5 domain enums (`UserRole`, `SubscriptionStatus`, `PaymentStatus`, etc.)
+  * [x] Two User Types implemented:
+    * `admin`: Platform Administrator with privileges to manage, create, and view any user.
+    * `user`: Standard showroom partner/customer who can self-register and manage their own details.
+  * [x] Registration & Authentication Flow:
+    * Public self-registration (`/register`) with name, email, phone, city, password.
+    * Auto-login and immediate redirection to their dedicated details page.
+    * Secure login (`/login`) with session regeneration and remember-me support.
+    * Logout (`/logout`) with session invalidation.
+  * [x] User Details Page:
+    * Every user has their own dedicated page with complete details (`/users/{user}` and `/profile`).
+    * Displays profile avatar, name, email, role badge (`Admin`/`User`), account status badge, phone, city, address, bio/showroom notes, and account timestamp metadata.
+    * Self-editing support (`/users/{user}/edit`) with security protection preventing privilege escalation.
+    * Strict authorization preventing standard users from viewing other users' private detail pages (HTTP 403).
+  * [x] Admin User Management:
+    * Admin user directory (`/admin/users`) with search, role filters, status filters, and metric statistic cards.
+    * Admin user creation workflow (`/admin/users/create`) with ability to provision both `admin` and `user` accounts with custom details.
+    * `EnsureAdmin` middleware protecting administrative routes.
+  * [x] Database Seeder with default demo accounts:
+    * Admin: `admin@motoshowroom.example` / `Password123!`
+    * User: `user@motoshowroom.example` / `Password123!`
+  * [x] Automated PHPUnit test suite passing (14 tests, 66 assertions, 0 failures)
   * [x] Code formatted with Laravel Pint
 
 ---
@@ -47,6 +50,7 @@
 | Phase | Description | Status |
 |---|---|---|
 | **Phase 1** | Laravel Foundation & Core Structure | ✅ COMPLETED |
+| **Phase 1.5** | User Roles (`admin` & `user`), Admin Creation & Personal Details Page | ✅ COMPLETED |
 | **Phase 2** | Authentication & Multi-Tenant Isolation | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 3** | Super Admin Dashboard | ⏳ PENDING |
 | **Phase 4** | Subscription Management & Entitlements | ⏳ PENDING |
@@ -66,18 +70,6 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit / Pest Suites**: All 7 tests passing (`Tests\Feature\Phase1FoundationTest`, `Tests\Feature\ExampleTest`, `Tests\Unit\ExampleTest`).
-* **Assertions**: 25 assertions passed in 175ms.
-* **Failed Tests**: 0
-* **Known Bugs**: None.
+* **PHPUnit Suite**: 14 tests, 66 assertions, 0 failures (100% passing).
+* **Coverage**: Registration, login, logout, user details page, user profile editing, cross-user authorization boundaries, admin user creation, admin user management, and middleware access control.
 * **Code Styling**: Formatted with `vendor/bin/pint --format agent`.
-
----
-
-## 5. Next Recommended Action
-Proceed to **Phase 2: Authentication and Tenant Isolation**:
-1. Implement Showroom model, ShowroomMembership model, and migrations for showrooms and memberships.
-2. Implement User authentication (Login, Register with showroom onboarding, Logout, Password Reset, Email Verification).
-3. Implement Laravel Socialite Google OAuth callback handling.
-4. Implement multi-tenant resolution middleware (`EnsureTenantContext`) and membership authorization policies.
-5. Create automated test suite for tenant isolation (Showroom A cannot access Showroom B data).
