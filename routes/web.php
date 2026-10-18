@@ -11,6 +11,8 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Showroom\BikeController;
 use App\Http\Controllers\Showroom\BillingController;
 use App\Http\Controllers\Showroom\EnquiryController;
+use App\Http\Controllers\Showroom\PaymentCheckoutController;
+use App\Http\Controllers\Showroom\PaymentHistoryController;
 use App\Http\Controllers\Showroom\PublicBikeController;
 use App\Http\Controllers\Showroom\PublicEnquiryController;
 use App\Http\Controllers\Showroom\PublicServiceController;
@@ -130,16 +132,25 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::get('/services/slots', [PublicServiceController::class, 'slots'])->name('showrooms.services.slots');
     Route::post('/services/book', [PublicServiceController::class, 'store'])->name('showrooms.services.store');
     Route::get('/services/track/{booking?}', [PublicServiceController::class, 'track'])->name('showrooms.services.track');
+    Route::get('/services/{booking}/checkout', [PaymentCheckoutController::class, 'serviceCheckout'])->name('showrooms.services.checkout');
+
+    // Payment Signature Verification
+    Route::post('/payments/verify', [PaymentCheckoutController::class, 'verifyPayment'])->name('showrooms.payments.verify');
 
     // Showroom Billing & Subscription Hub
     Route::middleware(['auth', 'tenant.member'])->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('showrooms.billing.index');
         Route::post('/billing/select-plan', [BillingController::class, 'selectPlan'])->name('showrooms.billing.select-plan');
+        Route::get('/billing/checkout', [PaymentCheckoutController::class, 'subscriptionCheckout'])->name('showrooms.billing.checkout');
     });
 
     // Authenticated Showroom Back-Office (Tenant isolation + Active Subscription check)
     Route::middleware(['auth', 'tenant.member', 'subscription.active'])->group(function () {
         Route::get('/manage', [App\Http\Controllers\Showroom\DashboardController::class, 'index'])->name('showrooms.manage');
+
+        // Financial Ledger & Payment Transactions
+        Route::get('/manage/payments', [PaymentHistoryController::class, 'index'])->name('showrooms.manage.payments.index');
+        Route::get('/manage/payments/{payment}', [PaymentHistoryController::class, 'show'])->name('showrooms.manage.payments.show');
 
         // Customer Purchase Enquiries & Test Rides
         Route::get('/manage/enquiries', [EnquiryController::class, 'index'])->name('showrooms.manage.enquiries.index');

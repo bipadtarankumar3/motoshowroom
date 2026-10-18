@@ -315,4 +315,12 @@ class Showroom extends Model
     {
         return (int) $this->getSetting('service_bays_count', 4);
     }
+
+    /**
+     * All financial payment transactions processed for this showroom.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'tenant_id');
+    }
 }

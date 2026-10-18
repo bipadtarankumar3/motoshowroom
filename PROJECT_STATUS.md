@@ -60,8 +60,19 @@
     * Public Motorcycle Catalog (`/showrooms/{showroom}/bikes`): Customer-facing inventory catalog with category pills, brand dropdown, price sorting, search, and responsive cards.
     * Public Motorcycle Detail Profile (`/showrooms/{showroom}/bikes/{bike}`): Interactive image gallery, color/trim swatches, comprehensive powertrain/dimensions/equipment specs grid, WhatsApp dealer contact button, and related motorcycles showcase.
     * Dealership Homepage Showcase: Featured motorcycles automatically highlighted on the public showroom storefront.
-    * System-wide Audit Trails: Logs `bike.created`, `bike.updated`, and `bike.deleted` events.
-  * [x] Automated PHPUnit test suite passing (64 tests, 320 assertions, 0 failures)
+  * [x] Purchase Enquiries & Test Rides (Phase 7):
+    * Customer purchase enquiry and test-ride request booking with automated reference tracking (`ENQ-YYYYMMDD-XXXX`).
+    * Back-office enquiry hub with status workflows, appointment scheduling, staff assignment, and audit trails.
+  * [x] Service Booking Management & Bay Concurrency (Phase 8):
+    * Multi-tier service package selection, physical bay slot concurrency control (`service_bays_count`), and live repair tracking (`/services/track`).
+    * Back-office workshop manager with status progression, mechanic assignment, diagnostic notes, and invoice costing.
+  * [x] Razorpay Payments & Webhooks (Phase 9):
+    * Server-side cryptographic HMAC-SHA256 signature verification (`RazorpayService`, `PaymentProcessingService`).
+    * Dealership SaaS subscription checkout (`/showrooms/{showroom}/billing/checkout`) with automatic plan activation.
+    * Workshop service invoice checkout (`/showrooms/{showroom}/services/{booking}/checkout`) with live status settlement.
+    * Idempotent asynchronous Razorpay webhook processing (`POST /api/webhooks/razorpay`) with idempotency ledger (`webhook_events`).
+    * Back-office financial ledger (`/showrooms/{showroom}/manage/payments`) with KPI revenue volume metrics and printable digital tax receipts.
+  * [x] Automated PHPUnit test suite passing (123 tests, 544 assertions, 0 failures)
   * [x] Code formatted with Laravel Pint
 
 ---
@@ -79,8 +90,8 @@
 | **Phase 6** | Motorcycle Inventory Management | ✅ COMPLETED |
 | **Phase 7** | Purchase Enquiries & Test Rides | ✅ COMPLETED |
 | **Phase 8** | Service Booking Management | ✅ COMPLETED |
-| **Phase 9** | Razorpay Payments & Webhooks | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 10** | Email Notification System | ⏳ PENDING |
+| **Phase 9** | Razorpay Payments & Webhooks | ✅ COMPLETED |
+| **Phase 10** | Email Notification System | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 11** | Careers & Job Applications | ⏳ PENDING |
 | **Phase 12** | Promotional Scratch Cards | ⏳ PENDING |
 | **Phase 13** | Interactive 360-Degree Motorcycle Viewer | ⏳ PENDING |
@@ -91,8 +102,14 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 107 tests, 477 assertions, 0 failures (100% passing).
+* **PHPUnit Suite**: 123 tests, 544 assertions, 0 failures (100% passing).
 * **Coverage**: 
+  - Razorpay payment gateway integration with server-side HMAC-SHA256 cryptographic verification (`PaymentProcessingService`, `RazorpayService`).
+  - SaaS dealership subscription checkout (`/showrooms/{showroom}/billing/checkout`), automatic tier provisioning, and activation.
+  - Workshop service booking invoice settlement (`/showrooms/{showroom}/services/{booking}/checkout`) with live cost updates.
+  - Idempotent asynchronous Razorpay webhook handling (`POST /api/webhooks/razorpay`) with duplicate event suppression via `webhook_events` ledger and HMAC signature validation.
+  - Back-office financial ledger (`/showrooms/{showroom}/manage/payments`) with volume processed, transaction counts, search, status filtering, and printable digital tax receipts.
+  - Strict multi-tenant isolation guarding payment records and checkout flows against cross-tenant tampering.
   - Service booking appointment scheduling with physical bay slot concurrency control (`service_bays_count`), preventing overbooking when all bays are occupied.
   - Multi-tier service package catalog (`ServiceType`: general maintenance, oil & lube, brake overhaul, engine tuning, electrical, accident repair, custom upgrades).
   - Public customer booking form with dynamic slot availability computation, registration plate inputs, and odometer reading.
@@ -101,7 +118,7 @@
   - Customer purchase enquiries, test-ride requests, and general showroom inquiries with automated reference numbers (`ENQ-YYYYMMDD-XXXX`).
   - Pre-selected motorcycle links from inventory showcase to test-ride booking form.
   - Back-office enquiry management with KPI metric counters, real-time search, category/status filters, staff assignment, appointment scheduling, and internal notes.
-  - Milestone timestamp tracking (`contacted_at`, `completed_at`, `confirmed_at`, `checked_in_at`, `in_service_at`, `ready_at`) and audit logging (`service_booking.created`, `service_booking.updated`, `service_booking.deleted`).
+  - Milestone timestamp tracking (`contacted_at`, `completed_at`, `confirmed_at`, `checked_in_at`, `in_service_at`, `ready_at`) and audit logging (`payment.captured`, `payment.failed`, `service_booking.created`, `service_booking.updated`, `service_booking.deleted`).
   - Motorcycle inventory CRUD operations, specifications, photo gallery, variant trims, subscription listing quota enforcement (`max_bike_listings`), multi-tenant cross-dealership isolation (404/403).
   - Public inventory catalog, public bike detail profiles with interactive gallery, featured showcase on storefront homepage, showroom dashboard, website builder, operating hours computation, showroom business settings.
   - Subscription lifecycle & plans CRUD, manual expiry extensions, plan upgrades, dynamic feature & limit entitlement checks, back-office subscription gating, showroom billing hub with usage meters.
