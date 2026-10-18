@@ -4,8 +4,11 @@ use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlatformSettingController;
 use App\Http\Controllers\Admin\ShowroomController;
+use App\Http\Controllers\Admin\SubscriptionController;
+use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Showroom\BillingController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\UserController;
 use App\Models\Showroom;
@@ -70,6 +73,20 @@ Route::middleware('auth')->group(function () {
         Route::post('/showrooms/{showroom}/members', [ShowroomController::class, 'addMember'])->name('showrooms.members.store');
         Route::delete('/showrooms/{showroom}/members/{membership}', [ShowroomController::class, 'removeMember'])->name('showrooms.members.destroy');
 
+        // Subscription Plans Management
+        Route::get('/plans', [SubscriptionPlanController::class, 'index'])->name('plans.index');
+        Route::get('/plans/create', [SubscriptionPlanController::class, 'create'])->name('plans.create');
+        Route::post('/plans', [SubscriptionPlanController::class, 'store'])->name('plans.store');
+        Route::get('/plans/{plan}/edit', [SubscriptionPlanController::class, 'edit'])->name('plans.edit');
+        Route::put('/plans/{plan}', [SubscriptionPlanController::class, 'update'])->name('plans.update');
+        Route::post('/plans/{plan}/toggle', [SubscriptionPlanController::class, 'toggle'])->name('plans.toggle');
+
+        // Subscriptions Platform Oversight
+        Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::post('/subscriptions/{subscription}/extend', [SubscriptionController::class, 'extend'])->name('subscriptions.extend');
+        Route::post('/subscriptions/{subscription}/change-plan', [SubscriptionController::class, 'changePlan'])->name('subscriptions.change-plan');
+        Route::post('/subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+
         // Audit Trail Logs
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
 
@@ -90,8 +107,14 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         return view('showrooms.public', compact('showroom'));
     })->name('showrooms.show');
 
-    // Authenticated Showroom Back-Office (Tenant isolation enforced via VerifyShowroomMembership)
-    Route::middleware(['auth', 'tenant.member'])->get('/manage', function (Showroom $showroom) {
+    // Showroom Billing & Subscription Hub
+    Route::middleware(['auth', 'tenant.member'])->group(function () {
+        Route::get('/billing', [BillingController::class, 'index'])->name('showrooms.billing.index');
+        Route::post('/billing/select-plan', [BillingController::class, 'selectPlan'])->name('showrooms.billing.select-plan');
+    });
+
+    // Authenticated Showroom Back-Office (Tenant isolation + Active Subscription check)
+    Route::middleware(['auth', 'tenant.member', 'subscription.active'])->get('/manage', function (Showroom $showroom) {
         return view('showrooms.manage', compact('showroom'));
     })->name('showrooms.manage');
 });

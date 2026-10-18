@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\EnsureSubscriptionActive;
 use App\Http\Middleware\EnsureTenantContext;
 use App\Http\Middleware\VerifyShowroomMembership;
 use Illuminate\Foundation\Application;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureAdmin::class,
             'tenant' => EnsureTenantContext::class,
             'tenant.member' => VerifyShowroomMembership::class,
+            'subscription.active' => EnsureSubscriptionActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

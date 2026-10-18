@@ -23,6 +23,14 @@
                        class="px-3.5 py-2 rounded-xl text-sm font-semibold transition {{ request()->routeIs('admin.showrooms*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
                         Showrooms
                     </a>
+                    <a href="{{ route('admin.plans.index') }}"
+                       class="px-3.5 py-2 rounded-xl text-sm font-semibold transition {{ request()->routeIs('admin.plans*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
+                        Plans
+                    </a>
+                    <a href="{{ route('admin.subscriptions.index') }}"
+                       class="px-3.5 py-2 rounded-xl text-sm font-semibold transition {{ request()->routeIs('admin.subscriptions*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
+                        Subscriptions
+                    </a>
                     <a href="{{ route('admin.users.index') }}"
                        class="px-3.5 py-2 rounded-xl text-sm font-semibold transition {{ request()->routeIs('admin.users*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
                         Users
@@ -65,6 +73,8 @@
         <div class="md:hidden flex items-center space-x-1 overflow-x-auto py-2 border-t border-slate-800/80 text-xs">
             <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.dashboard*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Dashboard</a>
             <a href="{{ route('admin.showrooms.index') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.showrooms*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Showrooms</a>
+            <a href="{{ route('admin.plans.index') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.plans*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Plans</a>
+            <a href="{{ route('admin.subscriptions.index') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.subscriptions*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Subscriptions</a>
             <a href="{{ route('admin.users.index') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.users*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Users</a>
             <a href="{{ route('admin.audit-logs.index') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.audit-logs*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Audit Logs</a>
             <a href="{{ route('admin.settings.index') }}" class="px-3 py-1.5 rounded-lg {{ request()->routeIs('admin.settings*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Settings</a>

@@ -121,4 +121,40 @@ class Showroom extends Model
     {
         return $this->ownerMembership?->user;
     }
+
+    /**
+     * All subscriptions for this showroom.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class)->latest('created_at');
+    }
+
+    /**
+     * The active or current subscription for this showroom.
+     */
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)->latestOfMany();
+    }
+
+    /**
+     * Determine if showroom has access to a specific plan feature flag.
+     */
+    public function canAccessFeature(string $featureKey): bool
+    {
+        return $this->subscription?->canAccessFeature($featureKey) ?? false;
+    }
+
+    /**
+     * Determine if showroom has reached an entitlement limit.
+     */
+    public function hasReachedLimit(string $limitKey, int $currentCount): bool
+    {
+        if (! $this->subscription) {
+            return true;
+        }
+
+        return $this->subscription->hasReachedLimit($limitKey, $currentCount);
+    }
 }

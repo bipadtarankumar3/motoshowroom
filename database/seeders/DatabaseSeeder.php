@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Showroom;
 use App\Models\ShowroomMembership;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
+use App\Services\SubscriptionService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -112,5 +114,83 @@ class DatabaseSeeder extends Seeder
             ['showroom_id' => $showroomB->id, 'user_id' => $ownerB->id],
             ['role' => 'owner', 'status' => 'active']
         );
+
+        // 7. Seed Default Subscription Plans
+        $starterPlan = SubscriptionPlan::updateOrCreate(
+            ['slug' => 'starter'],
+            [
+                'name' => 'Starter Dealership',
+                'description' => 'Perfect for independent single-location bike showrooms getting started online.',
+                'monthly_price' => 999.00,
+                'annual_price' => 9990.00,
+                'currency' => 'INR',
+                'trial_days' => 14,
+                'max_staff_accounts' => 3,
+                'max_bike_listings' => 15,
+                'max_monthly_bookings' => 50,
+                'media_storage_mb' => 1024,
+                'has_careers_module' => true,
+                'has_scratch_cards' => true,
+                'has_360_viewer' => false,
+                'has_ai_assistant' => false,
+                'has_custom_domain' => false,
+                'has_advanced_analytics' => false,
+                'is_active' => true,
+                'sort_order' => 1,
+            ]
+        );
+
+        $proPlan = SubscriptionPlan::updateOrCreate(
+            ['slug' => 'professional'],
+            [
+                'name' => 'Professional Showroom',
+                'description' => 'Comprehensive multi-department suite with interactive 360 viewer and AI advisor.',
+                'monthly_price' => 2999.00,
+                'annual_price' => 29990.00,
+                'currency' => 'INR',
+                'trial_days' => 14,
+                'max_staff_accounts' => 10,
+                'max_bike_listings' => 50,
+                'max_monthly_bookings' => 250,
+                'media_storage_mb' => 5120,
+                'has_careers_module' => true,
+                'has_scratch_cards' => true,
+                'has_360_viewer' => true,
+                'has_ai_assistant' => true,
+                'has_custom_domain' => true,
+                'has_advanced_analytics' => false,
+                'is_active' => true,
+                'sort_order' => 2,
+            ]
+        );
+
+        $enterprisePlan = SubscriptionPlan::updateOrCreate(
+            ['slug' => 'enterprise'],
+            [
+                'name' => 'Enterprise Franchise',
+                'description' => 'Unlimited scaling for dealership chains, franchise networks, and high-volume dealers.',
+                'monthly_price' => 7999.00,
+                'annual_price' => 79990.00,
+                'currency' => 'INR',
+                'trial_days' => 30,
+                'max_staff_accounts' => 50,
+                'max_bike_listings' => 200,
+                'max_monthly_bookings' => 1000,
+                'media_storage_mb' => 20480,
+                'has_careers_module' => true,
+                'has_scratch_cards' => true,
+                'has_360_viewer' => true,
+                'has_ai_assistant' => true,
+                'has_custom_domain' => true,
+                'has_advanced_analytics' => true,
+                'is_active' => true,
+                'sort_order' => 3,
+            ]
+        );
+
+        // 8. Assign Subscriptions to Seeded Showrooms
+        $subscriptionService = app(SubscriptionService::class);
+        $subscriptionService->subscribe($showroomA, $proPlan, 'monthly', $admin->id);
+        $subscriptionService->subscribe($showroomB, $starterPlan, 'annual', $admin->id);
     }
 }
