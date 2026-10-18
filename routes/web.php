@@ -8,13 +8,16 @@ use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Showroom\ApplicantManagementController;
 use App\Http\Controllers\Showroom\BikeController;
 use App\Http\Controllers\Showroom\BillingController;
+use App\Http\Controllers\Showroom\CareerManagementController;
 use App\Http\Controllers\Showroom\EmailPreviewController;
 use App\Http\Controllers\Showroom\EnquiryController;
 use App\Http\Controllers\Showroom\PaymentCheckoutController;
 use App\Http\Controllers\Showroom\PaymentHistoryController;
 use App\Http\Controllers\Showroom\PublicBikeController;
+use App\Http\Controllers\Showroom\PublicCareerController;
 use App\Http\Controllers\Showroom\PublicEnquiryController;
 use App\Http\Controllers\Showroom\PublicServiceController;
 use App\Http\Controllers\Showroom\ServiceBookingController;
@@ -138,6 +141,11 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     // Payment Signature Verification
     Route::post('/payments/verify', [PaymentCheckoutController::class, 'verifyPayment'])->name('showrooms.payments.verify');
 
+    // Careers & Job Openings (Public Dealership Portal)
+    Route::get('/careers', [PublicCareerController::class, 'index'])->name('showrooms.careers.index');
+    Route::get('/careers/{jobOpening}', [PublicCareerController::class, 'show'])->name('showrooms.careers.show');
+    Route::post('/careers/{jobOpening}/apply', [PublicCareerController::class, 'apply'])->name('showrooms.careers.apply');
+
     // Showroom Billing & Subscription Hub
     Route::middleware(['auth', 'tenant.member'])->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('showrooms.billing.index');
@@ -178,6 +186,21 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::delete('/manage/bikes/{bike}', [BikeController::class, 'destroy'])->name('showrooms.manage.bikes.destroy');
         Route::post('/manage/bikes/{bike}/toggle-featured', [BikeController::class, 'toggleFeatured'])->name('showrooms.manage.bikes.toggle-featured');
         Route::post('/manage/bikes/{bike}/toggle-published', [BikeController::class, 'togglePublished'])->name('showrooms.manage.bikes.toggle-published');
+
+        // Careers & Job Openings Management
+        Route::get('/manage/careers', [CareerManagementController::class, 'index'])->name('showrooms.manage.careers.index');
+        Route::get('/manage/careers/create', [CareerManagementController::class, 'create'])->name('showrooms.manage.careers.create');
+        Route::post('/manage/careers', [CareerManagementController::class, 'store'])->name('showrooms.manage.careers.store');
+        Route::get('/manage/careers/{jobOpening}/edit', [CareerManagementController::class, 'edit'])->name('showrooms.manage.careers.edit');
+        Route::put('/manage/careers/{jobOpening}', [CareerManagementController::class, 'update'])->name('showrooms.manage.careers.update');
+        Route::delete('/manage/careers/{jobOpening}', [CareerManagementController::class, 'destroy'])->name('showrooms.manage.careers.destroy');
+        Route::post('/manage/careers/{jobOpening}/toggle-active', [CareerManagementController::class, 'toggleActive'])->name('showrooms.manage.careers.toggle-active');
+
+        // Job Applicants & ATS Workflow Ledger
+        Route::get('/manage/applicants', [ApplicantManagementController::class, 'index'])->name('showrooms.manage.applicants.index');
+        Route::get('/manage/applicants/{applicant}', [ApplicantManagementController::class, 'show'])->name('showrooms.manage.applicants.show');
+        Route::put('/manage/applicants/{applicant}', [ApplicantManagementController::class, 'update'])->name('showrooms.manage.applicants.update');
+        Route::delete('/manage/applicants/{applicant}', [ApplicantManagementController::class, 'destroy'])->name('showrooms.manage.applicants.destroy');
 
         // Website Builder & Storefront Customizer
         Route::get('/manage/website', [WebsiteBuilderController::class, 'edit'])->name('showrooms.manage.website');

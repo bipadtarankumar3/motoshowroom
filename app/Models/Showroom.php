@@ -139,6 +139,34 @@ class Showroom extends Model
     }
 
     /**
+     * All job openings posted by this dealership.
+     */
+    public function jobOpenings(): HasMany
+    {
+        return $this->hasMany(JobOpening::class, 'tenant_id');
+    }
+
+    /**
+     * Active job vacancies available for public candidate application.
+     */
+    public function activeJobOpenings(): HasMany
+    {
+        return $this->hasMany(JobOpening::class, 'tenant_id')
+            ->where('is_active', true)
+            ->where(function ($q): void {
+                $q->whereNull('deadline')->orWhereDate('deadline', '>=', today());
+            });
+    }
+
+    /**
+     * All job applications submitted to this dealership.
+     */
+    public function jobApplications(): HasMany
+    {
+        return $this->hasMany(JobApplication::class, 'tenant_id');
+    }
+
+    /**
      * Check if the showroom is active.
      */
     public function isActive(): bool

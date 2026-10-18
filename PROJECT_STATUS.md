@@ -99,8 +99,8 @@
 | **Phase 8** | Service Booking Management | ✅ COMPLETED |
 | **Phase 9** | Razorpay Payments & Webhooks | ✅ COMPLETED |
 | **Phase 10** | Email Notification System | ✅ COMPLETED |
-| **Phase 11** | Careers & Job Applications | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 12** | Promotional Scratch Cards | ⏳ PENDING |
+| **Phase 11** | Careers & Job Applications | ✅ COMPLETED |
+| **Phase 12** | Promotional Scratch Cards | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 13** | Interactive 360-Degree Motorcycle Viewer | ⏳ PENDING |
 | **Phase 14** | AI Virtual Showroom Assistant | ⏳ PENDING |
 | **Phase 15** | Analytics & Production Testing | ⏳ PENDING |
@@ -109,8 +109,15 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 131 tests, 576 assertions, 0 failures (100% passing).
+* **PHPUnit Suite**: 146 tests, 664 assertions, 0 failures (100% passing).
 * **Coverage**: 
+  - Dealership recruitment & job opening management (`JobOpening`, `JobApplication`, `JobDepartment`, `JobType`, `ApplicationStatus`).
+  - Public careers portal (`/showrooms/{showroom}/careers`) with dynamic department and contract type filtering, keyword search, and responsive vacancies showcase.
+  - Job vacancy profile and candidate application submission (`/showrooms/{showroom}/careers/{jobOpening}`) with automated reference number generation (`APP-YYYYMMDD-XXXX`) and PDF/DOC resume file uploads.
+  - Subscription plan entitlement gating guarding back-office job posting (`has_careers_module`) with plan upgrade prompts.
+  - Back-office recruitment dashboard (`/showrooms/{showroom}/manage/careers`) with KPI metric cards, vacancy publishing, editing, one-click active toggling, and soft deletion.
+  - Full Applicant Tracking System (ATS) ledger (`/showrooms/{showroom}/manage/applicants`) with 7-stage candidate lifecycle progression, interview scheduling datetime integration, recruiter internal notes, and rejection tracking.
+  - Multi-tenant data isolation guarding job vacancies and candidate resume profiles against cross-showroom exposure.
   - Transactional email dispatching and queued mailables (`EnquiryReceivedMail`, `NewEnquiryAlertMail`, `ServiceBookingConfirmedMail`, `ServiceStatusUpdatedMail`, `PaymentReceiptMail`, `SubscriptionExpiringMail`).
   - Artisan command `subscriptions:send-expiry-reminders` with days threshold filtering and multi-tenant owner dispatch.
   - Interactive email template browser previewer (`/showrooms/{showroom}/manage/email-previews`).

@@ -34,6 +34,7 @@
                 <a href="{{ route('showrooms.bikes.index', $showroom) }}" class="text-slate-300 hover:text-white transition">Inventory</a>
                 <a href="{{ route('showrooms.enquiries.create', $showroom) }}" class="text-slate-300 hover:text-white transition">Book Test Ride</a>
                 <a href="{{ route('showrooms.services.create', $showroom) }}" class="text-slate-300 hover:text-white transition">Service Workshop</a>
+                <a href="{{ route('showrooms.careers.index', $showroom) }}" class="text-slate-300 hover:text-white transition">Careers</a>
                 <a href="#about" class="text-slate-300 hover:text-white transition">About</a>
                 <a href="#hours" class="text-slate-300 hover:text-white transition">Hours</a>
                 <a href="#contact" class="text-slate-300 hover:text-white transition">Contact</a>
@@ -282,6 +283,9 @@
     <!-- Footer with Social Handles -->
     <footer class="border-t border-slate-800 bg-slate-950 py-10 text-center text-xs text-slate-500 space-y-4">
         <div class="flex justify-center gap-4 text-slate-400">
+            <a href="{{ route('showrooms.bikes.index', $showroom) }}" class="hover:text-white transition">Inventory</a>
+            <a href="{{ route('showrooms.services.create', $showroom) }}" class="hover:text-white transition">Service Workshop</a>
+            <a href="{{ route('showrooms.careers.index', $showroom) }}" class="hover:text-white transition">Careers</a>
             @foreach($showroom->getSocialLinks() as $network => $url)
                 @if(!empty($url))
                     <a href="{{ $url }}" target="_blank" class="hover:text-white capitalize transition">
