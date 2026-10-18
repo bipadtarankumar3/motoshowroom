@@ -357,4 +357,108 @@ class SubscriptionManagementTest extends TestCase
         $response = $this->get("/showrooms/{$this->showroom->slug}/manage");
         $response->assertOk();
     }
+
+    public function test_admin_can_filter_subscriptions_by_date_range(): void
+    {
+        $this->actingAs($this->admin);
+
+        $sub = Subscription::create([
+            'showroom_id' => $this->showroom->id,
+            'plan_id' => $this->proPlan->id,
+            'status' => SubscriptionStatus::Active,
+            'billing_interval' => 'monthly',
+            'current_period_start' => now()->startOfMonth(),
+            'current_period_end' => now()->addDays(15),
+            'auto_renew' => true,
+        ]);
+
+        // Filter within matching range
+        $response = $this->get(route('admin.subscriptions.index', [
+            'date_type' => 'expiry',
+            'from_date' => now()->format('Y-m-d'),
+            'to_date' => now()->addDays(20)->format('Y-m-d'),
+        ]));
+
+        $response->assertOk();
+        $response->assertSee($this->showroom->name);
+
+        // Filter outside matching range
+        $mismatchResponse = $this->get(route('admin.subscriptions.index', [
+            'date_type' => 'expiry',
+            'from_date' => now()->addDays(50)->format('Y-m-d'),
+            'to_date' => now()->addDays(60)->format('Y-m-d'),
+        ]));
+
+        $mismatchResponse->assertOk();
+        $mismatchResponse->assertDontSee($this->showroom->name);
+    }
+
+    public function test_admin_can_export_all_filtered_subscriptions_to_csv(): void
+    {
+        $this->actingAs($this->admin);
+
+        Subscription::create([
+            'showroom_id' => $this->showroom->id,
+            'plan_id' => $this->proPlan->id,
+            'status' => SubscriptionStatus::Active,
+            'billing_interval' => 'monthly',
+            'current_period_start' => now()->startOfMonth(),
+            'current_period_end' => now()->addDays(25),
+            'auto_renew' => true,
+        ]);
+
+        $response = $this->get(route('admin.subscriptions.export'));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('Subscription ID', $content);
+        $this->assertStringContainsString('Showroom Name', $content);
+        $this->assertStringContainsString('Apex Moto Hub', $content);
+        $this->assertStringContainsString('Professional Showroom', $content);
+    }
+
+    public function test_admin_can_export_selected_subscriptions_to_csv(): void
+    {
+        $this->actingAs($this->admin);
+
+        $showroom2 = Showroom::create([
+            'name' => 'Zenith Speedways',
+            'slug' => 'zenith-speed',
+            'email' => 'info@zenith.example',
+            'city' => 'Pune',
+            'status' => 'active',
+            'public_website_enabled' => true,
+        ]);
+
+        $sub1 = Subscription::create([
+            'showroom_id' => $this->showroom->id,
+            'plan_id' => $this->proPlan->id,
+            'status' => SubscriptionStatus::Active,
+            'billing_interval' => 'monthly',
+            'current_period_start' => now()->startOfMonth(),
+            'current_period_end' => now()->addDays(25),
+            'auto_renew' => true,
+        ]);
+
+        $sub2 = Subscription::create([
+            'showroom_id' => $showroom2->id,
+            'plan_id' => $this->starterPlan->id,
+            'status' => SubscriptionStatus::Active,
+            'billing_interval' => 'annual',
+            'current_period_start' => now()->startOfMonth(),
+            'current_period_end' => now()->addYear(),
+            'auto_renew' => true,
+        ]);
+
+        // Export only sub1
+        $response = $this->post(route('admin.subscriptions.export'), [
+            'selected_ids' => [$sub1->id],
+        ]);
+
+        $response->assertOk();
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('Apex Moto Hub', $content);
+        $this->assertStringNotContainsString('Zenith Speedways', $content);
+    }
 }

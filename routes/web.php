@@ -112,6 +112,7 @@ Route::middleware('auth')->group(function () {
 
         // Subscriptions Platform Oversight
         Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::match(['get', 'post'], '/subscriptions/export', [SubscriptionController::class, 'export'])->name('subscriptions.export');
         Route::post('/subscriptions/{subscription}/extend', [SubscriptionController::class, 'extend'])->name('subscriptions.extend');
         Route::post('/subscriptions/{subscription}/change-plan', [SubscriptionController::class, 'changePlan'])->name('subscriptions.change-plan');
         Route::post('/subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
