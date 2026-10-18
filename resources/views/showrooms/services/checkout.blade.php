@@ -1,4 +1,7 @@
 <x-app-layout :title="'Service Invoice Payment - ' . $booking->booking_number . ' - ' . $showroom->name">
+    {{-- Branded Dealership Header --}}
+    @include('showrooms.partials.header')
+
 <div class="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto space-y-8">
 
@@ -179,4 +182,7 @@ document.getElementById('btn-rzp-pay-service')?.addEventListener('click', functi
     }
 });
 </script>
+
+    {{-- Motorcycle Showroom Footer --}}
+    @include('showrooms.partials.footer')
 </x-app-layout>

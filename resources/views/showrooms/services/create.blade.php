@@ -1,4 +1,7 @@
 <x-app-layout :title="'Book Service - ' . $showroom->name">
+    {{-- Branded Dealership Header --}}
+    @include('showrooms.partials.header')
+
 <div class="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto space-y-8">
 
@@ -349,4 +352,7 @@ function fetchSlotsForDate(date) {
         .catch(err => console.error('Error fetching slots:', err));
 }
 </script>
+
+    {{-- Motorcycle Showroom Footer --}}
+    @include('showrooms.partials.footer')
 </x-app-layout>

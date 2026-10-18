@@ -1,4 +1,7 @@
 <x-app-layout :title="'Live Service Tracker - ' . $showroom->name">
+    {{-- Branded Dealership Header --}}
+    @include('showrooms.partials.header')
+
 <div class="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto space-y-8">
 
@@ -220,4 +223,7 @@
 
     </div>
 </div>
+
+    {{-- Motorcycle Showroom Footer --}}
+    @include('showrooms.partials.footer')
 </x-app-layout>

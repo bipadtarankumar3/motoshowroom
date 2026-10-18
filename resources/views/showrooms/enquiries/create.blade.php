@@ -5,44 +5,7 @@
 @section('content')
 <div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
 
-    <!-- Showroom Branded Topbar / Header -->
-    <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-40 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Showroom Identity -->
-                <a href="{{ route('showrooms.show', $showroom) }}" class="flex items-center gap-3 group">
-                    @if($showroom->logo_url)
-                        <img src="{{ $showroom->logo_url }}" alt="{{ $showroom->name }}" class="h-10 w-auto rounded-xl object-contain bg-white border border-slate-200 p-1">
-                    @else
-                        <span class="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-white text-base shadow-md group-hover:scale-105 transition-transform"
-                              style="background: linear-gradient(135deg, {{ $showroom->brand_color_primary ?? '#dc2626' }}, {{ $showroom->brand_color_accent ?? '#f43f5e' }})">
-                            {{ strtoupper(substr($showroom->name, 0, 1)) }}
-                        </span>
-                    @endif
-                    <div>
-                        <span class="font-display font-black text-lg sm:text-xl tracking-tight text-slate-900 block leading-none">{{ $showroom->name }}</span>
-                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest block mt-0.5">{{ $showroom->city }}, {{ $showroom->state ?? 'IN' }}</span>
-                    </div>
-                </a>
-
-                <!-- Navigation Links -->
-                <div class="hidden md:flex items-center space-x-6 text-sm font-semibold">
-                    <a href="{{ route('showrooms.show', $showroom) }}" class="text-slate-600 hover:text-slate-900 transition">Home</a>
-                    <a href="{{ route('showrooms.bikes.index', $showroom) }}" class="text-slate-600 hover:text-slate-900 transition">Motorcycles</a>
-                    <a href="{{ route('showrooms.enquiries.create', $showroom) }}" class="text-rose-600 font-bold transition">Test Ride & Enquiries</a>
-                    <a href="{{ route('showrooms.show', $showroom) }}#contact" class="text-slate-600 hover:text-slate-900 transition">Contact</a>
-                </div>
-
-                <!-- Phone Support -->
-                @if($showroom->phone)
-                    <a href="tel:{{ $showroom->phone }}" class="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        <span>{{ $showroom->phone }}</span>
-                    </a>
-                @endif
-            </div>
-        </div>
-    </header>
+    @include('showrooms.partials.header')
 
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
@@ -251,11 +214,6 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 mt-12">
-        <div class="max-w-7xl mx-auto px-4">
-            <p>© {{ date('Y') }} {{ $showroom->name }}. All rights reserved.</p>
-        </div>
-    </footer>
+    @include('showrooms.partials.footer')
 </div>
 @endsection

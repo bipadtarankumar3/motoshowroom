@@ -5,29 +5,8 @@
 @section('content')
 <div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-purple-500 selection:text-white">
 
-    <!-- Header -->
-    <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-40 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <a href="{{ route('showrooms.show', $showroom) }}" class="flex items-center gap-3">
-                    <span class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-xs shadow-sm"
-                          style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }}">
-                        {{ strtoupper(substr($showroom->name, 0, 1)) }}
-                    </span>
-                    <div>
-                        <span class="font-display font-black text-sm text-slate-900 block leading-none">{{ $showroom->name }}</span>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">{{ $campaign->name }}</span>
-                    </div>
-                </a>
-
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('showrooms.promotions.index', $showroom) }}" class="text-xs text-slate-600 hover:text-slate-900 transition">
-                        &larr; More Promotions
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+    {{-- Branded Dealership Header --}}
+    @include('showrooms.partials.header')
 
     <main class="flex-1 flex items-center justify-center p-4 sm:p-8">
 
@@ -124,10 +103,8 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-        <p>&copy; {{ date('Y') }} {{ $showroom->name }}. Powered by MotoShowroom SaaS.</p>
-    </footer>
+    {{-- Motorcycle Showroom Footer --}}
+    @include('showrooms.partials.footer')
 
 </div>
 
