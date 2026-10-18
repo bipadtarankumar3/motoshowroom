@@ -152,4 +152,20 @@ class Enquiry extends Model
                 ->orWhere('customer_notes', 'like', "%{$term}%");
         });
     }
+
+    /**
+     * Determine if this enquiry is a test ride booking request.
+     */
+    public function isTestRide(): bool
+    {
+        return $this->type === EnquiryType::TestRide;
+    }
+
+    /**
+     * Determine if this enquiry is a purchase enquiry.
+     */
+    public function isPurchase(): bool
+    {
+        return $this->type === EnquiryType::Purchase;
+    }
 }

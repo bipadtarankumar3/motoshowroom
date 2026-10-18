@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
+use App\Services\ShowroomNotificationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -131,6 +132,8 @@ class PublicServiceController extends Controller
             $showroom->id,
             Auth::user()
         );
+
+        app(ShowroomNotificationService::class)->notifyServiceBookingConfirmed($booking);
 
         return redirect()->route('showrooms.services.track', [
             'showroom' => $showroom,

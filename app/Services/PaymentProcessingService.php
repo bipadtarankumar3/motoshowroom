@@ -135,7 +135,7 @@ class PaymentProcessingService
         }
 
         // 2. Fulfill Payment State Transition inside Transaction
-        return DB::transaction(function () use ($payment, $razorpayPaymentId, $razorpaySignature, $method): bool {
+        $result = DB::transaction(function () use ($payment, $razorpayPaymentId, $razorpaySignature, $method): bool {
             $payment->update([
                 'status' => PaymentStatus::Captured->value,
                 'razorpay_payment_id' => $razorpayPaymentId,
@@ -187,6 +187,12 @@ class PaymentProcessingService
 
             return true;
         });
+
+        if ($result) {
+            app(ShowroomNotificationService::class)->notifyPaymentCaptured($payment->fresh());
+        }
+
+        return $result;
     }
 
     /**
@@ -252,6 +258,8 @@ class PaymentProcessingService
                                     ]);
                                 }
                             }
+
+                            app(ShowroomNotificationService::class)->notifyPaymentCaptured($payment->fresh());
                         }
                     }
                 } elseif ($eventType === 'payment.failed') {

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Enquiry;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
+use App\Services\ShowroomNotificationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -84,6 +85,8 @@ class PublicEnquiryController extends Controller
             $showroom->id,
             Auth::user()
         );
+
+        app(ShowroomNotificationService::class)->notifyEnquiryCreated($enquiry);
 
         $typeLabel = $enquiry->type->label();
 

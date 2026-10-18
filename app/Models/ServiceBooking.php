@@ -219,4 +219,28 @@ class ServiceBooking extends Model
 
         return $occupancy < $capacity;
     }
+
+    /**
+     * Determine if service is ready for customer collection.
+     */
+    public function isReady(): bool
+    {
+        return $this->status === BookingStatus::ReadyForCollection;
+    }
+
+    /**
+     * Determine if service is completed.
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === BookingStatus::Completed;
+    }
+
+    /**
+     * Determine if invoice has been paid/captured.
+     */
+    public function isPaid(): bool
+    {
+        return $this->payment_status === PaymentStatus::Captured;
+    }
 }

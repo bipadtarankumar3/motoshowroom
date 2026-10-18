@@ -72,7 +72,14 @@
     * Workshop service invoice checkout (`/showrooms/{showroom}/services/{booking}/checkout`) with live status settlement.
     * Idempotent asynchronous Razorpay webhook processing (`POST /api/webhooks/razorpay`) with idempotency ledger (`webhook_events`).
     * Back-office financial ledger (`/showrooms/{showroom}/manage/payments`) with KPI revenue volume metrics and printable digital tax receipts.
-  * [x] Automated PHPUnit test suite passing (123 tests, 544 assertions, 0 failures)
+  * [x] Email Notification System (Phase 10):
+    * High-conversion dark/rose responsive HTML email master layout (`emails.layouts.master`).
+    * 6 dedicated transaction email templates: `EnquiryReceivedMail`, `NewEnquiryAlertMail`, `ServiceBookingConfirmedMail`, `ServiceStatusUpdatedMail`, `PaymentReceiptMail`, and `SubscriptionExpiringMail`.
+    * Centralized `ShowroomNotificationService` with clean error handling and logging.
+    * Integrated event triggers for customer enquiry submission, workshop booking confirmation, service status progression, payment capture, and webhook settlement.
+    * Scheduled Artisan command: `php artisan subscriptions:send-expiry-reminders {--days=7}` to alert dealership owners before plan expiration.
+    * Back-office visual email template previewer (`/showrooms/{showroom}/manage/email-previews`) for showroom staff and admins.
+  * [x] Automated PHPUnit test suite passing (131 tests, 576 assertions, 0 failures)
   * [x] Code formatted with Laravel Pint
 
 ---
@@ -91,8 +98,8 @@
 | **Phase 7** | Purchase Enquiries & Test Rides | ✅ COMPLETED |
 | **Phase 8** | Service Booking Management | ✅ COMPLETED |
 | **Phase 9** | Razorpay Payments & Webhooks | ✅ COMPLETED |
-| **Phase 10** | Email Notification System | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 11** | Careers & Job Applications | ⏳ PENDING |
+| **Phase 10** | Email Notification System | ✅ COMPLETED |
+| **Phase 11** | Careers & Job Applications | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 12** | Promotional Scratch Cards | ⏳ PENDING |
 | **Phase 13** | Interactive 360-Degree Motorcycle Viewer | ⏳ PENDING |
 | **Phase 14** | AI Virtual Showroom Assistant | ⏳ PENDING |
@@ -102,8 +109,11 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 123 tests, 544 assertions, 0 failures (100% passing).
+* **PHPUnit Suite**: 131 tests, 576 assertions, 0 failures (100% passing).
 * **Coverage**: 
+  - Transactional email dispatching and queued mailables (`EnquiryReceivedMail`, `NewEnquiryAlertMail`, `ServiceBookingConfirmedMail`, `ServiceStatusUpdatedMail`, `PaymentReceiptMail`, `SubscriptionExpiringMail`).
+  - Artisan command `subscriptions:send-expiry-reminders` with days threshold filtering and multi-tenant owner dispatch.
+  - Interactive email template browser previewer (`/showrooms/{showroom}/manage/email-previews`).
   - Razorpay payment gateway integration with server-side HMAC-SHA256 cryptographic verification (`PaymentProcessingService`, `RazorpayService`).
   - SaaS dealership subscription checkout (`/showrooms/{showroom}/billing/checkout`), automatic tier provisioning, and activation.
   - Workshop service booking invoice settlement (`/showrooms/{showroom}/services/{booking}/checkout`) with live cost updates.

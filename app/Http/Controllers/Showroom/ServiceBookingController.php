@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
+use App\Services\ShowroomNotificationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -160,6 +161,10 @@ class ServiceBookingController extends Controller
             ]),
             $showroom->id
         );
+
+        if ($oldValues['status'] !== $validated['status']) {
+            app(ShowroomNotificationService::class)->notifyServiceStatusUpdated($booking->fresh());
+        }
 
         return redirect()->back()->with(
             'success',

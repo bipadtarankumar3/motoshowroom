@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Showroom\BikeController;
 use App\Http\Controllers\Showroom\BillingController;
+use App\Http\Controllers\Showroom\EmailPreviewController;
 use App\Http\Controllers\Showroom\EnquiryController;
 use App\Http\Controllers\Showroom\PaymentCheckoutController;
 use App\Http\Controllers\Showroom\PaymentHistoryController;
@@ -151,6 +152,10 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         // Financial Ledger & Payment Transactions
         Route::get('/manage/payments', [PaymentHistoryController::class, 'index'])->name('showrooms.manage.payments.index');
         Route::get('/manage/payments/{payment}', [PaymentHistoryController::class, 'show'])->name('showrooms.manage.payments.show');
+
+        // Transactional Email Templates & Previews
+        Route::get('/manage/email-previews', [EmailPreviewController::class, 'index'])->name('showrooms.manage.email-previews.index');
+        Route::get('/manage/email-previews/{type}', [EmailPreviewController::class, 'show'])->name('showrooms.manage.email-previews.show');
 
         // Customer Purchase Enquiries & Test Rides
         Route::get('/manage/enquiries', [EnquiryController::class, 'index'])->name('showrooms.manage.enquiries.index');
