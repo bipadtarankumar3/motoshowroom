@@ -32,6 +32,7 @@
 
             <div class="flex items-center gap-4 text-sm font-medium">
                 <a href="{{ route('showrooms.bikes.index', $showroom) }}" class="text-slate-300 hover:text-white transition">Inventory</a>
+                <a href="{{ route('showrooms.enquiries.create', $showroom) }}" class="text-slate-300 hover:text-white transition">Book Test Ride</a>
                 <a href="#about" class="text-slate-300 hover:text-white transition">About</a>
                 <a href="#hours" class="text-slate-300 hover:text-white transition">Hours</a>
                 <a href="#contact" class="text-slate-300 hover:text-white transition">Contact</a>
@@ -80,6 +81,12 @@
                    class="px-6 py-3.5 rounded-xl bg-brand-primary text-white font-bold text-sm shadow-xl shadow-brand-primary/30 transition hover:brightness-110 flex items-center gap-2" id="btn-browse-inventory">
                     <span>Explore Motorcycles</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+
+                <a href="{{ route('showrooms.enquiries.create', $showroom) }}"
+                   class="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold text-sm transition flex items-center gap-2" id="btn-book-test-ride">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span>Book Test Ride</span>
                 </a>
 
                 @if($showroom->getSetting('whatsapp_number'))

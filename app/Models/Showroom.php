@@ -117,6 +117,28 @@ class Showroom extends Model
     }
 
     /**
+     * All customer purchase enquiries and test ride requests.
+     */
+    public function enquiries(): HasMany
+    {
+        return $this->hasMany(Enquiry::class, 'tenant_id');
+    }
+
+    /**
+     * Active enquiries pending customer follow-up or test ride delivery.
+     */
+    public function activeEnquiries(): HasMany
+    {
+        return $this->hasMany(Enquiry::class, 'tenant_id')->whereIn('status', [
+            'new',
+            'contacted',
+            'test_ride_scheduled',
+            'negotiation',
+            'booking_pending',
+        ]);
+    }
+
+    /**
      * Check if the showroom is active.
      */
     public function isActive(): bool

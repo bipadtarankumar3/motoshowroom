@@ -10,7 +10,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Showroom\BikeController;
 use App\Http\Controllers\Showroom\BillingController;
+use App\Http\Controllers\Showroom\EnquiryController;
 use App\Http\Controllers\Showroom\PublicBikeController;
+use App\Http\Controllers\Showroom\PublicEnquiryController;
 use App\Http\Controllers\Showroom\SettingController;
 use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
@@ -117,6 +119,10 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::get('/bikes', [PublicBikeController::class, 'index'])->name('showrooms.bikes.index');
     Route::get('/bikes/{bike}', [PublicBikeController::class, 'show'])->name('showrooms.bikes.show');
 
+    // Customer Enquiries & Test-Rides
+    Route::get('/enquiries/create', [PublicEnquiryController::class, 'create'])->name('showrooms.enquiries.create');
+    Route::post('/enquiries', [PublicEnquiryController::class, 'store'])->name('showrooms.enquiries.store');
+
     // Showroom Billing & Subscription Hub
     Route::middleware(['auth', 'tenant.member'])->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('showrooms.billing.index');
@@ -126,6 +132,12 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     // Authenticated Showroom Back-Office (Tenant isolation + Active Subscription check)
     Route::middleware(['auth', 'tenant.member', 'subscription.active'])->group(function () {
         Route::get('/manage', [App\Http\Controllers\Showroom\DashboardController::class, 'index'])->name('showrooms.manage');
+
+        // Customer Purchase Enquiries & Test Rides
+        Route::get('/manage/enquiries', [EnquiryController::class, 'index'])->name('showrooms.manage.enquiries.index');
+        Route::get('/manage/enquiries/{enquiry}', [EnquiryController::class, 'show'])->name('showrooms.manage.enquiries.show');
+        Route::put('/manage/enquiries/{enquiry}', [EnquiryController::class, 'update'])->name('showrooms.manage.enquiries.update');
+        Route::delete('/manage/enquiries/{enquiry}', [EnquiryController::class, 'destroy'])->name('showrooms.manage.enquiries.destroy');
 
         // Motorcycle Inventory Management
         Route::get('/manage/bikes', [BikeController::class, 'index'])->name('showrooms.manage.bikes.index');

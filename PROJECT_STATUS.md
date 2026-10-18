@@ -77,8 +77,8 @@
 | **Phase 4** | Subscription Management & Entitlements | ✅ COMPLETED |
 | **Phase 5** | Showroom Dashboard & Website Builder | ✅ COMPLETED |
 | **Phase 6** | Motorcycle Inventory Management | ✅ COMPLETED |
-| **Phase 7** | Purchase Enquiries & Test Rides | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 8** | Service Booking Management | ⏳ PENDING |
+| **Phase 7** | Purchase Enquiries & Test Rides | ✅ COMPLETED |
+| **Phase 8** | Service Booking Management | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 9** | Razorpay Payments & Webhooks | ⏳ PENDING |
 | **Phase 10** | Email Notification System | ⏳ PENDING |
 | **Phase 11** | Careers & Job Applications | ⏳ PENDING |
@@ -91,6 +91,14 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 64 tests, 320 assertions, 0 failures (100% passing).
-* **Coverage**: Motorcycle CRUD operations, specifications, photo gallery, variant trims, subscription listing quota enforcement (`max_bike_listings`), multi-tenant cross-dealership isolation (404/403), public inventory catalog, public bike detail profiles with interactive gallery, featured showcase on storefront homepage, showroom dashboard, website builder, operating hours computation, showroom business settings, subscription lifecycle & plans CRUD, manual expiry extensions, plan upgrades, dynamic feature & limit entitlement checks, back-office subscription gating, showroom billing hub with usage meters, Super Admin dashboard, tenant provisioning, showroom status toggles & audit logs, staff role assignments, platform settings with cache management, user roles & details pages, admin user provisioning, password reset lifecycle, Google OAuth integration, and base foundation.
+* **PHPUnit Suite**: 85 tests, 389 assertions, 0 failures (100% passing).
+* **Coverage**: 
+  - Customer purchase enquiries, test-ride requests, and general showroom inquiries with automated reference numbers (`ENQ-YYYYMMDD-XXXX`).
+  - Pre-selected motorcycle links from inventory showcase to test-ride booking form.
+  - Back-office enquiry management with KPI metric counters, real-time search, category/status filters, staff assignment, appointment scheduling, and internal notes.
+  - Milestone timestamp tracking (`contacted_at`, `completed_at`) and audit logging (`enquiry.created`, `enquiry.updated`, `enquiry.deleted`).
+  - Motorcycle inventory CRUD operations, specifications, photo gallery, variant trims, subscription listing quota enforcement (`max_bike_listings`), multi-tenant cross-dealership isolation (404/403).
+  - Public inventory catalog, public bike detail profiles with interactive gallery, featured showcase on storefront homepage, showroom dashboard, website builder, operating hours computation, showroom business settings.
+  - Subscription lifecycle & plans CRUD, manual expiry extensions, plan upgrades, dynamic feature & limit entitlement checks, back-office subscription gating, showroom billing hub with usage meters.
+  - Super Admin dashboard, tenant provisioning, showroom status toggles & audit logs, staff role assignments, platform settings with cache management, user roles & details pages, admin user provisioning, password reset lifecycle, Google OAuth integration, and base foundation.
 * **Code Styling**: Formatted with `vendor/bin/pint --format agent`.

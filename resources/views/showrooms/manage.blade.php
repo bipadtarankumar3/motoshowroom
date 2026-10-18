@@ -73,11 +73,14 @@
                     <span class="text-[10px] text-slate-500">Motorcycles listed</span>
                 </a>
 
-                <div class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow">
-                    <span class="text-[10px] uppercase font-bold text-sky-400 tracking-wider">Enquiries</span>
+                <a href="{{ route('showrooms.manage.enquiries.index', $showroom) }}" class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow hover:border-sky-500/50 transition group block">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-bold text-sky-400 tracking-wider">Enquiries</span>
+                        <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
                     <p class="text-2xl font-black font-display text-sky-400 mt-1">{{ $metrics['active_enquiries'] ?? 0 }}</p>
-                    <span class="text-[10px] text-slate-500">Pending follow-ups</span>
-                </div>
+                    <span class="text-[10px] text-slate-500">Active leads & test rides</span>
+                </a>
 
                 <div class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow">
                     <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Service Bookings</span>

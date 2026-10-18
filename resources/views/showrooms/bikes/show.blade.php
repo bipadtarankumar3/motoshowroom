@@ -250,6 +250,17 @@
 
                     <!-- Dealer Engagement Action Buttons -->
                     <div class="space-y-3">
+                        <a href="{{ route('showrooms.enquiries.create', [$showroom, 'bike' => $bike->slug, 'type' => 'test_ride']) }}"
+                           class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-950/40 transition flex items-center justify-center gap-2 text-center" id="btn-book-test-ride">
+                            <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span>Book Free Test Ride</span>
+                        </a>
+
+                        <a href="{{ route('showrooms.enquiries.create', [$showroom, 'bike' => $bike->slug, 'type' => 'purchase']) }}"
+                           class="w-full py-3.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold text-sm transition flex items-center justify-center gap-2 text-center" id="btn-request-quote">
+                            <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>Get On-Road Price Quote</span>
+                        </a>
                         @if($showroom->getSetting('whatsapp_number'))
                             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $showroom->getSetting('whatsapp_number')) }}?text={{ urlencode('Hi! I want to check availability and purchase the ' . $bike->name . ' (SKU: ' . $bike->sku . ') from ' . $showroom->name . '.') }}"
                                target="_blank"

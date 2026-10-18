@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
         $metrics = [
             'bikes_count' => $showroom->bikes()->count(),
-            'active_enquiries' => 0,
+            'active_enquiries' => $showroom->activeEnquiries()->count(),
             'today_services' => 0,
             'open_jobs' => 0,
             'active_campaigns' => 0,
