@@ -103,14 +103,26 @@
 | **Phase 12** | Promotional Scratch Cards | ✅ COMPLETED |
 | **Phase 13** | Interactive 360-Degree Motorcycle Viewer | ✅ COMPLETED |
 | **Phase 14** | AI Virtual Showroom Assistant | ✅ COMPLETED |
-| **Phase 15** | Analytics & Production Testing | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 16** | Deployment & Operational Readiness | ⏳ PENDING |
+| **Phase 15** | Analytics & Business Intelligence Reports | ✅ COMPLETED |
+| **Phase 16** | Deployment & Operational Readiness | 🔄 READY FOR IMPLEMENTATION |
 
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 193 tests, 888 assertions, 0 failures (100% passing).
+* **PHPUnit Suite**: 212 tests, 965 assertions, 0 failures (100% passing).
 * **Coverage**: 
+  - Advanced Multi-Dimensional Analytics & Business Intelligence engine (`AnalyticsService`, `ShowroomAnalyticsController`, `PlatformAnalyticsController`).
+  - Dealership Executive KPI cards covering Gross Revenue (`₹` formatted), total transaction volume, average transaction value, service vs direct payments split.
+  - Multi-horizon time filter switching (`7d`, `30d`, `90d`, `365d`, `all`) with dynamic date threshold filtering.
+  - 5-stage sales conversion funnel tracking (New Inbound Leads → Staff Contacted → Test Ride Scheduled → Quotation & Negotiation → Closed Won Bookings) with lifecycle transition percentages.
+  - Workshop operations and service bay throughput analytics (Pending, Confirmed, In Bay, Ready for Pickup, Completed, Cancelled) and completion efficiency rate calculations.
+  - Promotional marketing ROI tracking (Issued Scratch Cards, Scratched %, and In-Store Coupon Redemption Desk conversion rate).
+  - AI Virtual Showroom Concierge telemetry (Total Chats, Converted Test Ride Leads, and AI conversion rate).
+  - Top 5 in-demand motorcycle models ranking by inbound lead volume.
+  - On-demand streaming CSV report generator with three specialized exports: Captured Revenue Ledger, Enquiries & Leads Ledger, and Workshop Service Bookings Ledger.
+  - Plan entitlement gating (`has_advanced_analytics`) guarding dealership analytics views and CSV downloads to Pro/Enterprise tiers with upgrade prompts.
+  - Super Administrator Platform Financial Intelligence dashboard (`/admin/analytics`) tracking Platform Gross GMV, Monthly Recurring Revenue (MRR), normalized Annual Recurring Revenue (ARR), total transactions, active tenant showroom portfolio (Active, Trialing, Suspended), and active subscriber density breakdown by subscription plan.
+  - Strict multi-tenant isolation guaranteeing zero cross-showroom data leakage in telemetry, dashboards, and exported CSV streams. 
   - AI Virtual Showroom Concierge with multi-intent heuristic NLP and contextual reasoning engine (`AiAssistantSetting`, `AiConversation`, `AiMessage`, `AiAssistantService`, `PublicAiAssistantController`, `AiAssistantManagementController`).
   - Context-aware motorcycle recommendation engine matching user queries on budget, category (sports, cruiser, adventure, EV, scooter), and brand against live dealership inventory, returning rich cards with prices, specs, and direct booking links.
   - Automated high-intent lead capture converting customer chat inquiries (with contact phone/name) directly into active `Enquiry` records (`type = 'test_ride'`).

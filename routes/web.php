@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PlatformAnalyticsController;
 use App\Http\Controllers\Admin\PlatformSettingController;
 use App\Http\Controllers\Admin\ShowroomController;
 use App\Http\Controllers\Admin\SubscriptionController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Showroom\PublicScratchCardController;
 use App\Http\Controllers\Showroom\PublicServiceController;
 use App\Http\Controllers\Showroom\ServiceBookingController;
 use App\Http\Controllers\Showroom\SettingController;
+use App\Http\Controllers\Showroom\ShowroomAnalyticsController;
 use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\UserController;
@@ -113,6 +115,9 @@ Route::middleware('auth')->group(function () {
         // Platform Settings
         Route::get('/settings', [PlatformSettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [PlatformSettingController::class, 'update'])->name('settings.update');
+
+        // Platform Analytics & Intelligence Oversight
+        Route::get('/analytics', [PlatformAnalyticsController::class, 'index'])->name('analytics.index');
 
         // Platform Users
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -250,6 +255,10 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::put('/manage/ai/settings', [AiAssistantManagementController::class, 'updateSettings'])->name('showrooms.manage.ai.settings');
         Route::get('/manage/ai/conversations/{conversation}', [AiAssistantManagementController::class, 'showConversation'])->name('showrooms.manage.ai.conversations.show');
         Route::delete('/manage/ai/conversations/{conversation}', [AiAssistantManagementController::class, 'destroyConversation'])->name('showrooms.manage.ai.conversations.destroy');
+
+        // Analytics & Business Intelligence Reports
+        Route::get('/manage/analytics', [ShowroomAnalyticsController::class, 'index'])->name('showrooms.manage.analytics.index');
+        Route::get('/manage/analytics/export', [ShowroomAnalyticsController::class, 'export'])->name('showrooms.manage.analytics.export');
 
         // Showroom Settings & Profile
         Route::get('/manage/settings', [SettingController::class, 'edit'])->name('showrooms.manage.settings');

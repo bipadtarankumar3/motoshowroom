@@ -35,6 +35,10 @@
                        class="px-3.5 py-2 rounded-xl text-sm font-semibold transition {{ request()->routeIs('admin.users*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
                         Users
                     </a>
+                    <a href="{{ route('admin.analytics.index') }}"
+                       class="px-3.5 py-2 rounded-xl text-sm font-semibold transition {{ request()->routeIs('admin.analytics*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
+                        Analytics
+                    </a>
                     <a href="{{ route('admin.audit-logs.index') }}"
                        class="px-3.5 py-2 rounded-xl text-sm font-semibold transition {{ request()->routeIs('admin.audit-logs*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
                         Audit Logs
