@@ -139,4 +139,74 @@ class EnquiryController extends Controller
         return redirect()->route('showrooms.manage.enquiries.index', $showroom)
             ->with('success', "Enquiry #{$num} removed.");
     }
+
+    /**
+     * Delete multiple selected enquiries.
+     */
+    public function bulkDestroy(Request $request, Showroom $showroom): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:enquiries,id'],
+        ]);
+
+        $count = $showroom->enquiries()->whereIn('id', $validated['ids'])->delete();
+
+        AuditLogger::log('enquiry.bulk_deleted', null, ['ids' => $validated['ids']], null, $showroom->id);
+
+        return redirect()->route('showrooms.manage.enquiries.index', $showroom)
+            ->with('success', "{$count} enquiry/lead(s) removed.");
+    }
+
+    /**
+     * Export showroom enquiries to CSV.
+     */
+    public function export(Request $request, Showroom $showroom)
+    {
+        $query = $showroom->enquiries()->with(['bike', 'assignedTo']);
+
+        if ($request->filled('ids')) {
+            $ids = is_array($request->input('ids'))
+                ? $request->input('ids')
+                : explode(',', $request->input('ids'));
+            $query->whereIn('id', $ids);
+        } else {
+            if ($request->filled('search')) {
+                $query->search($request->input('search'));
+            }
+            if ($request->filled('type')) {
+                $query->where('type', $request->input('type'));
+            }
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+        }
+
+        $enquiries = $query->latest()->get();
+        $filename = Str::slug($showroom->name).'_enquiries_'.date('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($enquiries) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Ref No', 'Customer Name', 'Phone', 'Email', 'Type', 'Motorcycle', 'Status', 'Scheduled At', 'Assigned Staff', 'Created At']);
+
+            foreach ($enquiries as $e) {
+                fputcsv($handle, [
+                    $e->enquiry_number,
+                    $e->name,
+                    $e->phone,
+                    $e->email ?? 'N/A',
+                    $e->type?->value ?? $e->type,
+                    $e->bike?->name ?? 'General Enquiry',
+                    $e->status?->value ?? $e->status,
+                    $e->scheduled_at?->format('Y-m-d H:i') ?? 'N/A',
+                    $e->assignedTo?->name ?? 'Unassigned',
+                    $e->created_at?->format('Y-m-d H:i') ?? 'N/A',
+                ]);
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
 }

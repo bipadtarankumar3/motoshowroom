@@ -1,8 +1,8 @@
 <x-app-layout :title="$showroom->name . ' - Showroom Back-Office | MotoShowroom SaaS'">
     @include('showrooms.partials.manage-nav')
 
-    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto space-y-8">
+    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div class="w-full space-y-8">
 
             <!-- Hero Header Card -->
             <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm relative overflow-hidden">

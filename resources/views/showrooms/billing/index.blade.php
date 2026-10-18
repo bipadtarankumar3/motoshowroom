@@ -1,6 +1,6 @@
 <x-showroom-layout :showroom="$showroom" :title="'Subscription & Billing - ' . $showroom->name">
     @include('showrooms.partials.manage-nav')
-    <div class="max-w-7xl mx-auto space-y-8 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="w-full space-y-8 py-8 px-4 sm:px-6 lg:px-8 xl:px-10">
 
         <!-- Breadcrumb & Top Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">

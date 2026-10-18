@@ -187,4 +187,76 @@ class ServiceBookingController extends Controller
         return redirect()->route('showrooms.manage.services.index', $showroom)
             ->with('success', "Service booking #{$num} removed.");
     }
+
+    /**
+     * Delete multiple selected service bookings.
+     */
+    public function bulkDestroy(Request $request, Showroom $showroom): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:service_bookings,id'],
+        ]);
+
+        $count = $showroom->serviceBookings()->whereIn('id', $validated['ids'])->delete();
+
+        AuditLogger::log('service_booking.bulk_deleted', null, ['ids' => $validated['ids']], null, $showroom->id);
+
+        return redirect()->route('showrooms.manage.services.index', $showroom)
+            ->with('success', "{$count} service booking(s) removed.");
+    }
+
+    /**
+     * Export showroom service bookings to CSV.
+     */
+    public function export(Request $request, Showroom $showroom)
+    {
+        $query = $showroom->serviceBookings()->with(['assignedTechnician']);
+
+        if ($request->filled('ids')) {
+            $ids = is_array($request->input('ids'))
+                ? $request->input('ids')
+                : explode(',', $request->input('ids'));
+            $query->whereIn('id', $ids);
+        } else {
+            if ($request->filled('search')) {
+                $query->search($request->input('search'));
+            }
+            if ($request->filled('status')) {
+                $query->filterStatus($request->input('status'));
+            }
+            if ($request->filled('bay')) {
+                $query->filterBay((int) $request->input('bay'));
+            }
+        }
+
+        $bookings = $query->latest()->get();
+        $filename = Str::slug($showroom->name).'_services_'.date('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($bookings) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Booking Ref', 'Customer Name', 'Phone', 'Motorcycle', 'Reg Plate', 'Service Type', 'Date', 'Time Slot', 'Bay', 'Status', 'Payment', 'Cost']);
+
+            foreach ($bookings as $b) {
+                fputcsv($handle, [
+                    $b->booking_number,
+                    $b->customer_name,
+                    $b->customer_phone,
+                    $b->bike_make_model,
+                    $b->registration_number ?? 'N/A',
+                    $b->service_type,
+                    $b->booking_date?->format('Y-m-d') ?? 'N/A',
+                    $b->time_slot,
+                    $b->bay_number ? "Bay {$b->bay_number}" : 'Unassigned',
+                    $b->status?->value ?? $b->status,
+                    $b->payment_status?->value ?? $b->payment_status,
+                    $b->final_cost ?? $b->estimated_cost ?? 0,
+                ]);
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
 }

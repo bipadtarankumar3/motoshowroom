@@ -1,7 +1,7 @@
 {{-- ============================================================
      SHOWROOM MANAGE SIDEBAR — Catalyst-style fixed left sidebar
      ============================================================ --}}
-<div class="manage-shell" x-data="{ open: false }">
+<div class="manage-shell" x-data="{ open: false, sidebarCollapsed: false, topUserMenuOpen: false }">
 
     {{-- Backdrop (mobile) --}}
     <div
@@ -20,10 +20,10 @@
     {{-- ═══ SIDEBAR ═══ --}}
     <aside
         id="manage-sidebar"
-        class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-white border-r border-slate-200/80 shadow-xs
-               transition-transform duration-300 ease-in-out
-               lg:translate-x-0"
-        :class="open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+        class="fixed {{ session()->has('admin_impersonator_id') ? 'top-11' : 'top-0' }} bottom-0 left-0 z-40 flex w-64 flex-col bg-white border-r border-slate-200/80 shadow-xs
+               transition-all duration-300 ease-in-out
+               -translate-x-full lg:translate-x-0"
+        :class="open ? '!translate-x-0' : (sidebarCollapsed ? 'lg:!-translate-x-full' : 'lg:translate-x-0')"
         x-cloak
     >
         {{-- Brand / Showroom Header (Catalyst-style) --}}
@@ -230,27 +230,146 @@
         </div>
     </aside>
 
-    {{-- ═══ MAIN CONTENT CONTAINER (offsets sidebar on desktop) ═══ --}}
-    <div class="lg:pl-64 flex flex-col min-h-screen">
-        {{-- Mobile Top Header --}}
-        <header class="sticky top-0 z-20 lg:hidden flex items-center justify-between h-14 px-4 bg-white border-b border-slate-200 shadow-xs">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <button @click="open = true" class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition" id="btn-manage-open-sidebar">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+    {{-- ═══ MAIN CONTENT CONTAINER (offsets sidebar on desktop when not collapsed) ═══ --}}
+    <div class="flex flex-col min-h-screen lg:pl-64 transition-all duration-300 ease-in-out"
+         :class="sidebarCollapsed ? 'lg:!pl-0' : 'lg:pl-64'">
+
+        {{-- Modern Sticky Top Navbar / Header (Desktop & Mobile) --}}
+        <header class="sticky {{ session()->has('admin_impersonator_id') ? 'top-11' : 'top-0' }} z-30 flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+            <div class="flex items-center gap-3">
+                {{-- Toggle Side Panel button --}}
+                <button
+                    @click="if (window.innerWidth >= 1024) { sidebarCollapsed = !sidebarCollapsed; } else { open = !open; }"
+                    class="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-2 group cursor-pointer"
+                    title="Toggle Side Panel (Show/Hide)"
+                    id="btn-manage-toggle-sidebar"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+                    </svg>
+                    <span class="hidden md:inline-block text-xs font-semibold text-slate-500 group-hover:text-slate-700" x-text="sidebarCollapsed ? 'Show Panel' : 'Hide Panel'"></span>
                 </button>
-                <a href="{{ route('showrooms.manage', $showroom) }}" class="flex items-center gap-2 min-w-0">
-                    <span class="w-7 h-7 rounded-lg flex items-center justify-center font-black text-white text-xs flex-shrink-0"
+
+                <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+
+                {{-- Showroom Identity Breadcrumb --}}
+                <a href="{{ route('showrooms.manage', $showroom) }}" class="flex items-center gap-2.5 group">
+                    <span class="w-7 h-7 rounded-lg flex items-center justify-center font-black text-white text-xs flex-shrink-0 shadow-2xs group-hover:scale-105 transition-transform"
                           style="background-color: {{ $primaryColor }}">
                         {{ strtoupper(substr($showroom->name, 0, 1)) }}
                     </span>
-                    <span class="font-display font-black text-sm tracking-tight text-slate-900 truncate">{{ $showroom->name }}</span>
+                    <div class="leading-tight">
+                        <span class="font-display font-black text-sm tracking-tight text-slate-900 block truncate group-hover:text-slate-700 transition">{{ $showroom->name }}</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Back-Office</span>
+                    </div>
                 </a>
             </div>
 
-            <div class="flex items-center gap-2">
-                <a href="{{ route('showrooms.show', $showroom) }}" target="_blank" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition" title="View Storefront">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            {{-- Right-side Actions & User Dropdown --}}
+            <div class="flex items-center gap-3" x-data="{ userMenuOpen: false }">
+                <a href="{{ route('showrooms.show', $showroom) }}" target="_blank"
+                   class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition border border-transparent hover:border-slate-200">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <span>View Storefront</span>
                 </a>
+
+                {{-- User Icon & Dropdown --}}
+                <div class="relative">
+                    <button
+                        @click="userMenuOpen = !userMenuOpen"
+                        id="btn-manage-header-user-menu"
+                        class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl border border-slate-200/80 bg-white hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs group cursor-pointer"
+                    >
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white text-xs shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform"
+                             style="background-color: {{ $primaryColor }}">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
+                        <div class="hidden sm:block text-left leading-tight">
+                            <span class="text-xs font-bold text-slate-900 block truncate max-w-[120px]">{{ auth()->user()->name }}</span>
+                            <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Showroom Staff</span>
+                        </div>
+                        <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown Card --}}
+                    <div
+                        x-show="userMenuOpen"
+                        @click.away="userMenuOpen = false"
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                        class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 text-xs"
+                        x-cloak
+                    >
+                        {{-- User Header Details --}}
+                        <div class="px-4 py-2.5 border-b border-slate-100">
+                            <p class="font-bold text-slate-900 text-sm truncate">{{ auth()->user()->name }}</p>
+                            <p class="text-slate-500 text-[11px] truncate">{{ auth()->user()->email }}</p>
+                            <span class="inline-flex mt-1.5 items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                                {{ $showroom->name }}
+                            </span>
+                        </div>
+
+                        {{-- Links --}}
+                        <div class="py-1">
+                            <a href="{{ route('profile') }}" class="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition font-medium">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                <span>View Profile & Details</span>
+                            </a>
+
+                            {{-- Side Panel Toggle (vide panel) --}}
+                            <button
+                                type="button"
+                                @click="sidebarCollapsed = !sidebarCollapsed; userMenuOpen = false"
+                                class="w-full flex items-center justify-between px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition font-medium text-left cursor-pointer"
+                            >
+                                <div class="flex items-center gap-2.5">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                                    <span x-text="sidebarCollapsed ? 'Show Side Panel' : 'Hide Side Panel'"></span>
+                                </div>
+                                <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Toggle</span>
+                            </button>
+
+                            <a href="{{ route('showrooms.show', $showroom) }}" target="_blank" class="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition font-medium">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                <span>Public Storefront</span>
+                            </a>
+
+                            @if(auth()->user()->isAdmin())
+                                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 text-orange-600 hover:bg-orange-50 transition font-medium">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    <span>Super Admin Console</span>
+                                </a>
+                            @endif
+
+                            @if(session()->has('admin_impersonator_id'))
+                                <form method="POST" action="{{ route('impersonate.leave') }}">
+                                    @csrf
+                                    <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-amber-700 hover:bg-amber-50 transition font-semibold text-left cursor-pointer">
+                                        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                                        <span>Return to Admin Dashboard</span>
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+
+                        {{-- Logout --}}
+                        <div class="border-t border-slate-100 pt-1">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-rose-600 hover:bg-rose-50 transition font-semibold text-left cursor-pointer">
+                                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    <span>Sign Out</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 

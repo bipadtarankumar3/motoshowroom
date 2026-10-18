@@ -334,4 +334,111 @@ class ShowroomController extends Controller
         return redirect()->route('admin.showrooms.show', $showroom)
             ->with('success', 'Staff membership removed successfully.');
     }
+
+    /**
+     * Delete a single showroom (Admin only).
+     */
+    public function destroy(Showroom $showroom): RedirectResponse
+    {
+        $name = $showroom->name;
+
+        DB::transaction(function () use ($showroom) {
+            $showroom->memberships()->delete();
+            $showroom->delete();
+        });
+
+        AuditLogger::log(
+            action: 'showroom.deleted',
+            auditable: null,
+            oldValues: ['name' => $name, 'id' => $showroom->id],
+            newValues: null
+        );
+
+        return redirect()->route('admin.showrooms.index')
+            ->with('success', "Showroom \"{$name}\" was removed successfully.");
+    }
+
+    /**
+     * Delete multiple selected showrooms.
+     */
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:showrooms,id'],
+        ]);
+
+        $count = count($validated['ids']);
+
+        DB::transaction(function () use ($validated) {
+            ShowroomMembership::whereIn('showroom_id', $validated['ids'])->delete();
+            Showroom::whereIn('id', $validated['ids'])->delete();
+        });
+
+        AuditLogger::log(
+            action: 'showroom.bulk_deleted',
+            auditable: null,
+            oldValues: ['ids' => $validated['ids']],
+            newValues: null
+        );
+
+        return redirect()->route('admin.showrooms.index')
+            ->with('success', "{$count} showroom(s) were removed successfully.");
+    }
+
+    /**
+     * Export showrooms to CSV.
+     */
+    public function export(Request $request)
+    {
+        $query = Showroom::with(['ownerMembership.user'])->withCount('memberships');
+
+        if ($request->filled('ids')) {
+            $ids = is_array($request->input('ids'))
+                ? $request->input('ids')
+                : explode(',', $request->input('ids'));
+            $query->whereIn('id', $ids);
+        } else {
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+        }
+
+        $showrooms = $query->orderBy('name')->get();
+        $filename = 'showrooms_export_'.date('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($showrooms) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['ID', 'Name', 'Slug', 'Email', 'Phone', 'City', 'Status', 'Owner', 'Members', 'Created At']);
+
+            foreach ($showrooms as $s) {
+                fputcsv($handle, [
+                    $s->id,
+                    $s->name,
+                    $s->slug,
+                    $s->email ?? 'N/A',
+                    $s->phone ?? 'N/A',
+                    $s->city ?? 'N/A',
+                    ucfirst($s->status),
+                    $s->ownerMembership?->user?->name ?? 'N/A',
+                    $s->memberships_count,
+                    $s->created_at?->format('Y-m-d H:i') ?? 'N/A',
+                ]);
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
 }

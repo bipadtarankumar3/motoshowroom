@@ -71,8 +71,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // Dashboard & Profile shortcuts
-    Route::get('/dashboard', [UserController::class, 'profile'])->name('dashboard');
+    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+
+    // Super Admin Impersonation Exit
+    Route::post('/impersonate/leave', [UserController::class, 'leaveImpersonate'])->name('impersonate.leave');
 
     // User details page & edit
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
@@ -88,9 +91,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/showrooms', [ShowroomController::class, 'index'])->name('showrooms.index');
         Route::get('/showrooms/create', [ShowroomController::class, 'create'])->name('showrooms.create');
         Route::post('/showrooms', [ShowroomController::class, 'store'])->name('showrooms.store');
+        Route::post('/showrooms/bulk-delete', [ShowroomController::class, 'bulkDestroy'])->name('showrooms.bulk-destroy');
+        Route::post('/showrooms/bulk-destroy-alias', [ShowroomController::class, 'bulkDestroy'])->name('showrooms.bulk-delete');
+        Route::get('/showrooms/export', [ShowroomController::class, 'export'])->name('showrooms.export');
         Route::get('/showrooms/{showroom}', [ShowroomController::class, 'show'])->name('showrooms.show');
         Route::get('/showrooms/{showroom}/edit', [ShowroomController::class, 'edit'])->name('showrooms.edit');
         Route::put('/showrooms/{showroom}', [ShowroomController::class, 'update'])->name('showrooms.update');
+        Route::delete('/showrooms/{showroom}', [ShowroomController::class, 'destroy'])->name('showrooms.destroy');
         Route::post('/showrooms/{showroom}/status', [ShowroomController::class, 'toggleStatus'])->name('showrooms.status');
         Route::post('/showrooms/{showroom}/members', [ShowroomController::class, 'addMember'])->name('showrooms.members.store');
         Route::delete('/showrooms/{showroom}/members/{membership}', [ShowroomController::class, 'removeMember'])->name('showrooms.members.destroy');
@@ -123,6 +130,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::post('/users/bulk-delete', [UserController::class, 'bulkDestroy'])->name('users.bulk-destroy');
+        Route::post('/users/bulk-destroy-alias', [UserController::class, 'bulkDestroy'])->name('users.bulk-delete');
+        Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
     });
 });
 
@@ -192,12 +204,18 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
 
         // Customer Purchase Enquiries & Test Rides
         Route::get('/manage/enquiries', [EnquiryController::class, 'index'])->name('showrooms.manage.enquiries.index');
+        Route::post('/manage/enquiries/bulk-delete', [EnquiryController::class, 'bulkDestroy'])->name('showrooms.manage.enquiries.bulk-destroy');
+        Route::post('/manage/enquiries/bulk-destroy-alias', [EnquiryController::class, 'bulkDestroy'])->name('showrooms.manage.enquiries.bulk-delete');
+        Route::get('/manage/enquiries/export', [EnquiryController::class, 'export'])->name('showrooms.manage.enquiries.export');
         Route::get('/manage/enquiries/{enquiry}', [EnquiryController::class, 'show'])->name('showrooms.manage.enquiries.show');
         Route::put('/manage/enquiries/{enquiry}', [EnquiryController::class, 'update'])->name('showrooms.manage.enquiries.update');
         Route::delete('/manage/enquiries/{enquiry}', [EnquiryController::class, 'destroy'])->name('showrooms.manage.enquiries.destroy');
 
         // Service Booking & Workshop Bay Management
         Route::get('/manage/services', [ServiceBookingController::class, 'index'])->name('showrooms.manage.services.index');
+        Route::post('/manage/services/bulk-delete', [ServiceBookingController::class, 'bulkDestroy'])->name('showrooms.manage.services.bulk-destroy');
+        Route::post('/manage/services/bulk-destroy-alias', [ServiceBookingController::class, 'bulkDestroy'])->name('showrooms.manage.services.bulk-delete');
+        Route::get('/manage/services/export', [ServiceBookingController::class, 'export'])->name('showrooms.manage.services.export');
         Route::get('/manage/services/{booking}', [ServiceBookingController::class, 'show'])->name('showrooms.manage.services.show');
         Route::put('/manage/services/{booking}', [ServiceBookingController::class, 'update'])->name('showrooms.manage.services.update');
         Route::delete('/manage/services/{booking}', [ServiceBookingController::class, 'destroy'])->name('showrooms.manage.services.destroy');
@@ -206,6 +224,9 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::get('/manage/bikes', [BikeController::class, 'index'])->name('showrooms.manage.bikes.index');
         Route::get('/manage/bikes/create', [BikeController::class, 'create'])->name('showrooms.manage.bikes.create');
         Route::post('/manage/bikes', [BikeController::class, 'store'])->name('showrooms.manage.bikes.store');
+        Route::post('/manage/bikes/bulk-delete', [BikeController::class, 'bulkDestroy'])->name('showrooms.manage.bikes.bulk-destroy');
+        Route::post('/manage/bikes/bulk-destroy-alias', [BikeController::class, 'bulkDestroy'])->name('showrooms.manage.bikes.bulk-delete');
+        Route::get('/manage/bikes/export', [BikeController::class, 'export'])->name('showrooms.manage.bikes.export');
         Route::get('/manage/bikes/{bike}/edit', [BikeController::class, 'edit'])->name('showrooms.manage.bikes.edit');
         Route::put('/manage/bikes/{bike}', [BikeController::class, 'update'])->name('showrooms.manage.bikes.update');
         Route::delete('/manage/bikes/{bike}', [BikeController::class, 'destroy'])->name('showrooms.manage.bikes.destroy');

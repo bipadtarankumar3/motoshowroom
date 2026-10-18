@@ -1,8 +1,8 @@
 <x-app-layout title="Super Admin Dashboard | MotoShowroom SaaS">
     @include('admin.partials.nav')
 
-    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto space-y-8">
+    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div class="w-full space-y-8">
 
             <!-- Catalyst-style Header (Welcome back + Action Controls) -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-6">

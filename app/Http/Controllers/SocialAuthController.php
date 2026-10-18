@@ -46,6 +46,15 @@ class SocialAuthController extends Controller
             Auth::login($user);
             request()->session()->regenerate();
 
+            if ($user->isAdmin()) {
+                return redirect()->intended(route('admin.dashboard'))->with('success', "Signed in with Google as {$user->name}.");
+            }
+
+            $showroom = $user->showrooms()->first();
+            if ($showroom) {
+                return redirect()->intended(route('showrooms.manage', $showroom))->with('success', "Signed in with Google as {$user->name}.");
+            }
+
             return redirect()->intended(route('profile'))->with('success', "Signed in with Google as {$user->name}.");
         }
 
@@ -77,6 +86,11 @@ class SocialAuthController extends Controller
 
         Auth::login($user);
         request()->session()->regenerate();
+
+        $showroom = $user->showrooms()->first();
+        if ($showroom) {
+            return redirect()->intended(route('showrooms.manage', $showroom))->with('success', 'Account linked and signed in with Google successfully!');
+        }
 
         return redirect()->intended(route('profile'))->with('success', 'Account linked and signed in with Google successfully!');
     }

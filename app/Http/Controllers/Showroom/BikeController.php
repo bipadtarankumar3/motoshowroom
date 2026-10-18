@@ -417,4 +417,76 @@ class BikeController extends Controller
 
         return back()->with('success', "\"{$bike->name}\" {$statusText}.");
     }
+
+    /**
+     * Delete multiple selected motorcycles.
+     */
+    public function bulkDestroy(Request $request, Showroom $showroom): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:bikes,id'],
+        ]);
+
+        $count = $showroom->bikes()->whereIn('id', $validated['ids'])->delete();
+
+        AuditLogger::log('bike.bulk_deleted', null, ['ids' => $validated['ids']], null, $showroom->id);
+
+        return redirect()->route('showrooms.manage.bikes.index', $showroom)
+            ->with('success', "{$count} motorcycle(s) removed from inventory.");
+    }
+
+    /**
+     * Export showroom motorcycles to CSV.
+     */
+    public function export(Request $request, Showroom $showroom)
+    {
+        $query = $showroom->bikes()->with(['variants']);
+
+        if ($request->filled('ids')) {
+            $ids = is_array($request->input('ids'))
+                ? $request->input('ids')
+                : explode(',', $request->input('ids'));
+            $query->whereIn('id', $ids);
+        } else {
+            if ($request->filled('search')) {
+                $query->search($request->input('search'));
+            }
+            if ($request->filled('category')) {
+                $query->filterCategory($request->input('category'));
+            }
+            if ($request->filled('status')) {
+                $query->filterStatus($request->input('status'));
+            }
+        }
+
+        $bikes = $query->latest()->get();
+        $filename = Str::slug($showroom->name).'_bikes_'.date('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($bikes) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['ID', 'Name', 'SKU', 'Brand', 'Model Year', 'Category', 'Price', 'Status', 'Featured', 'Published', 'Engine CC', 'Power BHP']);
+
+            foreach ($bikes as $b) {
+                fputcsv($handle, [
+                    $b->id,
+                    $b->name,
+                    $b->sku,
+                    $b->brand,
+                    $b->model_year,
+                    $b->category?->value ?? $b->category,
+                    $b->price,
+                    $b->status?->value ?? $b->status,
+                    $b->is_featured ? 'Yes' : 'No',
+                    $b->is_published ? 'Yes' : 'No',
+                    $b->engine_cc ?? 'N/A',
+                    $b->power_bhp ?? 'N/A',
+                ]);
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
 }
