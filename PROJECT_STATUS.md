@@ -100,8 +100,8 @@
 | **Phase 9** | Razorpay Payments & Webhooks | ✅ COMPLETED |
 | **Phase 10** | Email Notification System | ✅ COMPLETED |
 | **Phase 11** | Careers & Job Applications | ✅ COMPLETED |
-| **Phase 12** | Promotional Scratch Cards | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 13** | Interactive 360-Degree Motorcycle Viewer | ⏳ PENDING |
+| **Phase 12** | Promotional Scratch Cards | ✅ COMPLETED |
+| **Phase 13** | Interactive 360-Degree Motorcycle Viewer | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 14** | AI Virtual Showroom Assistant | ⏳ PENDING |
 | **Phase 15** | Analytics & Production Testing | ⏳ PENDING |
 | **Phase 16** | Deployment & Operational Readiness | ⏳ PENDING |
@@ -109,8 +109,17 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 146 tests, 664 assertions, 0 failures (100% passing).
+* **PHPUnit Suite**: 161 tests, 729 assertions, 0 failures (100% passing).
 * **Coverage**: 
+  - Promotional scratch cards marketing engine with probability-weighted prize distribution engine (`PromotionalCampaign`, `CampaignPrize`, `ScratchCardParticipation`, `CampaignStatus`, `PrizeType`, `ScratchCardService`).
+  - Interactive HTML5 Canvas scratch-off game with touch/pointer dragging, reveal percentage threshold detection (40%), instant reveal fallback, dynamic sound fx triggers, and coupon code clipboard copying.
+  - Multi-tier campaign prize allocation engine with pessimistic locking (`lockForUpdate()`), inventory decrementing, and automatic fallback to non-exhaustible tiers (`better_luck`).
+  - Anti-fraud single/repeat customer participation gating (`max_participations_per_customer`), preventing spam or repeated wins per email/phone.
+  - Public promotions showcase (`/showrooms/{showroom}/promotions`) and campaign claim portal with real-time inventory counter.
+  - Dealership back-office campaign builder (`/showrooms/{showroom}/manage/campaigns`) with dynamic multi-tier prize creation, activation toggling, and campaign analytics.
+  - Scratched cards ledger with search, prize filtering, and cashier in-store coupon redemption desk (`/showrooms/{showroom}/manage/coupons/redeem`) verifying unique `MOTO-XXXX-XXXX` tokens.
+  - Plan entitlement gating (`has_scratch_cards`) ensuring only subscribed tiers can configure and launch promotional games.
+  - Strict multi-tenant isolation guarding campaigns, prizes, and claimed coupons from cross-dealership exposure. 
   - Dealership recruitment & job opening management (`JobOpening`, `JobApplication`, `JobDepartment`, `JobType`, `ApplicationStatus`).
   - Public careers portal (`/showrooms/{showroom}/careers`) with dynamic department and contract type filtering, keyword search, and responsive vacancies showcase.
   - Job vacancy profile and candidate application submission (`/showrooms/{showroom}/careers/{jobOpening}`) with automated reference number generation (`APP-YYYYMMDD-XXXX`) and PDF/DOC resume file uploads.

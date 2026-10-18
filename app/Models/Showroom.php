@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CampaignStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -164,6 +165,49 @@ class Showroom extends Model
     public function jobApplications(): HasMany
     {
         return $this->hasMany(JobApplication::class, 'tenant_id');
+    }
+
+    /**
+     * All promotional marketing campaigns created by this showroom.
+     */
+    public function promotionalCampaigns(): HasMany
+    {
+        return $this->hasMany(PromotionalCampaign::class, 'tenant_id');
+    }
+
+    /**
+     * Alias for route model binding scoping.
+     */
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(PromotionalCampaign::class, 'tenant_id');
+    }
+
+    /**
+     * Active promotional campaigns currently open for participation.
+     */
+    public function activePromotionalCampaigns(): HasMany
+    {
+        return $this->hasMany(PromotionalCampaign::class, 'tenant_id')
+            ->where('status', CampaignStatus::Active->value)
+            ->whereDate('start_date', '<=', today())
+            ->whereDate('end_date', '>=', today());
+    }
+
+    /**
+     * All promotional scratch card participations issued by this showroom.
+     */
+    public function scratchCardParticipations(): HasMany
+    {
+        return $this->hasMany(ScratchCardParticipation::class, 'tenant_id');
+    }
+
+    /**
+     * Alias for route model binding scoping.
+     */
+    public function participations(): HasMany
+    {
+        return $this->hasMany(ScratchCardParticipation::class, 'tenant_id');
     }
 
     /**

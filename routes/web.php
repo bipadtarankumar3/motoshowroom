@@ -11,6 +11,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Showroom\ApplicantManagementController;
 use App\Http\Controllers\Showroom\BikeController;
 use App\Http\Controllers\Showroom\BillingController;
+use App\Http\Controllers\Showroom\CampaignManagementController;
 use App\Http\Controllers\Showroom\CareerManagementController;
 use App\Http\Controllers\Showroom\EmailPreviewController;
 use App\Http\Controllers\Showroom\EnquiryController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Showroom\PaymentHistoryController;
 use App\Http\Controllers\Showroom\PublicBikeController;
 use App\Http\Controllers\Showroom\PublicCareerController;
 use App\Http\Controllers\Showroom\PublicEnquiryController;
+use App\Http\Controllers\Showroom\PublicScratchCardController;
 use App\Http\Controllers\Showroom\PublicServiceController;
 use App\Http\Controllers\Showroom\ServiceBookingController;
 use App\Http\Controllers\Showroom\SettingController;
@@ -146,6 +148,13 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::get('/careers/{jobOpening}', [PublicCareerController::class, 'show'])->name('showrooms.careers.show');
     Route::post('/careers/{jobOpening}/apply', [PublicCareerController::class, 'apply'])->name('showrooms.careers.apply');
 
+    // Promotional Marketing & Scratch Cards (Public Portal)
+    Route::get('/promotions', [PublicScratchCardController::class, 'index'])->name('showrooms.promotions.index');
+    Route::get('/promotions/{campaign:slug}', [PublicScratchCardController::class, 'show'])->name('showrooms.promotions.show');
+    Route::post('/promotions/{campaign:slug}/claim', [PublicScratchCardController::class, 'claim'])->name('showrooms.promotions.claim');
+    Route::get('/scratch/{participation:participation_token}', [PublicScratchCardController::class, 'play'])->name('showrooms.scratch.play');
+    Route::post('/scratch/{participation:participation_token}/reveal', [PublicScratchCardController::class, 'reveal'])->name('showrooms.scratch.reveal');
+
     // Showroom Billing & Subscription Hub
     Route::middleware(['auth', 'tenant.member'])->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('showrooms.billing.index');
@@ -201,6 +210,17 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::get('/manage/applicants/{applicant}', [ApplicantManagementController::class, 'show'])->name('showrooms.manage.applicants.show');
         Route::put('/manage/applicants/{applicant}', [ApplicantManagementController::class, 'update'])->name('showrooms.manage.applicants.update');
         Route::delete('/manage/applicants/{applicant}', [ApplicantManagementController::class, 'destroy'])->name('showrooms.manage.applicants.destroy');
+
+        // Promotional Campaigns & Scratch Card Marketing Management
+        Route::get('/manage/campaigns', [CampaignManagementController::class, 'index'])->name('showrooms.manage.campaigns.index');
+        Route::get('/manage/campaigns/create', [CampaignManagementController::class, 'create'])->name('showrooms.manage.campaigns.create');
+        Route::post('/manage/campaigns', [CampaignManagementController::class, 'store'])->name('showrooms.manage.campaigns.store');
+        Route::get('/manage/campaigns/{campaign}/edit', [CampaignManagementController::class, 'edit'])->name('showrooms.manage.campaigns.edit');
+        Route::put('/manage/campaigns/{campaign}', [CampaignManagementController::class, 'update'])->name('showrooms.manage.campaigns.update');
+        Route::delete('/manage/campaigns/{campaign}', [CampaignManagementController::class, 'destroy'])->name('showrooms.manage.campaigns.destroy');
+        Route::post('/manage/campaigns/{campaign}/toggle-status', [CampaignManagementController::class, 'toggleStatus'])->name('showrooms.manage.campaigns.toggle-status');
+        Route::get('/manage/campaigns/{campaign}/participations', [CampaignManagementController::class, 'participations'])->name('showrooms.manage.campaigns.participations');
+        Route::post('/manage/coupons/redeem', [CampaignManagementController::class, 'redeemCoupon'])->name('showrooms.manage.coupons.redeem');
 
         // Website Builder & Storefront Customizer
         Route::get('/manage/website', [WebsiteBuilderController::class, 'edit'])->name('showrooms.manage.website');
