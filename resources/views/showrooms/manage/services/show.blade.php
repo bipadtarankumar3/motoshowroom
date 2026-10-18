@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="min-h-screen bg-slate-50 text-slate-900 py-8">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10 space-y-6">
 
         <!-- Top Breadcrumbs -->
         <div class="flex items-center gap-2 text-xs text-slate-500">

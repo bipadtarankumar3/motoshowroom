@@ -7,7 +7,7 @@
 
     <!-- Showroom Branded Topbar -->
     <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
             <div class="flex items-center justify-between h-16 sm:h-20">
                 <div class="flex items-center gap-3">
                     <a href="{{ route('showrooms.manage.bikes.index', $showroom) }}" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition">
@@ -41,7 +41,7 @@
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-8 space-y-6">
 
         <!-- Plan Entitlement Warning (if plan lacks 360 viewer) -->
         @if(! $hasFeature)

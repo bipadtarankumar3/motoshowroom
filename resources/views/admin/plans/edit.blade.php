@@ -1,8 +1,8 @@
 <x-app-layout title="Edit Plan: {{ $plan->name }} - Super Admin | MotoShowroom SaaS">
     @include('admin.partials.nav')
 
-    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-4xl mx-auto space-y-8">
+    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div class="w-full space-y-8">
 
             <!-- Breadcrumbs -->
             <div class="flex items-center gap-2 text-xs text-slate-500">
