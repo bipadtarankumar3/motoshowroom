@@ -8,18 +8,18 @@
                 <span class="badge badge-rose">Application Received</span>
             </div>
 
-            <h1 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 12px 0;">
+            <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">
                 Hello, {{ $application->applicant_name }}
             </h1>
 
-            <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin: 0 0 20px 0;">
-                Thank you for applying for the position of <strong style="color: #ffffff;">{{ $jobOpening->title }}</strong> at <strong style="color: #ffffff;">{{ $showroom->name }}</strong>. We have successfully logged your profile and resume in our recruitment system. Our hiring team will review your qualifications and contact you if your experience aligns with our needs.
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;">
+                Thank you for applying for the position of <strong style="color: #0f172a;">{{ $jobOpening->title }}</strong> at <strong style="color: #0f172a;">{{ $showroom->name }}</strong>. We have successfully logged your profile and resume in our recruitment system. Our hiring team will review your qualifications and contact you if your experience aligns with our needs.
             </p>
 
             <table class="details-table" role="presentation" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">Reference ID</td>
-                    <td class="value mono" style="color: #fb7185;">#{{ $application->applicant_number }}</td>
+                    <td class="value mono" style="color: #e11d48; font-weight: bold;">#{{ $application->applicant_number }}</td>
                 </tr>
                 <tr>
                     <td class="label">Position</td>
@@ -54,8 +54,8 @@
             </div>
 
             @if ($showroom->email)
-                <div style="margin-top: 24px; padding: 14px; background-color: #090e1a; border-radius: 10px; text-align: center; font-size: 12px; color: #94a3b8;">
-                    Have questions regarding your application? You can reach the dealership recruitment desk at <strong style="color: #ffffff;">{{ $showroom->email }}</strong>.
+                <div style="margin-top: 24px; padding: 14px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 12px; color: #64748b;">
+                    Have questions regarding your application? You can reach the dealership recruitment desk at <strong style="color: #0f172a;">{{ $showroom->email }}</strong>.
                 </div>
             @endif
         </td>

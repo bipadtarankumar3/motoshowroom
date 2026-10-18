@@ -8,18 +8,18 @@
                 <span class="badge badge-emerald">Appointment Confirmed</span>
             </div>
 
-            <h1 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 12px 0;">
+            <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">
                 Service Appointment Confirmed
             </h1>
 
-            <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin: 0 0 20px 0;">
-                Dear <strong style="color: #ffffff;">{{ $booking->customer_name }}</strong>, your service appointment at <strong style="color: #ffffff;">{{ $showroom->name }}</strong> has been confirmed. Our certified workshop technicians are ready for your motorcycle.
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;">
+                Dear <strong style="color: #0f172a;">{{ $booking->customer_name }}</strong>, your service appointment at <strong style="color: #0f172a;">{{ $showroom->name }}</strong> has been confirmed. Our certified workshop technicians are ready for your motorcycle.
             </p>
 
             <table class="details-table" role="presentation" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">Booking Number</td>
-                    <td class="value mono" style="color: #34d399;">#{{ $booking->booking_number }}</td>
+                    <td class="value mono" style="color: #059669;">#{{ $booking->booking_number }}</td>
                 </tr>
                 <tr>
                     <td class="label">Date & Time Slot</td>

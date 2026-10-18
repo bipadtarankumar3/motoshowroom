@@ -3,25 +3,25 @@
 @section('title', 'Scratch & Win - ' . $showroom->name)
 
 @section('content')
-<div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-500 selection:text-white">
+<div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-purple-500 selection:text-white">
 
     <!-- Header -->
-    <header class="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-40">
+    <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-40 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="{{ route('showrooms.show', $showroom) }}" class="flex items-center gap-3">
-                    <span class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-xs shadow"
+                    <span class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-xs shadow-sm"
                           style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }}">
                         {{ strtoupper(substr($showroom->name, 0, 1)) }}
                     </span>
                     <div>
-                        <span class="font-display font-black text-sm text-white block leading-none">{{ $showroom->name }}</span>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">{{ $campaign->name }}</span>
+                        <span class="font-display font-black text-sm text-slate-900 block leading-none">{{ $showroom->name }}</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">{{ $campaign->name }}</span>
                     </div>
                 </a>
 
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('showrooms.promotions.index', $showroom) }}" class="text-xs text-slate-400 hover:text-white transition">
+                    <a href="{{ route('showrooms.promotions.index', $showroom) }}" class="text-xs text-slate-600 hover:text-slate-900 transition">
                         &larr; More Promotions
                     </a>
                 </div>
@@ -35,57 +35,57 @@
 
             <!-- Card Header -->
             <div class="text-center mb-6">
-                <span class="text-xs font-bold uppercase tracking-widest text-purple-400 block mb-1">Official Showroom Voucher</span>
-                <h1 class="text-2xl sm:text-3xl font-black font-display text-white tracking-tight">Your Digital Scratch Card</h1>
-                <p class="text-xs text-slate-400 mt-1">Scratch the silver foil below with your finger or mouse to reveal your reward!</p>
+                <span class="text-xs font-bold uppercase tracking-widest text-purple-600 block mb-1">Official Showroom Voucher</span>
+                <h1 class="text-2xl sm:text-3xl font-black font-display text-slate-900 tracking-tight">Your Digital Scratch Card</h1>
+                <p class="text-xs text-slate-500 mt-1">Scratch the silver foil below with your finger or mouse to reveal your reward!</p>
             </div>
 
             <!-- The Scratch Card Container -->
-            <div class="relative rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-purple-950/40 border-2 border-purple-500/30 p-6 sm:p-8 shadow-2xl overflow-hidden backdrop-blur">
+            <div class="relative rounded-3xl bg-white border border-purple-200 p-6 sm:p-8 shadow-xl overflow-hidden">
                 <div class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none"></div>
 
                 <!-- Recipient Identity -->
-                <div class="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-3 mb-6">
+                <div class="flex items-center justify-between text-xs text-slate-600 border-b border-slate-100 pb-3 mb-6">
                     <div>
                         <span class="text-slate-500 block text-[10px] uppercase font-bold">Issued For</span>
-                        <strong class="text-white">{{ $participation->customer_name }}</strong>
+                        <strong class="text-slate-900">{{ $participation->customer_name }}</strong>
                     </div>
                     <div class="text-right">
                         <span class="text-slate-500 block text-[10px] uppercase font-bold">Card Token</span>
-                        <span class="font-mono text-purple-400 font-bold">#{{ substr($participation->participation_token, 0, 8) }}</span>
+                        <span class="font-mono text-purple-600 font-bold">#{{ substr($participation->participation_token, 0, 8) }}</span>
                     </div>
                 </div>
 
                 <!-- Interactive Scratch Stage -->
-                <div class="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-inner flex items-center justify-center p-4">
+                <div class="relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-slate-50 border border-slate-200 shadow-inner flex items-center justify-center p-4">
 
                     <!-- UNDERNEATH: The Hidden Prize / Outcome -->
                     <div id="prize-container" class="w-full text-center space-y-3 z-0">
                         @if($participation->prize && $participation->prize->prize_type->isWinningPrize())
-                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto shadow-xl shadow-emerald-900/40 animate-bounce">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto shadow-md animate-bounce">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                             </div>
-                            <span class="text-xs px-3 py-1 rounded-lg font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider inline-block">
+                            <span class="text-xs px-3 py-1 rounded-lg font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider inline-block">
                                 {{ $participation->prize->prize_type->label() }}
                             </span>
-                            <h3 class="text-xl sm:text-2xl font-black font-display text-white" id="prize-title">
+                            <h3 class="text-xl sm:text-2xl font-black font-display text-slate-900" id="prize-title">
                                 {{ $participation->prize->title }}
                             </h3>
                         @else
-                            <div class="w-16 h-16 rounded-2xl bg-slate-800 text-slate-400 flex items-center justify-center mx-auto shadow">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto shadow-xs border border-slate-200">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <h3 class="text-xl font-bold font-display text-white">Better Luck Next Time!</h3>
-                            <p class="text-xs text-slate-400">Thank you for visiting {{ $showroom->name }}. Keep riding!</p>
+                            <h3 class="text-xl font-bold font-display text-slate-900">Better Luck Next Time!</h3>
+                            <p class="text-xs text-slate-500">Thank you for visiting {{ $showroom->name }}. Keep riding!</p>
                         @endif
 
                         <!-- Coupon Code Display (If won) -->
                         @if($participation->coupon_code)
                             <div class="pt-2">
-                                <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Coupon Claim Code</span>
-                                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-purple-500/50 shadow">
-                                    <span class="font-mono text-base font-black text-purple-400 tracking-wider" id="coupon-code-text">{{ $participation->coupon_code }}</span>
-                                    <button type="button" onclick="navigator.clipboard.writeText('{{ $participation->coupon_code }}'); alert('Coupon code copied to clipboard!');" class="text-slate-400 hover:text-white transition" title="Copy Coupon Code">
+                                <span class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Coupon Claim Code</span>
+                                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-purple-300 shadow-sm">
+                                    <span class="font-mono text-base font-black text-purple-700 tracking-wider" id="coupon-code-text">{{ $participation->coupon_code }}</span>
+                                    <button type="button" onclick="navigator.clipboard.writeText('{{ $participation->coupon_code }}'); alert('Coupon code copied to clipboard!');" class="text-slate-400 hover:text-slate-700 transition" title="Copy Coupon Code">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                     </button>
                                 </div>
@@ -105,15 +105,15 @@
                 <!-- Footer & Action Buttons -->
                 <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                     @if(! $participation->is_scratched)
-                        <span class="text-slate-400 text-center sm:text-left">Swipe to scratch or click button:</span>
+                        <span class="text-slate-500 text-center sm:text-left">Swipe to scratch or click button:</span>
                         <button type="button"
                                 id="btn-instant-reveal"
-                                class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition shadow-lg shadow-purple-600/30">
+                                class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold transition shadow-md shadow-purple-600/20">
                             Instant Reveal Prize
                         </button>
                     @else
-                        <div class="w-full text-center p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300">
-                            Scratched on <strong class="text-white">{{ $participation->scratched_at?->format('M d, Y h:i A') }}</strong>. Present this code at our showroom.
+                        <div class="w-full text-center p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700">
+                            Scratched on <strong class="text-slate-900">{{ $participation->scratched_at?->format('M d, Y h:i A') }}</strong>. Present this code at our showroom.
                         </div>
                     @endif
                 </div>
@@ -125,7 +125,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
         <p>&copy; {{ date('Y') }} {{ $showroom->name }}. Powered by MotoShowroom SaaS.</p>
     </footer>
 

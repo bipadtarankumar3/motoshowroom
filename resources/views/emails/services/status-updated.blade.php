@@ -12,7 +12,7 @@
                 @endif
             </div>
 
-            <h1 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 12px 0;">
+            <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">
                 @if ($booking->isReady() || $booking->isCompleted())
                     Your Motorcycle is Ready for Pickup! 🏁
                 @else
@@ -20,8 +20,8 @@
                 @endif
             </h1>
 
-            <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin: 0 0 20px 0;">
-                Dear <strong style="color: #ffffff;">{{ $booking->customer_name }}</strong>, your motorcycle service status for <strong style="color: #ffffff;">{{ $booking->bike_make_model }} ({{ $booking->registration_number }})</strong> has been updated to <strong style="color: #38bdf8;">{{ $booking->status->label() }}</strong>.
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;">
+                Dear <strong style="color: #0f172a;">{{ $booking->customer_name }}</strong>, your motorcycle service status for <strong style="color: #0f172a;">{{ $booking->bike_make_model }} ({{ $booking->registration_number }})</strong> has been updated to <strong style="color: #0284c7;">{{ $booking->status->label() }}</strong>.
             </p>
 
             <table class="details-table" role="presentation" cellspacing="0" cellpadding="0">
@@ -31,7 +31,7 @@
                 </tr>
                 <tr>
                     <td class="label">Current Status</td>
-                    <td class="value" style="color: #38bdf8;">{{ $booking->status->label() }}</td>
+                    <td class="value" style="color: #0284c7; font-weight: bold;">{{ $booking->status->label() }}</td>
                 </tr>
                 <tr>
                     <td class="label">Service Type</td>
@@ -46,15 +46,15 @@
                 @if ($booking->final_cost)
                     <tr>
                         <td class="label">Final Invoice Amount</td>
-                        <td class="value mono" style="color: #34d399; font-size: 15px;">₹{{ number_format($booking->final_cost) }}</td>
+                        <td class="value mono" style="color: #059669; font-size: 15px; font-weight: bold;">₹{{ number_format($booking->final_cost) }}</td>
                     </tr>
                     <tr>
                         <td class="label">Payment Status</td>
                         <td class="value">
                             @if ($booking->isPaid())
-                                <span style="color: #34d399; font-weight: bold;">PAID / CAPTURED</span>
+                                <span style="color: #059669; font-weight: bold;">PAID / CAPTURED</span>
                             @else
-                                <span style="color: #fbbf24; font-weight: bold;">PAYMENT DUE</span>
+                                <span style="color: #d97706; font-weight: bold;">PAYMENT DUE</span>
                             @endif
                         </td>
                     </tr>
@@ -62,7 +62,7 @@
                 @if ($booking->technician_notes)
                     <tr>
                         <td class="label">Technician Notes</td>
-                        <td class="value" style="font-size: 12px; color: #cbd5e1; font-weight: 400;">
+                        <td class="value" style="font-size: 12px; color: #334155; font-weight: 400;">
                             "{{ $booking->technician_notes }}"
                         </td>
                     </tr>

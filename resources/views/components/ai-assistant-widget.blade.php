@@ -8,55 +8,55 @@
 
     <!-- Floating Chat Launcher Button -->
     <button type="button" id="ai-launcher-btn"
-            class="group relative flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white shadow-2xl shadow-rose-600/40 hover:scale-105 transition-all duration-300 focus:outline-none">
+            class="group relative flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white shadow-xl shadow-rose-600/30 hover:scale-105 transition-all duration-300 focus:outline-none">
         <!-- Bot Avatar with Pulse Ring -->
         <div class="relative w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-950 animate-pulse"></span>
+            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse"></span>
         </div>
         <div class="text-left hidden sm:block">
             <span class="text-xs font-black tracking-tight block leading-tight">{{ $aiSetting->bot_name }}</span>
-            <span class="text-[10px] text-white/80 font-medium block">Ask me anything &bull; Online</span>
+            <span class="text-[10px] text-white/90 font-medium block">Ask me anything &bull; Online</span>
         </div>
     </button>
 
     <!-- Chat Dialog Box Container -->
     <div id="ai-chat-dialog"
-         class="hidden fixed bottom-6 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[420px] max-h-[640px] h-[85vh] rounded-3xl bg-slate-950/95 border border-slate-800 shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl z-50 transition-all duration-300 transform scale-95 opacity-0">
+         class="hidden fixed bottom-6 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[420px] max-h-[640px] h-[85vh] rounded-3xl bg-white/98 border border-slate-200 shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl z-50 transition-all duration-300 transform scale-95 opacity-0">
 
         <!-- Chat Header -->
-        <div class="px-5 py-4 border-b border-slate-800/80 bg-slate-900/80 flex items-center justify-between shrink-0">
+        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-600 to-rose-400 flex items-center justify-center shadow-lg shadow-rose-600/30">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-600 to-rose-400 flex items-center justify-center shadow-md shadow-rose-600/20">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-black text-white leading-tight block">{{ $aiSetting->bot_name }}</span>
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live AI</span>
+                        <span class="text-sm font-black text-slate-900 leading-tight block">{{ $aiSetting->bot_name }}</span>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Live AI</span>
                     </div>
-                    <span class="text-[11px] text-slate-400">{{ $showroom->name }} Concierge</span>
+                    <span class="text-[11px] text-slate-500">{{ $showroom->name }} Concierge</span>
                 </div>
             </div>
 
             <div class="flex items-center gap-1.5">
-                <button type="button" id="ai-reset-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Start New Conversation">
+                <button type="button" id="ai-reset-btn" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition" title="Start New Conversation">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 </button>
-                <button type="button" id="ai-close-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Minimize Chat">
+                <button type="button" id="ai-close-btn" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition" title="Minimize Chat">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
 
         <!-- Chat Messages Container -->
-        <div id="ai-messages-container" class="flex-1 p-4 overflow-y-auto space-y-4 text-xs scroll-smooth">
+        <div id="ai-messages-container" class="flex-1 p-4 overflow-y-auto space-y-4 text-xs scroll-smooth bg-slate-50/50">
             <!-- Welcome message -->
             <div class="flex items-start gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-rose-600/20 border border-rose-500/30 flex items-center justify-center shrink-0 text-rose-400 mt-0.5">
+                <div class="w-7 h-7 rounded-lg bg-rose-100 border border-rose-200 flex items-center justify-center shrink-0 text-rose-600 mt-0.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
-                <div class="max-w-[85%] rounded-2xl rounded-tl-sm p-3.5 bg-slate-900 border border-slate-800 text-slate-200 leading-relaxed shadow-sm">
+                <div class="max-w-[85%] rounded-2xl rounded-tl-sm p-3.5 bg-white border border-slate-200 text-slate-800 leading-relaxed shadow-xs">
                     {{ $aiSetting->welcome_message_or_default }}
                 </div>
             </div>
@@ -65,7 +65,7 @@
             @if(!empty($aiSetting->suggested_prompts))
                 <div id="ai-prompt-chips" class="pt-2 flex flex-wrap gap-1.5">
                     @foreach($aiSetting->suggested_prompts as $prompt)
-                        <button type="button" class="ai-chip px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[11px] font-medium transition text-left">
+                        <button type="button" class="ai-chip px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 text-[11px] font-medium transition text-left shadow-xs">
                             {{ $prompt }}
                         </button>
                     @endforeach
@@ -74,20 +74,20 @@
         </div>
 
         <!-- Typing Indicator -->
-        <div id="ai-typing-indicator" class="hidden px-5 py-2 flex items-center gap-2 text-[11px] text-slate-400 bg-slate-950/60 border-t border-slate-900">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        <div id="ai-typing-indicator" class="hidden px-5 py-2 flex items-center gap-2 text-[11px] text-slate-500 bg-white border-t border-slate-100">
+            <span class="w-2 h-2 rounded-full bg-cyan-500 animate-ping"></span>
             <span>{{ $aiSetting->bot_name }} is thinking...</span>
         </div>
 
         <!-- Input Bar -->
-        <form id="ai-chat-form" class="p-3 bg-slate-900/90 border-t border-slate-800 flex items-center gap-2 shrink-0">
+        <form id="ai-chat-form" class="p-3 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0">
             <input type="text" id="ai-chat-input"
                    placeholder="Ask about bikes, specs, test rides, or timings..."
                    autocomplete="off"
-                   class="flex-1 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition">
+                   class="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:bg-white transition">
 
             <button type="submit" id="ai-send-btn"
-                    class="p-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white shadow-lg shadow-rose-600/30 transition shrink-0 focus:outline-none" title="Send Message">
+                    class="p-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition shrink-0 focus:outline-none" title="Send Message">
                 <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
             </button>
         </form>
@@ -147,10 +147,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // Reset messages to welcome
         messagesContainer.innerHTML = `
             <div class="flex items-start gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-rose-600/20 border border-rose-500/30 flex items-center justify-center shrink-0 text-rose-400 mt-0.5">
+                <div class="w-7 h-7 rounded-lg bg-rose-100 border border-rose-200 flex items-center justify-center shrink-0 text-rose-600 mt-0.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
-                <div class="max-w-[85%] rounded-2xl rounded-tl-sm p-3.5 bg-slate-900 border border-slate-800 text-slate-200 leading-relaxed shadow-sm">
+                <div class="max-w-[85%] rounded-2xl rounded-tl-sm p-3.5 bg-white border border-slate-200 text-slate-800 leading-relaxed shadow-xs">
                     {{ addslashes($aiSetting->welcome_message_or_default) }}
                 </div>
             </div>
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const msgDiv = document.createElement('div');
         msgDiv.className = 'flex items-start justify-end gap-2.5';
         msgDiv.innerHTML = `
-            <div class="max-w-[85%] rounded-2xl rounded-tr-sm p-3.5 bg-gradient-to-r from-rose-600 to-rose-500 text-white leading-relaxed shadow-md">
+            <div class="max-w-[85%] rounded-2xl rounded-tr-sm p-3.5 bg-rose-600 text-white leading-relaxed shadow-sm">
                 ${escapeHtml(text)}
             </div>
         `;
@@ -187,16 +187,16 @@ document.addEventListener('DOMContentLoaded', function () {
             extraHtml = '<div class="mt-3 space-y-2">';
             structuredPayload.bikes.forEach(b => {
                 extraHtml += `
-                    <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
-                        <img src="${b.image_url}" alt="${escapeHtml(b.name)}" class="w-16 h-12 rounded-lg object-cover bg-slate-900 shrink-0">
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
+                        <img src="${b.image_url}" alt="${escapeHtml(b.name)}" class="w-16 h-12 rounded-lg object-cover bg-white shrink-0 border border-slate-200">
                         <div class="flex-1 min-w-0">
-                            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">${escapeHtml(b.brand)} &bull; ${escapeHtml(b.category)}</span>
-                            <h5 class="text-xs font-bold text-white truncate">${escapeHtml(b.name)}</h5>
-                            <span class="font-mono text-cyan-300 font-bold text-xs">${b.price}</span>
+                            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">${escapeHtml(b.brand)} &bull; ${escapeHtml(b.category)}</span>
+                            <h5 class="text-xs font-bold text-slate-900 truncate">${escapeHtml(b.name)}</h5>
+                            <span class="font-mono text-emerald-700 font-bold text-xs">${b.price}</span>
                         </div>
                         <div class="shrink-0 flex flex-col gap-1">
-                            <a href="${b.url}" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] font-semibold text-white text-center transition">View</a>
-                            <a href="${b.test_ride_url}" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-[10px] font-bold text-white text-center transition">Test Ride</a>
+                            <a href="${b.url}" class="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-[10px] font-semibold text-slate-800 text-center transition">View</a>
+                            <a href="${b.test_ride_url}" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-[10px] font-bold text-white text-center transition">Test Ride</a>
                         </div>
                     </div>
                 `;
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (structuredPayload && structuredPayload.type === 'test_ride_prompt' && structuredPayload.booking_url) {
             extraHtml = `
                 <div class="mt-3">
-                    <a href="${structuredPayload.booking_url}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition shadow-md shadow-rose-600/30">
+                    <a href="${structuredPayload.booking_url}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition shadow-xs">
                         <span>Schedule Your Test Ride</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
@@ -214,15 +214,15 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (structuredPayload && structuredPayload.type === 'service_options') {
             extraHtml = `
                 <div class="mt-3 flex items-center gap-2">
-                    <a href="${structuredPayload.book_url}" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-rose-400 hover:text-white hover:bg-slate-800 font-semibold text-[11px] transition">Book Service</a>
-                    <a href="${structuredPayload.track_url}" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 font-semibold text-[11px] transition">Track Repair</a>
+                    <a href="${structuredPayload.book_url}" class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-rose-600 hover:bg-slate-50 font-semibold text-[11px] transition shadow-xs">Book Service</a>
+                    <a href="${structuredPayload.track_url}" class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-[11px] transition shadow-xs">Track Repair</a>
                 </div>
             `;
         } else if (structuredPayload && structuredPayload.type === 'promotional_campaigns' && structuredPayload.campaigns) {
             extraHtml = '<div class="mt-2.5 flex flex-wrap gap-1.5">';
             structuredPayload.campaigns.forEach(c => {
                 extraHtml += `
-                    <a href="${c.url}" class="px-3 py-1.5 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 hover:text-white font-bold text-[11px] transition flex items-center gap-1">
+                    <a href="${c.url}" class="px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 font-bold text-[11px] transition flex items-center gap-1">
                         <span>🎁 Play ${escapeHtml(c.name)}</span>
                     </a>
                 `;
@@ -231,10 +231,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         msgDiv.innerHTML = `
-            <div class="w-7 h-7 rounded-lg bg-rose-600/20 border border-rose-500/30 flex items-center justify-center shrink-0 text-rose-400 mt-0.5">
+            <div class="w-7 h-7 rounded-lg bg-rose-100 border border-rose-200 flex items-center justify-center shrink-0 text-rose-600 mt-0.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
-            <div class="max-w-[85%] rounded-2xl rounded-tl-sm p-3.5 bg-slate-900 border border-slate-800 text-slate-200 leading-relaxed shadow-sm">
+            <div class="max-w-[85%] rounded-2xl rounded-tl-sm p-3.5 bg-white border border-slate-200 text-slate-800 leading-relaxed shadow-xs">
                 ${escapeHtml(text)}
                 ${extraHtml}
             </div>

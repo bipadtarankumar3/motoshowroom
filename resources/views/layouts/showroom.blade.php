@@ -25,7 +25,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased min-h-full flex flex-col bg-slate-900 text-slate-100 selection:bg-brand-primary selection:text-white">
+<body class="font-sans antialiased min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-brand-primary selection:text-white">
 
     <!-- Read-Only / Subscription Notice Banner if applicable -->
     @if (isset($showroom) && $showroom->read_only_mode)

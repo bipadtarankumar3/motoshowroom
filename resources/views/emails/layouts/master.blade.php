@@ -8,8 +8,8 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #030712;
-            color: #f1f5f9;
+            background-color: #f8fafc;
+            color: #0f172a;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -23,11 +23,12 @@
             width: 100%;
         }
         .card {
-            background-color: #0f172a;
-            border: 1px solid #1e293b;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 16px;
             padding: 32px;
             margin: 20px 0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
         }
         .btn-primary {
             display: inline-block;
@@ -42,9 +43,9 @@
         }
         .btn-secondary {
             display: inline-block;
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            color: #cbd5e1 !important;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #334155 !important;
             font-weight: 600;
             font-size: 13px;
             text-decoration: none;
@@ -62,43 +63,43 @@
             letter-spacing: 0.5px;
         }
         .badge-rose {
-            background-color: rgba(225, 29, 72, 0.15);
-            color: #fb7185;
-            border: 1px solid rgba(225, 29, 72, 0.3);
+            background-color: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #fecdd3;
         }
         .badge-emerald {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            background-color: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
         }
         .badge-sky {
-            background-color: rgba(14, 165, 233, 0.15);
-            color: #38bdf8;
-            border: 1px solid rgba(14, 165, 233, 0.3);
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border: 1px solid #bae6fd;
         }
         .details-table {
             width: 100%;
             margin: 20px 0;
-            background-color: #090e1a;
-            border: 1px solid #1e293b;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
             overflow: hidden;
         }
         .details-table td {
             padding: 12px 16px;
             font-size: 13px;
-            border-bottom: 1px solid #1e293b;
+            border-bottom: 1px solid #e2e8f0;
         }
         .details-table tr:last-child td {
             border-bottom: none;
         }
         .label {
-            color: #94a3b8;
+            color: #64748b;
             width: 38%;
             font-weight: 500;
         }
         .value {
-            color: #f8fafc;
+            color: #0f172a;
             font-weight: 600;
         }
         .mono {
@@ -113,7 +114,7 @@
         }
     </style>
 </head>
-<body style="background-color: #030712; padding: 20px 10px;">
+<body style="background-color: #f8fafc; padding: 20px 10px;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
         <tr>
             <td align="center">
@@ -128,7 +129,7 @@
                                         <div style="display: inline-block; background: linear-gradient(135deg, #e11d48, #be123c); width: 36px; height: 36px; border-radius: 10px; line-height: 36px; text-align: center; vertical-align: middle; margin-right: 10px;">
                                             <span style="font-size: 18px; color: #ffffff;">🏍</span>
                                         </div>
-                                        <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; vertical-align: middle;">
+                                        <span style="font-size: 20px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; vertical-align: middle;">
                                             {{ $showroom->name ?? 'MotoShowroom SaaS' }}
                                         </span>
                                     </td>
@@ -136,7 +137,7 @@
                                 @if (isset($showroom->city))
                                     <tr>
                                         <td align="center" style="padding-top: 4px;">
-                                            <span style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">
+                                            <span style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
                                                 {{ $showroom->city }} • Authorized Dealership & Service
                                             </span>
                                         </td>
@@ -158,7 +159,7 @@
                     <!-- Footer -->
                     <tr>
                         <td class="footer">
-                            <p style="margin: 0 0 6px 0; color: #94a3b8; font-weight: 600;">
+                            <p style="margin: 0 0 6px 0; color: #475569; font-weight: 600;">
                                 {{ $showroom->name ?? 'MotoShowroom SaaS' }}
                             </p>
                             @if (isset($showroom->address) || isset($showroom->phone))
@@ -169,7 +170,7 @@
                                     @endif
                                 </p>
                             @endif
-                            <p style="margin: 0; color: #475569; font-size: 11px;">
+                            <p style="margin: 0; color: #94a3b8; font-size: 11px;">
                                 This is an automated transactional message sent regarding your activity on {{ $showroom->name ?? 'MotoShowroom' }}. Please do not reply directly to this email.
                             </p>
                         </td>

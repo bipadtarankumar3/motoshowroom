@@ -8,18 +8,18 @@
                 <span class="badge badge-rose">New Lead Alert</span>
             </div>
 
-            <h1 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 12px 0;">
+            <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">
                 New Enquiry Received!
             </h1>
 
-            <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin: 0 0 20px 0;">
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;">
                 A new customer has submitted an enquiry through your public dealership showcase. Please review customer details and follow up promptly to maximize conversion.
             </p>
 
             <table class="details-table" role="presentation" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">Reference ID</td>
-                    <td class="value mono" style="color: #fb7185;">#{{ $enquiry->enquiry_number }}</td>
+                    <td class="value mono" style="color: #e11d48; font-weight: bold;">#{{ $enquiry->enquiry_number }}</td>
                 </tr>
                 <tr>
                     <td class="label">Customer Name</td>
@@ -52,7 +52,7 @@
                 @if ($enquiry->customer_notes)
                     <tr>
                         <td class="label">Customer Notes</td>
-                        <td class="value" style="font-size: 12px; color: #cbd5e1; font-weight: 400;">"{{ $enquiry->customer_notes }}"</td>
+                        <td class="value" style="font-size: 12px; color: #334155; font-weight: 400;">"{{ $enquiry->customer_notes }}"</td>
                     </tr>
                 @endif
             </table>

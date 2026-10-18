@@ -8,18 +8,18 @@
                 <span class="badge badge-emerald">Payment Captured</span>
             </div>
 
-            <h1 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 12px 0;">
+            <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">
                 Official Payment Receipt
             </h1>
 
-            <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin: 0 0 20px 0;">
-                Your payment of <strong style="color: #34d399; font-size: 16px;">₹{{ number_format($payment->amount) }}</strong> has been verified and captured successfully via Razorpay.
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;">
+                Your payment of <strong style="color: #059669; font-size: 16px;">₹{{ number_format($payment->amount) }}</strong> has been verified and captured successfully via Razorpay.
             </p>
 
             <table class="details-table" role="presentation" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">Receipt Reference</td>
-                    <td class="value mono" style="color: #fb7185;">#PAY-{{ str_pad((string) $payment->id, 6, '0', STR_PAD_LEFT) }}</td>
+                    <td class="value mono" style="color: #e11d48; font-weight: bold;">#PAY-{{ str_pad((string) $payment->id, 6, '0', STR_PAD_LEFT) }}</td>
                 </tr>
                 <tr>
                     <td class="label">Purpose / Description</td>
@@ -27,7 +27,7 @@
                 </tr>
                 <tr>
                     <td class="label">Total Amount Paid</td>
-                    <td class="value mono" style="color: #34d399; font-size: 15px;">₹{{ number_format($payment->amount) }} {{ $payment->currency }}</td>
+                    <td class="value mono" style="color: #059669; font-size: 15px; font-weight: bold;">₹{{ number_format($payment->amount) }} {{ $payment->currency }}</td>
                 </tr>
                 <tr>
                     <td class="label">Razorpay Payment ID</td>
@@ -49,7 +49,7 @@
                 </tr>
                 <tr>
                     <td class="label">HMAC Verification</td>
-                    <td class="value" style="color: #34d399;">✔ Verified Cryptographically</td>
+                    <td class="value" style="color: #059669; font-weight: bold;">✔ Verified Cryptographically</td>
                 </tr>
             </table>
 

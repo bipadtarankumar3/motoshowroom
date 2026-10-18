@@ -1,27 +1,27 @@
 <x-app-layout title="User Management - Admin | MotoShowroom SaaS">
     @include('admin.partials.nav')
-    <div class="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto space-y-8">
 
             <!-- Top Header & Actions -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
                 <div>
                     <div class="flex items-center gap-3">
-                        <h1 class="text-3xl font-black font-display text-white tracking-tight">Platform Users</h1>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        <h1 class="text-3xl font-black font-display text-slate-900 tracking-tight">Platform Users</h1>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
                             Super Admin
                         </span>
                     </div>
-                    <p class="text-sm text-slate-400 mt-1">Manage system administrators, showroom owners, and registered users.</p>
+                    <p class="text-sm text-slate-500 mt-1">Manage system administrators, showroom owners, and registered users.</p>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('profile') }}" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-sm font-medium transition flex items-center gap-2">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <a href="{{ route('profile') }}" class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-sm font-semibold transition flex items-center gap-2 shadow-xs">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         <span>My Details Page</span>
                     </a>
 
-                    <a href="{{ route('admin.users.create') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-sm shadow-xl shadow-rose-600/30 transition flex items-center gap-2" id="btn-create-user-top">
+                    <a href="{{ route('admin.users.create') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-sm shadow-xs transition flex items-center gap-2" id="btn-create-user-top">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         <span>Create User</span>
                     </a>
@@ -30,56 +30,56 @@
 
             <!-- Metric Stat Cards -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-                <div class="glass-panel-dark rounded-2xl p-5 border border-slate-800/80 shadow-lg">
-                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Total Users</span>
-                    <p class="text-3xl font-extrabold font-display text-white mt-1">{{ $stats['total'] }}</p>
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+                    <span class="text-xs uppercase font-bold text-slate-500 tracking-wider">Total Users</span>
+                    <p class="text-3xl font-extrabold font-display text-slate-900 mt-1">{{ $stats['total'] }}</p>
                 </div>
 
-                <div class="glass-panel-dark rounded-2xl p-5 border border-slate-800/80 shadow-lg">
-                    <span class="text-xs uppercase font-bold text-rose-400 tracking-wider">Administrators</span>
-                    <p class="text-3xl font-extrabold font-display text-rose-400 mt-1">{{ $stats['admins'] }}</p>
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+                    <span class="text-xs uppercase font-bold text-rose-600 tracking-wider">Administrators</span>
+                    <p class="text-3xl font-extrabold font-display text-rose-600 mt-1">{{ $stats['admins'] }}</p>
                 </div>
 
-                <div class="glass-panel-dark rounded-2xl p-5 border border-slate-800/80 shadow-lg">
-                    <span class="text-xs uppercase font-bold text-sky-400 tracking-wider">Regular Users</span>
-                    <p class="text-3xl font-extrabold font-display text-sky-400 mt-1">{{ $stats['regular_users'] }}</p>
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+                    <span class="text-xs uppercase font-bold text-sky-600 tracking-wider">Regular Users</span>
+                    <p class="text-3xl font-extrabold font-display text-sky-600 mt-1">{{ $stats['regular_users'] }}</p>
                 </div>
 
-                <div class="glass-panel-dark rounded-2xl p-5 border border-slate-800/80 shadow-lg">
-                    <span class="text-xs uppercase font-bold text-emerald-400 tracking-wider">Active Status</span>
-                    <p class="text-3xl font-extrabold font-display text-emerald-400 mt-1">{{ $stats['active'] }}</p>
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+                    <span class="text-xs uppercase font-bold text-emerald-600 tracking-wider">Active Status</span>
+                    <p class="text-3xl font-extrabold font-display text-emerald-600 mt-1">{{ $stats['active'] }}</p>
                 </div>
             </div>
 
             <!-- Filters & Search Toolbar -->
-            <div class="glass-panel-dark rounded-2xl p-4 border border-slate-800/80 shadow-lg">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
                 <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col md:flex-row items-center gap-4">
                     <div class="flex-grow w-full">
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="Search by name, email, phone, or city..."
-                               class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                               class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
                     </div>
 
                     <div class="flex items-center gap-3 w-full md:w-auto">
-                        <select name="role" class="px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <select name="role" class="px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
                             <option value="">All Roles</option>
                             <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="user" {{ request('role') === 'user' ? 'selected' : '' }}>User</option>
                         </select>
 
-                        <select name="status" class="px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <select name="status" class="px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
                             <option value="">All Statuses</option>
                             <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
                             <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                             <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Suspended</option>
                         </select>
 
-                        <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition border border-slate-700">
+                        <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition shadow-xs">
                             Filter
                         </button>
 
                         @if (request()->hasAny(['search', 'role', 'status']))
-                            <a href="{{ route('admin.users.index') }}" class="px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 text-xs transition">
+                            <a href="{{ route('admin.users.index') }}" class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition">
                                 Reset
                             </a>
                         @endif
@@ -88,10 +88,10 @@
             </div>
 
             <!-- Users Data Table -->
-            <div class="glass-panel-dark rounded-3xl border border-slate-800 shadow-xl overflow-hidden backdrop-blur-xl">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-300">
-                        <thead class="bg-slate-900/80 border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400 font-bold">
+                    <table class="w-full text-left text-sm text-slate-700">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-bold">
                             <tr>
                                 <th scope="col" class="py-4 px-6">User</th>
                                 <th scope="col" class="py-4 px-6">Role</th>
@@ -101,28 +101,28 @@
                                 <th scope="col" class="py-4 px-6 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/60 font-medium">
+                        <tbody class="divide-y divide-slate-100 font-medium">
                             @forelse ($users as $u)
-                                <tr class="hover:bg-slate-900/40 transition">
+                                <tr class="hover:bg-slate-50/80 transition">
                                     <td class="py-4 px-6 flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-rose-400 text-sm font-display flex-shrink-0">
+                                        <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center font-bold text-rose-600 text-sm font-display flex-shrink-0">
                                             {{ strtoupper(substr($u->name, 0, 2)) }}
                                         </div>
                                         <div>
-                                            <a href="{{ route('users.show', $u) }}" class="font-bold text-white hover:text-rose-400 transition block">
+                                            <a href="{{ route('users.show', $u) }}" class="font-bold text-slate-900 hover:text-rose-600 transition block">
                                                 {{ $u->name }}
                                             </a>
-                                            <span class="text-xs text-slate-400">{{ $u->email }}</span>
+                                            <span class="text-xs text-slate-500">{{ $u->email }}</span>
                                         </div>
                                     </td>
 
                                     <td class="py-4 px-6">
                                         @if ($u->isAdmin())
-                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
                                                 Admin
                                             </span>
                                         @else
-                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200">
                                                 User
                                             </span>
                                         @endif
@@ -130,30 +130,30 @@
 
                                     <td class="py-4 px-6">
                                         @if ($u->status === 'active')
-                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 w-max">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active
+                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 w-max">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
                                             </span>
                                         @else
-                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1.5 w-max">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> {{ ucfirst($u->status) }}
+                                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5 w-max">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> {{ ucfirst($u->status) }}
                                             </span>
                                         @endif
                                     </td>
 
-                                    <td class="py-4 px-6 text-xs text-slate-400">
+                                    <td class="py-4 px-6 text-xs text-slate-600">
                                         <div>{{ $u->phone ?: 'No phone' }}</div>
-                                        <div class="text-slate-500">{{ $u->city ?: 'No city' }}</div>
+                                        <div class="text-slate-400">{{ $u->city ?: 'No city' }}</div>
                                     </td>
 
-                                    <td class="py-4 px-6 text-xs text-slate-400">
+                                    <td class="py-4 px-6 text-xs text-slate-500">
                                         {{ $u->created_at->format('M d, Y') }}
                                     </td>
 
                                     <td class="py-4 px-6 text-right space-x-2">
-                                        <a href="{{ route('users.show', $u) }}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition border border-slate-700" title="Open user details page">
+                                        <a href="{{ route('users.show', $u) }}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition border border-slate-300 shadow-xs" title="Open user details page">
                                             View Details
                                         </a>
-                                        <a href="{{ route('users.edit', $u) }}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/40 hover:text-rose-400 text-slate-400 text-xs font-semibold transition border border-slate-800" title="Edit user">
+                                        <a href="{{ route('users.edit', $u) }}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-600 text-xs font-semibold transition border border-slate-300 shadow-xs" title="Edit user">
                                             Edit
                                         </a>
                                     </td>
@@ -171,7 +171,7 @@
 
                 <!-- Pagination -->
                 @if ($users->hasPages())
-                    <div class="p-4 border-t border-slate-800 bg-slate-900/40">
+                    <div class="p-4 border-t border-slate-200 bg-slate-50/50">
                         {{ $users->links() }}
                     </div>
                 @endif

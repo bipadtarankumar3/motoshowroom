@@ -21,6 +21,14 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
 
+## Theme & UI Aesthetic
+
+- NEVER USE DARK THEME. Always use a clean, modern, premium LIGHT THEME across all views, components, and layouts.
+- Primary backgrounds must be light (e.g., `bg-slate-50`, `bg-white`, `bg-gray-50`).
+- Text must be dark and high contrast (e.g., `text-slate-900`, `text-slate-800`, `text-slate-700`).
+- Cards must be crisp white (`bg-white` with subtle borders like `border-slate-200` and soft shadows).
+- Do not use dark mode classes (`dark:...`, `bg-slate-950`, `bg-slate-900` as main canvas backgrounds, `text-white` on dark backgrounds).
+
 ## Verification Scripts
 
 - Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.

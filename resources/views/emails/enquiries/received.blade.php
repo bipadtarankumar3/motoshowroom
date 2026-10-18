@@ -8,18 +8,18 @@
                 <span class="badge badge-rose">Enquiry Logged</span>
             </div>
 
-            <h1 style="font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 0 12px 0;">
+            <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">
                 Hello, {{ $enquiry->customer_name }}
             </h1>
 
-            <p style="font-size: 14px; color: #94a3b8; line-height: 1.6; margin: 0 0 20px 0;">
-                Thank you for contacting <strong style="color: #ffffff;">{{ $showroom->name }}</strong>. We have received your {{ $enquiry->isTestRide() ? 'test ride booking request' : 'motorcycle purchase enquiry' }}. Our dedicated showroom representative will reach out to you shortly.
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;">
+                Thank you for contacting <strong style="color: #0f172a;">{{ $showroom->name }}</strong>. We have received your {{ $enquiry->isTestRide() ? 'test ride booking request' : 'motorcycle purchase enquiry' }}. Our dedicated showroom representative will reach out to you shortly.
             </p>
 
             <table class="details-table" role="presentation" cellspacing="0" cellpadding="0">
                 <tr>
                     <td class="label">Reference ID</td>
-                    <td class="value mono" style="color: #fb7185;">#{{ $enquiry->enquiry_number }}</td>
+                    <td class="value mono" style="color: #e11d48; font-weight: bold;">#{{ $enquiry->enquiry_number }}</td>
                 </tr>
                 <tr>
                     <td class="label">Type</td>
@@ -44,7 +44,7 @@
                 @if ($enquiry->customer_notes)
                     <tr>
                         <td class="label">Your Message</td>
-                        <td class="value" style="font-size: 12px; color: #cbd5e1; font-weight: 400;">"{{ $enquiry->customer_notes }}"</td>
+                        <td class="value" style="font-size: 12px; color: #334155; font-weight: 400;">"{{ $enquiry->customer_notes }}"</td>
                     </tr>
                 @endif
             </table>
@@ -56,8 +56,8 @@
             </div>
 
             @if ($showroom->phone)
-                <div style="margin-top: 24px; padding: 14px; background-color: #090e1a; border-radius: 10px; text-align: center; font-size: 12px; color: #94a3b8;">
-                    Need immediate assistance? Call our dealership desk directly at <strong style="color: #ffffff;">{{ $showroom->phone }}</strong>.
+                <div style="margin-top: 24px; padding: 14px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; font-size: 12px; color: #64748b;">
+                    Need immediate assistance? Call our dealership desk directly at <strong style="color: #0f172a;">{{ $showroom->phone }}</strong>.
                 </div>
             @endif
         </td>

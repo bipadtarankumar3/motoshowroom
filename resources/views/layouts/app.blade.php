@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-50 text-slate-900">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +16,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="font-sans antialiased min-h-full flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+<body class="font-sans antialiased min-h-full flex flex-col bg-slate-50 text-slate-900">
     <!-- Flash Messages -->
     @if (session()->has('success'))
         <div class="fixed top-4 right-4 z-50 bg-emerald-500/90 text-white backdrop-blur px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-emerald-400/30 text-sm">
