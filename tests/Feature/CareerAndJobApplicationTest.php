@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Enums\ApplicationStatus;
 use App\Enums\JobDepartment;
 use App\Enums\JobType;
+use App\Mail\JobApplicationReceivedMail;
+use App\Mail\NewJobApplicationAlertMail;
 use App\Models\JobApplication;
 use App\Models\JobOpening;
 use App\Models\Showroom;
@@ -14,6 +16,7 @@ use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -267,6 +270,8 @@ class CareerAndJobApplicationTest extends TestCase
 
     public function test_candidate_can_submit_job_application_with_resume_upload(): void
     {
+        Mail::fake();
+
         $resumeFile = UploadedFile::fake()->create('curriculum_vitae.pdf', 250, 'application/pdf');
 
         $payload = [
@@ -310,6 +315,20 @@ class CareerAndJobApplicationTest extends TestCase
             'tenant_id' => $this->showroomA->id,
             'action' => 'job_application.submitted',
         ]);
+
+        Mail::assertQueued(JobApplicationReceivedMail::class, function (JobApplicationReceivedMail $mail) use ($application): bool {
+            return $mail->hasTo('vikrant@rider.example')
+                && $mail->application->id === $application->id
+                && $mail->jobOpening->id === $this->openingA->id
+                && $mail->showroom->id === $this->showroomA->id;
+        });
+
+        Mail::assertQueued(NewJobApplicationAlertMail::class, function (NewJobApplicationAlertMail $mail) use ($application): bool {
+            return $mail->hasTo($this->showroomA->email)
+                && $mail->application->id === $application->id
+                && $mail->jobOpening->id === $this->openingA->id
+                && $mail->showroom->id === $this->showroomA->id;
+        });
     }
 
     public function test_back_office_careers_index_displays_vacancies_and_kpi_metrics(): void

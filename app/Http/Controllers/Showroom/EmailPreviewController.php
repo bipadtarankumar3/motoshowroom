@@ -2,20 +2,27 @@
 
 namespace App\Http\Controllers\Showroom;
 
+use App\Enums\ApplicationStatus;
 use App\Enums\BookingStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\EnquiryType;
+use App\Enums\JobDepartment;
+use App\Enums\JobType;
 use App\Enums\PaymentStatus;
 use App\Enums\ServiceType;
 use App\Enums\SubscriptionStatus;
 use App\Http\Controllers\Controller;
 use App\Mail\EnquiryReceivedMail;
+use App\Mail\JobApplicationReceivedMail;
 use App\Mail\NewEnquiryAlertMail;
+use App\Mail\NewJobApplicationAlertMail;
 use App\Mail\PaymentReceiptMail;
 use App\Mail\ServiceBookingConfirmedMail;
 use App\Mail\ServiceStatusUpdatedMail;
 use App\Mail\SubscriptionExpiringMail;
 use App\Models\Enquiry;
+use App\Models\JobApplication;
+use App\Models\JobOpening;
 use App\Models\Payment;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
@@ -69,6 +76,20 @@ class EmailPreviewController extends Controller
                 'color' => 'emerald',
             ],
             [
+                'id' => 'career_received',
+                'title' => 'Job Application Acknowledgement',
+                'description' => 'Sent to applicant confirming submission of their resume and candidate profile.',
+                'badge' => 'Candidate Alert',
+                'color' => 'sky',
+            ],
+            [
+                'id' => 'career_alert',
+                'title' => 'Dealership New Applicant Alert',
+                'description' => 'Sent to showroom recruitment desk notifying of a new job candidate.',
+                'badge' => 'Staff Alert',
+                'color' => 'rose',
+            ],
+            [
                 'id' => 'subscription_expiring',
                 'title' => 'Subscription Renewal Warning',
                 'description' => 'Sent to showroom owner when dealership plan is expiring in <= 7 days.',
@@ -91,6 +112,8 @@ class EmailPreviewController extends Controller
             'service_confirmed' => $this->previewServiceConfirmed($showroom),
             'service_status_updated' => $this->previewServiceStatusUpdated($showroom),
             'payment_receipt' => $this->previewPaymentReceipt($showroom),
+            'career_received' => $this->previewCareerReceived($showroom),
+            'career_alert' => $this->previewCareerAlert($showroom),
             'subscription_expiring' => $this->previewSubscriptionExpiring($showroom),
             default => abort(404, 'Unknown email notification template type.'),
         };
@@ -241,5 +264,91 @@ class EmailPreviewController extends Controller
         $subscription->setRelation('plan', $plan);
 
         return new SubscriptionExpiringMail($showroom, $subscription);
+    }
+
+    private function previewCareerReceived(Showroom $showroom): JobApplicationReceivedMail
+    {
+        $jobOpening = $showroom->jobOpenings()->latest()->first() ?? new JobOpening([
+            'id' => 1,
+            'tenant_id' => $showroom->id,
+            'title' => 'Master Diagnostic Technician',
+            'slug' => 'master-diagnostic-technician',
+            'department' => JobDepartment::Workshop,
+            'job_type' => JobType::FullTime,
+            'experience_level' => '3-5 years',
+            'location' => $showroom->city ?? 'Bengaluru',
+            'salary_range' => '₹45,000 - ₹65,000 / month',
+            'is_active' => true,
+        ]);
+
+        if (! $jobOpening->exists) {
+            $jobOpening->id = 1;
+            $jobOpening->exists = true;
+        }
+
+        $application = $showroom->jobApplications()->latest()->first() ?? new JobApplication([
+            'id' => 1,
+            'tenant_id' => $showroom->id,
+            'job_opening_id' => $jobOpening->id,
+            'applicant_number' => 'APP-'.date('Ymd').'-SAMPLE',
+            'applicant_name' => 'Kunal Sharma',
+            'applicant_email' => 'kunal.sharma@example.com',
+            'applicant_phone' => '+91 9988776655',
+            'experience_years' => 4.5,
+            'current_company' => 'Apex MotoWorks',
+            'portfolio_url' => 'https://linkedin.com/in/sample-technician',
+            'cover_letter' => 'Passionate diagnostic technician with certified OEM experience in multi-cylinder superbike engine rebuilds.',
+            'status' => ApplicationStatus::New,
+        ]);
+
+        if (! $application->exists) {
+            $application->id = 1;
+            $application->exists = true;
+        }
+
+        return new JobApplicationReceivedMail($showroom, $application, $jobOpening);
+    }
+
+    private function previewCareerAlert(Showroom $showroom): NewJobApplicationAlertMail
+    {
+        $jobOpening = $showroom->jobOpenings()->latest()->first() ?? new JobOpening([
+            'id' => 1,
+            'tenant_id' => $showroom->id,
+            'title' => 'Senior Superbike Consultant',
+            'slug' => 'senior-superbike-consultant',
+            'department' => JobDepartment::Sales,
+            'job_type' => JobType::FullTime,
+            'experience_level' => '2-4 years',
+            'location' => $showroom->city ?? 'Mumbai',
+            'salary_range' => '₹50,000 - ₹80,000 / month + Incentives',
+            'is_active' => true,
+        ]);
+
+        if (! $jobOpening->exists) {
+            $jobOpening->id = 1;
+            $jobOpening->exists = true;
+        }
+
+        $application = $showroom->jobApplications()->latest()->first() ?? new JobApplication([
+            'id' => 1,
+            'tenant_id' => $showroom->id,
+            'job_opening_id' => $jobOpening->id,
+            'applicant_number' => 'APP-'.date('Ymd').'-ALERT',
+            'applicant_name' => 'Priya Nair',
+            'applicant_email' => 'priya.nair@example.com',
+            'applicant_phone' => '+91 9822334455',
+            'experience_years' => 3.0,
+            'current_company' => 'Velocity Motors',
+            'portfolio_url' => 'https://linkedin.com/in/sample-consultant',
+            'cover_letter' => 'Over 3 years of consultative track record exceeding quarterly sales targets for premium superbike models.',
+            'status' => ApplicationStatus::New,
+        ]);
+
+        if (! $application->exists) {
+            $application->id = 1;
+            $application->exists = true;
+        }
+
+        return new NewJobApplicationAlertMail($showroom, $application, $jobOpening);
     }
 }

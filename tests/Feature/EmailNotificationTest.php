@@ -4,15 +4,21 @@ namespace Tests\Feature;
 
 use App\Enums\BookingStatus;
 use App\Enums\EnquiryType;
+use App\Enums\JobDepartment;
+use App\Enums\JobType;
 use App\Enums\PaymentStatus;
 use App\Enums\ServiceType;
 use App\Enums\SubscriptionStatus;
 use App\Mail\EnquiryReceivedMail;
+use App\Mail\JobApplicationReceivedMail;
 use App\Mail\NewEnquiryAlertMail;
+use App\Mail\NewJobApplicationAlertMail;
 use App\Mail\PaymentReceiptMail;
 use App\Mail\ServiceBookingConfirmedMail;
 use App\Mail\ServiceStatusUpdatedMail;
 use App\Mail\SubscriptionExpiringMail;
+use App\Models\JobApplication;
+use App\Models\JobOpening;
 use App\Models\Payment;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
@@ -21,6 +27,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use App\Services\RazorpayService;
+use App\Services\ShowroomNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
@@ -315,6 +322,8 @@ class EmailNotificationTest extends TestCase
             'service_confirmed',
             'service_status_updated',
             'payment_receipt',
+            'career_received',
+            'career_alert',
             'subscription_expiring',
         ];
 
@@ -331,5 +340,56 @@ class EmailNotificationTest extends TestCase
     {
         $response = $this->get(route('showrooms.manage.email-previews.index', $this->showroom));
         $response->assertRedirect(route('login'));
+    }
+
+    public function test_job_application_submission_sends_notification_to_applicant_and_dealership(): void
+    {
+        Mail::fake();
+
+        $opening = JobOpening::create([
+            'tenant_id' => $this->showroom->id,
+            'title' => 'Master Diagnostic Technician',
+            'slug' => 'master-diagnostic-technician',
+            'department' => JobDepartment::Workshop,
+            'job_type' => JobType::FullTime,
+            'experience_level' => '3-5 years',
+            'location' => 'Bangalore',
+            'salary_range' => '₹45,000 - ₹65,000 / month',
+            'description' => 'Perform ECU diagnostics, valve adjustments, and master engine tuning.',
+            'requirements' => '3+ years experience with multi-cylinder superbikes.',
+            'is_active' => true,
+        ]);
+
+        $application = JobApplication::create([
+            'tenant_id' => $this->showroom->id,
+            'job_opening_id' => $opening->id,
+            'applicant_number' => 'APP-20261018-TEST',
+            'applicant_name' => 'Aditya Kashyap',
+            'applicant_email' => 'aditya.kashyap@candidate.example',
+            'applicant_phone' => '+91 91234 56789',
+            'experience_years' => 4.0,
+            'current_company' => 'Speedline Moto',
+            'portfolio_url' => 'https://github.com/aditya',
+            'cover_letter' => 'Experienced superbike technician eager to join Apex Moto.',
+        ]);
+
+        $application->setRelation('jobOpening', $opening);
+        $application->setRelation('showroom', $this->showroom);
+
+        app(ShowroomNotificationService::class)->notifyJobApplicationSubmitted($application);
+
+        Mail::assertQueued(JobApplicationReceivedMail::class, function (JobApplicationReceivedMail $mail) use ($application, $opening): bool {
+            return $mail->hasTo('aditya.kashyap@candidate.example')
+                && $mail->application->id === $application->id
+                && $mail->jobOpening->id === $opening->id
+                && $mail->showroom->id === $this->showroom->id;
+        });
+
+        Mail::assertQueued(NewJobApplicationAlertMail::class, function (NewJobApplicationAlertMail $mail) use ($application, $opening): bool {
+            return $mail->hasTo($this->showroom->email)
+                && $mail->application->id === $application->id
+                && $mail->jobOpening->id === $opening->id
+                && $mail->showroom->id === $this->showroom->id;
+        });
     }
 }

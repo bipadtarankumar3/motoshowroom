@@ -3,12 +3,15 @@
 namespace App\Services;
 
 use App\Mail\EnquiryReceivedMail;
+use App\Mail\JobApplicationReceivedMail;
 use App\Mail\NewEnquiryAlertMail;
+use App\Mail\NewJobApplicationAlertMail;
 use App\Mail\PaymentReceiptMail;
 use App\Mail\ServiceBookingConfirmedMail;
 use App\Mail\ServiceStatusUpdatedMail;
 use App\Mail\SubscriptionExpiringMail;
 use App\Models\Enquiry;
+use App\Models\JobApplication;
 use App\Models\Payment;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
@@ -128,6 +131,41 @@ class ShowroomNotificationService
             Mail::to($recipientEmail)->send(new SubscriptionExpiringMail($showroom, $subscription));
         } catch (Exception $e) {
             Log::error("Failed to send SubscriptionExpiringMail to {$recipientEmail}: ".$e->getMessage());
+        }
+    }
+
+    /**
+     * Dispatch notifications when a new job application is submitted (both applicant and dealership).
+     */
+    public function notifyJobApplicationSubmitted(JobApplication $application): void
+    {
+        $jobOpening = $application->jobOpening;
+        $showroom = $application->showroom ?? $jobOpening?->showroom;
+        if (! $showroom || ! $jobOpening) {
+            return;
+        }
+
+        // 1. Send confirmation acknowledgement to candidate (customer)
+        if (! empty($application->applicant_email)) {
+            try {
+                Mail::to($application->applicant_email)->send(
+                    new JobApplicationReceivedMail($showroom, $application, $jobOpening)
+                );
+            } catch (Exception $e) {
+                Log::error("Failed to send JobApplicationReceivedMail to {$application->applicant_email}: ".$e->getMessage());
+            }
+        }
+
+        // 2. Send candidate application alert to dealership owner / contact (user)
+        $staffRecipient = $showroom->email ?: $showroom->owner?->email;
+        if (! empty($staffRecipient)) {
+            try {
+                Mail::to($staffRecipient)->send(
+                    new NewJobApplicationAlertMail($showroom, $application, $jobOpening)
+                );
+            } catch (Exception $e) {
+                Log::error("Failed to send NewJobApplicationAlertMail to {$staffRecipient}: ".$e->getMessage());
+            }
         }
     }
 }

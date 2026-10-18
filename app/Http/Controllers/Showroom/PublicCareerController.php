@@ -10,6 +10,7 @@ use App\Models\JobApplication;
 use App\Models\JobOpening;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
+use App\Services\ShowroomNotificationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -67,8 +68,12 @@ class PublicCareerController extends Controller
     /**
      * Submit a candidate job application with resume file upload.
      */
-    public function apply(Request $request, Showroom $showroom, JobOpening $jobOpening): RedirectResponse
-    {
+    public function apply(
+        Request $request,
+        Showroom $showroom,
+        JobOpening $jobOpening,
+        ShowroomNotificationService $notificationService
+    ): RedirectResponse {
         abort_if($jobOpening->tenant_id !== $showroom->id, 404);
         abort_if(! $jobOpening->is_active, 404);
 
@@ -102,6 +107,11 @@ class PublicCareerController extends Controller
             'cover_letter' => $validated['cover_letter'] ?? null,
             'status' => ApplicationStatus::New->value,
         ]);
+
+        $application->setRelation('jobOpening', $jobOpening);
+        $application->setRelation('showroom', $showroom);
+
+        $notificationService->notifyJobApplicationSubmitted($application);
 
         AuditLogger::log(
             'job_application.submitted',

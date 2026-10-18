@@ -161,9 +161,10 @@
   - Back-office recruitment dashboard (`/showrooms/{showroom}/manage/careers`) with KPI metric cards, vacancy publishing, editing, one-click active toggling, and soft deletion.
   - Full Applicant Tracking System (ATS) ledger (`/showrooms/{showroom}/manage/applicants`) with 7-stage candidate lifecycle progression, interview scheduling datetime integration, recruiter internal notes, and rejection tracking.
   - Multi-tenant data isolation guarding job vacancies and candidate resume profiles against cross-showroom exposure.
-  - Transactional email dispatching and queued mailables (`EnquiryReceivedMail`, `NewEnquiryAlertMail`, `ServiceBookingConfirmedMail`, `ServiceStatusUpdatedMail`, `PaymentReceiptMail`, `SubscriptionExpiringMail`).
+  - Candidate career submission transactional emails (`JobApplicationReceivedMail` to applicant with reference tracking, `NewJobApplicationAlertMail` to dealership recruitment desk/owner with candidate profile & back-office ATS direct link).
+  - Transactional email dispatching and queued mailables (`EnquiryReceivedMail`, `NewEnquiryAlertMail`, `ServiceBookingConfirmedMail`, `ServiceStatusUpdatedMail`, `PaymentReceiptMail`, `JobApplicationReceivedMail`, `NewJobApplicationAlertMail`, `SubscriptionExpiringMail`).
   - Artisan command `subscriptions:send-expiry-reminders` with days threshold filtering and multi-tenant owner dispatch.
-  - Interactive email template browser previewer (`/showrooms/{showroom}/manage/email-previews`).
+  - Interactive email template browser previewer (`/showrooms/{showroom}/manage/email-previews`) supporting all 8 customer and dealership alert templates.
   - Razorpay payment gateway integration with server-side HMAC-SHA256 cryptographic verification (`PaymentProcessingService`, `RazorpayService`).
   - SaaS dealership subscription checkout (`/showrooms/{showroom}/billing/checkout`), automatic tier provisioning, and activation.
   - Workshop service booking invoice settlement (`/showrooms/{showroom}/services/{booking}/checkout`) with live cost updates.
