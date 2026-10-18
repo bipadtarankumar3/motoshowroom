@@ -1,6 +1,6 @@
 <x-app-layout title="Admin: Create New User | MotoShowroom SaaS">
     @include('admin.partials.nav')
-    <div class="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl mx-auto space-y-8">
 
             <!-- Breadcrumbs / Top Navigation -->
@@ -143,4 +143,5 @@
 
         </div>
     </div>
+    @include('admin.partials.nav-close')
 </x-app-layout>

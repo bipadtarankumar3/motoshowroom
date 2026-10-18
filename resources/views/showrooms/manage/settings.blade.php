@@ -1,7 +1,7 @@
 <x-app-layout :title="'Settings - ' . $showroom->name">
     @include('showrooms.partials.manage-nav')
 
-    <div class="min-h-screen bg-slate-50 text-slate-900 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-5xl mx-auto space-y-8">
 
             <!-- Breadcrumbs -->
@@ -117,4 +117,5 @@
 
         </div>
     </div>
+    ("showrooms.partials.manage-nav-close")
 </x-app-layout>

@@ -1,7 +1,7 @@
 <x-app-layout title="Audit Trail Logs - Super Admin | MotoShowroom SaaS">
     @include('admin.partials.nav')
 
-    <div class="min-h-screen bg-slate-50 text-slate-900 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="bg-slate-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto space-y-8">
 
             <!-- Header -->
@@ -162,4 +162,5 @@
 
         </div>
     </div>
+    @include('admin.partials.nav-close')
 </x-app-layout>
