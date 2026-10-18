@@ -14,7 +14,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CampaignManagementController extends Controller
 {
@@ -245,28 +247,240 @@ class CampaignManagementController extends Controller
     }
 
     /**
-     * Display the participations ledger for a specific campaign.
+     * Display the participations ledger for a specific campaign with telemetry metrics and advanced filtering.
      */
     public function participations(Request $request, Showroom $showroom, PromotionalCampaign $campaign): View
     {
         abort_if($campaign->tenant_id !== $showroom->id, 404);
 
-        $search = $request->query('search');
-        $redeemed = $request->query('redeemed');
+        // Telemetry Metrics Calculation across all campaign participations
+        $allParticipations = $campaign->participations()->with('prize')->get();
 
-        $query = $campaign->participations()
-            ->with(['prize', 'redeemedBy'])
-            ->search($search);
+        $totalCount = $allParticipations->count();
+        $todayCount = $allParticipations->where('created_at', '>=', now()->startOfDay())->count();
 
-        if ($redeemed === 'yes') {
-            $query->where('is_redeemed', true);
-        } elseif ($redeemed === 'no') {
-            $query->where('is_redeemed', false);
+        $scratchedCount = $allParticipations->where('is_scratched', true)->count();
+        $scratchedTodayCount = $allParticipations->filter(fn ($p) => $p->is_scratched && $p->scratched_at && $p->scratched_at->gte(now()->startOfDay()))->count();
+
+        $unscratchedCount = $allParticipations->where('is_scratched', false)->count();
+
+        $redeemedCount = $allParticipations->where('is_redeemed', true)->count();
+        $redeemedTodayCount = $allParticipations->filter(fn ($p) => $p->is_redeemed && $p->redeemed_at && $p->redeemed_at->gte(now()->startOfDay()))->count();
+
+        $unredeemedCount = $allParticipations->where('is_scratched', true)->where('is_redeemed', false)->count();
+        $wonPrizesCount = $allParticipations->whereNotNull('prize_id')->count();
+
+        $totalWonValue = (float) $allParticipations->filter(fn ($p) => $p->is_scratched && $p->prize)->sum(function ($p) {
+            return (float) ($p->prize?->discount_amount ?? 0);
+        });
+
+        $stats = [
+            'total' => $totalCount,
+            'today' => $todayCount,
+            'scratched' => $scratchedCount,
+            'scratched_today' => $scratchedTodayCount,
+            'unscratched' => $unscratchedCount,
+            'redeemed' => $redeemedCount,
+            'redeemed_today' => $redeemedTodayCount,
+            'pending_redemption' => $unredeemedCount,
+            'won_prizes' => $wonPrizesCount,
+            'total_prize_value' => $totalWonValue,
+        ];
+
+        $prizes = $campaign->prizes()->orderBy('title')->get();
+
+        $query = $this->buildParticipationsQuery($request, $campaign);
+
+        // Sorting
+        $sort = $request->query('sort', 'latest');
+        match ($sort) {
+            'oldest' => $query->oldest('created_at'),
+            'scratched_desc' => $query->orderBy('scratched_at', 'desc'),
+            'redeemed_desc' => $query->orderBy('redeemed_at', 'desc'),
+            'customer_asc' => $query->orderBy('customer_name', 'asc'),
+            default => $query->latest('created_at'),
+        };
+
+        $participations = $query->paginate(20)->withQueryString();
+
+        return view('showrooms.manage.campaigns.participations', compact('showroom', 'campaign', 'participations', 'stats', 'prizes'));
+    }
+
+    /**
+     * Export campaign participations (selected rows or all matching filters) to CSV.
+     */
+    public function exportParticipations(Request $request, Showroom $showroom, PromotionalCampaign $campaign): StreamedResponse
+    {
+        abort_if($campaign->tenant_id !== $showroom->id, 404);
+
+        $query = $this->buildParticipationsQuery($request, $campaign);
+
+        // Check if specific rows were selected (via array selected_ids[] or comma-delimited string selected_ids)
+        $selectedIds = $request->input('selected_ids');
+        if (is_string($selectedIds) && strlen(trim($selectedIds)) > 0) {
+            $selectedIds = array_filter(array_map('trim', explode(',', $selectedIds)));
         }
 
-        $participations = $query->latest()->paginate(20)->withQueryString();
+        if (! empty($selectedIds) && is_array($selectedIds)) {
+            $query->whereIn('scratch_card_participations.id', $selectedIds);
+        }
 
-        return view('showrooms.manage.campaigns.participations', compact('showroom', 'campaign', 'participations', 'search', 'redeemed'));
+        // Apply sort order
+        $sort = $request->input('sort', 'latest');
+        match ($sort) {
+            'oldest' => $query->oldest('created_at'),
+            'scratched_desc' => $query->orderBy('scratched_at', 'desc'),
+            'redeemed_desc' => $query->orderBy('redeemed_at', 'desc'),
+            'customer_asc' => $query->orderBy('customer_name', 'asc'),
+            default => $query->latest('created_at'),
+        };
+
+        $participations = $query->get();
+
+        $filename = 'participations_'.Str::slug($campaign->name).'_'.date('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($participations, $campaign) {
+            $handle = fopen('php://output', 'w');
+
+            // UTF-8 BOM for Microsoft Excel compatibility
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'Participation ID',
+                'Campaign Name',
+                'Customer Name',
+                'Customer Email',
+                'Customer Phone',
+                'Participation Token',
+                'Scratch State',
+                'Scratched At',
+                'Prize Title',
+                'Prize Type',
+                'Discount Amount / Value',
+                'Coupon Code',
+                'Redemption Status',
+                'Redeemed At',
+                'Redeemed By Staff',
+                'Claim Date',
+            ]);
+
+            foreach ($participations as $part) {
+                $prize = $part->prize;
+                $redeemedBy = $part->redeemedBy;
+
+                $prizeReward = 'None';
+                if ($prize) {
+                    if ($prize->discount_amount > 0) {
+                        $prizeReward = '₹'.number_format($prize->discount_amount, 2);
+                    } elseif ($prize->discount_percentage > 0) {
+                        $prizeReward = $prize->discount_percentage.'% Off';
+                    } else {
+                        $prizeReward = $prize->title;
+                    }
+                }
+
+                fputcsv($handle, [
+                    $part->id,
+                    $campaign->name,
+                    $part->customer_name,
+                    $part->customer_email,
+                    $part->customer_phone,
+                    $part->participation_token,
+                    $part->is_scratched ? 'Revealed / Scratched' : 'Unscratched',
+                    $part->scratched_at ? $part->scratched_at->format('Y-m-d H:i') : 'N/A',
+                    $prize?->title ?? 'No Prize',
+                    $prize?->prize_type?->label() ?? 'N/A',
+                    $prizeReward,
+                    $part->coupon_code ?: 'N/A',
+                    $part->is_redeemed ? 'Redeemed In-Store' : ($part->is_scratched ? 'Pending Redemption' : 'Unrevealed'),
+                    $part->redeemed_at ? $part->redeemed_at->format('Y-m-d H:i') : 'N/A',
+                    $redeemedBy?->name ?? 'N/A',
+                    $part->created_at ? $part->created_at->format('Y-m-d H:i') : 'N/A',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
+     * Build filtered participations query.
+     */
+    protected function buildParticipationsQuery(Request $request, PromotionalCampaign $campaign)
+    {
+        $query = $campaign->participations()
+            ->with(['prize', 'redeemedBy']);
+
+        // Global Search (Name, email, phone, coupon code)
+        if ($request->filled('search')) {
+            $query->search($request->input('search'));
+        }
+
+        // Scratch State filter
+        if ($request->filled('scratched')) {
+            if ($request->input('scratched') === 'yes') {
+                $query->where('is_scratched', true);
+            } elseif ($request->input('scratched') === 'no') {
+                $query->where('is_scratched', false);
+            }
+        }
+
+        // Redemption State filter
+        if ($request->filled('redeemed')) {
+            if ($request->input('redeemed') === 'yes') {
+                $query->where('is_redeemed', true);
+            } elseif ($request->input('redeemed') === 'no') {
+                $query->where('is_redeemed', false);
+            }
+        }
+
+        // Prize Filter
+        if ($request->filled('prize_id')) {
+            if ($request->input('prize_id') === 'none') {
+                $query->whereNull('prize_id');
+            } elseif ($request->input('prize_id') === 'any') {
+                $query->whereNotNull('prize_id');
+            } else {
+                $query->where('prize_id', $request->input('prize_id'));
+            }
+        }
+
+        // Quick Preset Filters
+        $preset = $request->input('preset');
+        if ($preset) {
+            match ($preset) {
+                'today' => $query->whereDate('created_at', today()),
+                'scratched_today' => $query->where('is_scratched', true)->whereDate('scratched_at', today()),
+                'scratched' => $query->where('is_scratched', true),
+                'unscratched' => $query->where('is_scratched', false),
+                'redeemed' => $query->where('is_redeemed', true),
+                'redeemed_today' => $query->where('is_redeemed', true)->whereDate('redeemed_at', today()),
+                'pending' => $query->where('is_scratched', true)->where('is_redeemed', false),
+                'won' => $query->whereNotNull('prize_id'),
+                default => null,
+            };
+        }
+
+        // Date-Wise Search (from_date, to_date, date_type)
+        if ($request->filled('from_date') || $request->filled('to_date')) {
+            $dateColumn = match ($request->input('date_type')) {
+                'scratched' => 'scratched_at',
+                'redeemed' => 'redeemed_at',
+                default => 'created_at',
+            };
+
+            if ($request->filled('from_date')) {
+                $query->whereDate($dateColumn, '>=', $request->input('from_date'));
+            }
+            if ($request->filled('to_date')) {
+                $query->whereDate($dateColumn, '<=', $request->input('to_date'));
+            }
+        }
+
+        return $query;
     }
 
     /**

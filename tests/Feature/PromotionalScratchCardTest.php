@@ -668,4 +668,123 @@ class PromotionalScratchCardTest extends TestCase
         $responseRedeem->assertSessionHas('error');
         $this->assertFalse($participationA->fresh()->is_redeemed);
     }
+
+    public function test_participations_ledger_shows_counts_and_filters_date_wise(): void
+    {
+        // Create participations on showroomA
+        $part1 = ScratchCardParticipation::create([
+            'tenant_id' => $this->showroomA->id,
+            'campaign_id' => $this->campaignA->id,
+            'prize_id' => $this->prizeDiscount->id,
+            'customer_name' => 'John Doe',
+            'customer_email' => 'john@example.com',
+            'customer_phone' => '+91 99999 11111',
+            'participation_token' => 'token-john-1',
+            'is_scratched' => true,
+            'scratched_at' => now(),
+            'coupon_code' => 'COUPON-JOHN-1',
+            'is_redeemed' => false,
+            'created_at' => now(),
+        ]);
+
+        $part2 = ScratchCardParticipation::create([
+            'tenant_id' => $this->showroomA->id,
+            'campaign_id' => $this->campaignA->id,
+            'prize_id' => null,
+            'customer_name' => 'Alice Wonder',
+            'customer_email' => 'alice@example.com',
+            'customer_phone' => '+91 99999 22222',
+            'participation_token' => 'token-alice-2',
+            'is_scratched' => false,
+            'scratched_at' => null,
+            'coupon_code' => null,
+            'is_redeemed' => false,
+        ]);
+        $part2->created_at = now()->subDays(10);
+        $part2->save();
+
+        $response = $this->actingAs($this->ownerA)->get(route('showrooms.manage.campaigns.participations', [
+            'showroom' => $this->showroomA,
+            'campaign' => $this->campaignA,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('John Doe');
+        $response->assertSee('Alice Wonder');
+        $response->assertSee('COUPON-JOHN-1');
+
+        // Date-wise filter for today
+        $responseToday = $this->actingAs($this->ownerA)->get(route('showrooms.manage.campaigns.participations', [
+            'showroom' => $this->showroomA,
+            'campaign' => $this->campaignA,
+            'date_type' => 'created',
+            'from_date' => now()->format('Y-m-d'),
+            'to_date' => now()->format('Y-m-d'),
+        ]));
+
+        $responseToday->assertOk();
+        $responseToday->assertSee('John Doe');
+        $responseToday->assertDontSee('Alice Wonder');
+    }
+
+    public function test_participations_ledger_can_export_to_csv_all_and_selected(): void
+    {
+        $part1 = ScratchCardParticipation::create([
+            'tenant_id' => $this->showroomA->id,
+            'campaign_id' => $this->campaignA->id,
+            'prize_id' => $this->prizeDiscount->id,
+            'customer_name' => 'Export Rider One',
+            'customer_email' => 'rider1@export.test',
+            'customer_phone' => '+91 98765 00001',
+            'participation_token' => 'token-exp-1',
+            'is_scratched' => true,
+            'scratched_at' => now(),
+            'coupon_code' => 'EXP-CODE-1',
+            'is_redeemed' => true,
+            'redeemed_at' => now(),
+            'redeemed_by_user_id' => $this->ownerA->id,
+            'created_at' => now(),
+        ]);
+
+        $part2 = ScratchCardParticipation::create([
+            'tenant_id' => $this->showroomA->id,
+            'campaign_id' => $this->campaignA->id,
+            'prize_id' => null,
+            'customer_name' => 'Export Rider Two',
+            'customer_email' => 'rider2@export.test',
+            'customer_phone' => '+91 98765 00002',
+            'participation_token' => 'token-exp-2',
+            'is_scratched' => false,
+            'coupon_code' => null,
+            'is_redeemed' => false,
+            'created_at' => now(),
+        ]);
+
+        // Export all
+        $exportAll = $this->actingAs($this->ownerA)->get(route('showrooms.manage.campaigns.participations.export', [
+            'showroom' => $this->showroomA,
+            'campaign' => $this->campaignA,
+        ]));
+
+        $exportAll->assertOk();
+        $exportAll->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        $csv = $exportAll->streamedContent();
+        $this->assertStringContainsString('Participation ID', $csv);
+        $this->assertStringContainsString('Export Rider One', $csv);
+        $this->assertStringContainsString('Export Rider Two', $csv);
+        $this->assertStringContainsString('EXP-CODE-1', $csv);
+
+        // Export selected only (part1)
+        $exportSelected = $this->actingAs($this->ownerA)->post(route('showrooms.manage.campaigns.participations.export', [
+            'showroom' => $this->showroomA,
+            'campaign' => $this->campaignA,
+        ]), [
+            'selected_ids' => [$part1->id],
+        ]);
+
+        $exportSelected->assertOk();
+        $selectedCsv = $exportSelected->streamedContent();
+        $this->assertStringContainsString('Export Rider One', $selectedCsv);
+        $this->assertStringNotContainsString('Export Rider Two', $selectedCsv);
+    }
 }

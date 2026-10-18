@@ -267,6 +267,7 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::delete('/manage/campaigns/{campaign}', [CampaignManagementController::class, 'destroy'])->name('showrooms.manage.campaigns.destroy');
         Route::post('/manage/campaigns/{campaign}/toggle-status', [CampaignManagementController::class, 'toggleStatus'])->name('showrooms.manage.campaigns.toggle-status');
         Route::get('/manage/campaigns/{campaign}/participations', [CampaignManagementController::class, 'participations'])->name('showrooms.manage.campaigns.participations');
+        Route::match(['get', 'post'], '/manage/campaigns/{campaign}/participations/export', [CampaignManagementController::class, 'exportParticipations'])->name('showrooms.manage.campaigns.participations.export');
         Route::post('/manage/coupons/redeem', [CampaignManagementController::class, 'redeemCoupon'])->name('showrooms.manage.coupons.redeem');
 
         // Website Builder & Storefront Customizer
