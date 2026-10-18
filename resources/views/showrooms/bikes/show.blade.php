@@ -63,37 +63,141 @@
             <!-- Left Column: Gallery & In-Depth Specs (8 cols) -->
             <div class="lg:col-span-7 xl:col-span-8 space-y-8">
 
-                <!-- Interactive High-Res Gallery -->
+                <!-- Interactive High-Res Media Stage (Gallery & 360 Studio) -->
                 <div class="glass-panel-dark rounded-3xl border border-slate-800 p-3 sm:p-4 overflow-hidden">
-                    <!-- Main Hero Image Frame -->
-                    <div class="aspect-[16/10] rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 relative group">
-                        <img id="main-gallery-image"
-                             src="{{ $bike->primary_image_url }}"
-                             alt="{{ $bike->name }}"
-                             class="w-full h-full object-cover transition-all duration-300">
+                    @if($has360Viewer)
+                        <!-- Media View Mode Tabs -->
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-800/80">
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="tab-btn-gallery"
+                                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-800 text-white border border-slate-700 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>Photos ({{ $bike->images->count() }})</span>
+                                </button>
+                                <button type="button" id="tab-btn-360"
+                                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-900/60 hover:bg-cyan-500/10 text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 shadow-sm">
+                                    <svg class="w-4 h-4 text-cyan-400 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <span>Interactive 360° Studio</span>
+                                </button>
+                            </div>
 
-                        <div class="absolute top-4 left-4 flex items-center gap-2">
-                            <span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider {{ $bike->category->badgeClasses() }} backdrop-blur-md">
-                                {{ $bike->category->label() }}
-                            </span>
-                            @if($bike->is_featured)
-                                <span class="px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500 text-slate-950 shadow-md">
-                                    Featured Machine
-                                </span>
-                            @endif
+                            <a href="{{ route('showrooms.bikes.360', [$showroom, $bike]) }}"
+                               class="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-cyan-400 hover:text-cyan-300 transition">
+                                <span>Fullscreen 360</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
                         </div>
+                    @endif
+
+                    <!-- Mode 1: Standard Photo Gallery View -->
+                    <div id="media-view-gallery" class="space-y-3">
+                        <!-- Main Hero Image Frame -->
+                        <div class="aspect-[16/10] rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 relative group">
+                            <img id="main-gallery-image"
+                                 src="{{ $bike->primary_image_url }}"
+                                 alt="{{ $bike->name }}"
+                                 class="w-full h-full object-cover transition-all duration-300">
+
+                            <div class="absolute top-4 left-4 flex items-center gap-2">
+                                <span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider {{ $bike->category->badgeClasses() }} backdrop-blur-md">
+                                    {{ $bike->category->label() }}
+                                </span>
+                                @if($bike->is_featured)
+                                    <span class="px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500 text-slate-950 shadow-md">
+                                        Featured Machine
+                                    </span>
+                                @endif
+                                @if($has360Viewer)
+                                    <button type="button" onclick="document.getElementById('tab-btn-360').click()"
+                                            class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-cyan-500 text-slate-950 shadow-md flex items-center gap-1 hover:scale-105 transition">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span>360° Studio</span>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Gallery Thumbnails (if multiple images) -->
+                        @if($bike->images->count() > 1)
+                            <div class="flex items-center gap-3 overflow-x-auto pb-1">
+                                @foreach($bike->images as $img)
+                                    <button type="button"
+                                            onclick="document.getElementById('main-gallery-image').src = '{{ $img->image_url }}'"
+                                            class="w-20 h-14 rounded-xl overflow-hidden bg-slate-900 border-2 border-slate-800 hover:border-rose-500 focus:border-rose-500 transition-all flex-shrink-0">
+                                        <img src="{{ $img->image_url }}" alt="{{ $img->alt_text }}" class="w-full h-full object-cover">
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
-                    <!-- Gallery Thumbnails (if multiple images) -->
-                    @if($bike->images->count() > 1)
-                        <div class="flex items-center gap-3 mt-3 overflow-x-auto pb-1">
-                            @foreach($bike->images as $img)
-                                <button type="button"
-                                        onclick="document.getElementById('main-gallery-image').src = '{{ $img->image_url }}'"
-                                        class="w-20 h-14 rounded-xl overflow-hidden bg-slate-900 border-2 border-slate-800 hover:border-rose-500 focus:border-rose-500 transition-all flex-shrink-0">
-                                    <img src="{{ $img->image_url }}" alt="{{ $img->alt_text }}" class="w-full h-full object-cover">
-                                </button>
-                            @endforeach
+                    @if($has360Viewer)
+                        <!-- Mode 2: Interactive 360 Studio View -->
+                        <div id="media-view-360" class="hidden space-y-3">
+                            <div id="inline-turntable-container"
+                                 class="relative aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 overflow-hidden cursor-grab active:cursor-grabbing select-none flex items-center justify-center">
+
+                                <!-- Frames -->
+                                @foreach($bike->frames360 as $index => $frame)
+                                    <img src="{{ $frame->image_url }}"
+                                         alt="{{ $frame->alt_text }}"
+                                         data-frame-index="{{ $index }}"
+                                         class="inline-turntable-frame absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-75 {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' }}">
+                                @endforeach
+
+                                <!-- Hotspots Layer -->
+                                <div class="absolute inset-0 pointer-events-none z-20">
+                                    @foreach($bike->hotspots_list as $spot)
+                                        <div class="inline-hotspot-pin absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto group cursor-pointer"
+                                             data-angle="{{ $spot['frame_angle'] }}"
+                                             style="left: {{ $spot['x_pct'] }}%; top: {{ $spot['y_pct'] }}%;">
+                                            <div class="w-6 h-6 rounded-full bg-cyan-500/30 border-2 border-cyan-400 flex items-center justify-center shadow-lg shadow-cyan-500/50 animate-pulse">
+                                                <div class="w-2 h-2 rounded-full bg-cyan-300"></div>
+                                            </div>
+                                            <!-- Hotspot Tooltip -->
+                                            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 p-2.5 rounded-xl bg-slate-900/95 border border-cyan-500/40 text-white text-xs shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30 backdrop-blur">
+                                                <p class="font-bold text-cyan-300">{{ $spot['title'] }}</p>
+                                                @if(!empty($spot['description']))
+                                                    <p class="text-[11px] text-slate-300 mt-1 leading-snug">{{ $spot['description'] }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <!-- Drag Hint -->
+                                <div id="inline-drag-hint" class="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-slate-950/80 border border-slate-700/80 text-[11px] font-semibold text-slate-300 backdrop-blur flex items-center gap-2 pointer-events-none">
+                                    <svg class="w-4 h-4 text-cyan-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                    <span>Drag to spin 360°</span>
+                                </div>
+                            </div>
+
+                            <!-- Turntable Playback Controls -->
+                            <div class="pt-2 flex items-center justify-between gap-3 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <button type="button" id="btn-inline-spin-left" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                    </button>
+                                    <button type="button" id="btn-inline-toggle-play" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800 transition font-semibold flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                                        <span id="inline-play-text">Auto Spin</span>
+                                    </button>
+                                    <button type="button" id="btn-inline-spin-right" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <span id="inline-angle-badge" class="px-2 py-0.5 rounded-lg bg-cyan-500/15 text-cyan-300 font-mono font-bold text-xs border border-cyan-500/30">
+                                        0°
+                                    </span>
+                                    <a href="{{ route('showrooms.bikes.360', [$showroom, $bike]) }}"
+                                       class="px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition shadow-md shadow-cyan-500/20 flex items-center gap-1">
+                                        <span>Fullscreen 360</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -359,4 +463,156 @@
         </div>
     </footer>
 </div>
+
+@if($has360Viewer)
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tabGallery = document.getElementById('tab-btn-gallery');
+    const tab360 = document.getElementById('tab-btn-360');
+    const viewGallery = document.getElementById('media-view-gallery');
+    const view360 = document.getElementById('media-view-360');
+
+    if (tabGallery && tab360 && viewGallery && view360) {
+        tabGallery.addEventListener('click', function () {
+            viewGallery.classList.remove('hidden');
+            view360.classList.add('hidden');
+            tabGallery.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-800 text-white border border-slate-700 flex items-center gap-1.5';
+            tab360.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-900/60 hover:bg-cyan-500/10 text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 shadow-sm';
+            if (window._stopInlineAutoSpin) window._stopInlineAutoSpin();
+        });
+
+        tab360.addEventListener('click', function () {
+            viewGallery.classList.add('hidden');
+            view360.classList.remove('hidden');
+            tab360.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-cyan-500 text-slate-950 border border-cyan-400 flex items-center gap-1.5 shadow-md shadow-cyan-500/20';
+            tabGallery.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center gap-1.5';
+        });
+    }
+
+    // Inline Turntable Engine
+    const container = document.getElementById('inline-turntable-container');
+    const frames = document.querySelectorAll('.inline-turntable-frame');
+    const angleBadge = document.getElementById('inline-angle-badge');
+    const btnPlay = document.getElementById('btn-inline-toggle-play');
+    const playText = document.getElementById('inline-play-text');
+    const btnSpinLeft = document.getElementById('btn-inline-spin-left');
+    const btnSpinRight = document.getElementById('btn-inline-spin-right');
+    const dragHint = document.getElementById('inline-drag-hint');
+    const hotspots = document.querySelectorAll('.inline-hotspot-pin');
+
+    if (!frames || frames.length === 0) return;
+
+    let totalFrames = frames.length;
+    let currentIndex = 0;
+    let isDragging = false;
+    let startX = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let stepDegrees = 360 / totalFrames;
+
+    function showFrame(index) {
+        if (index < 0) index = (totalFrames + (index % totalFrames)) % totalFrames;
+        if (index >= totalFrames) index = index % totalFrames;
+
+        currentIndex = index;
+        const currentAngle = Math.round(currentIndex * stepDegrees);
+
+        frames.forEach((f, idx) => {
+            if (idx === currentIndex) {
+                f.classList.remove('opacity-0', 'z-0');
+                f.classList.add('opacity-100', 'z-10');
+            } else {
+                f.classList.remove('opacity-100', 'z-10');
+                f.classList.add('opacity-0', 'z-0');
+            }
+        });
+
+        if (angleBadge) angleBadge.textContent = currentAngle + '°';
+
+        hotspots.forEach(pin => {
+            const pinAngle = parseInt(pin.getAttribute('data-angle'), 10) || 0;
+            const diff = Math.abs(currentAngle - pinAngle);
+            const wrappedDiff = Math.min(diff, 360 - diff);
+            if (wrappedDiff <= 22) {
+                pin.style.display = 'block';
+                pin.style.opacity = Math.max(0.3, 1 - (wrappedDiff / 22));
+            } else {
+                pin.style.display = 'none';
+            }
+        });
+    }
+
+    if (container) {
+        container.addEventListener('pointerdown', function (e) {
+            isDragging = true;
+            startX = e.clientX;
+            if (dragHint) dragHint.style.opacity = '0';
+            if (isPlaying) stopAutoSpin();
+            container.setPointerCapture(e.pointerId);
+        });
+
+        container.addEventListener('pointermove', function (e) {
+            if (!isDragging) return;
+            const deltaX = e.clientX - startX;
+            const sensitivity = 8;
+            if (Math.abs(deltaX) >= sensitivity) {
+                const advance = Math.floor(deltaX / sensitivity);
+                showFrame(currentIndex - advance);
+                startX = e.clientX;
+            }
+        });
+
+        container.addEventListener('pointerup', function (e) {
+            isDragging = false;
+            container.releasePointerCapture(e.pointerId);
+        });
+
+        container.addEventListener('pointercancel', function () {
+            isDragging = false;
+        });
+    }
+
+    function startAutoSpin() {
+        isPlaying = true;
+        if (playText) playText.textContent = 'Pause';
+        playInterval = setInterval(() => {
+            showFrame(currentIndex + 1);
+        }, 120);
+    }
+
+    function stopAutoSpin() {
+        isPlaying = false;
+        if (playText) playText.textContent = 'Auto Spin';
+        if (playInterval) clearInterval(playInterval);
+    }
+
+    window._stopInlineAutoSpin = stopAutoSpin;
+
+    if (btnPlay) {
+        btnPlay.addEventListener('click', function () {
+            if (isPlaying) stopAutoSpin();
+            else startAutoSpin();
+        });
+    }
+
+    if (btnSpinLeft) {
+        btnSpinLeft.addEventListener('click', () => {
+            showFrame(currentIndex - 1);
+            if (isPlaying) stopAutoSpin();
+        });
+    }
+
+    if (btnSpinRight) {
+        btnSpinRight.addEventListener('click', () => {
+            showFrame(currentIndex + 1);
+            if (isPlaying) stopAutoSpin();
+        });
+    }
+
+    showFrame(0);
+});
+</script>
+@endpush
+@endif
 @endsection

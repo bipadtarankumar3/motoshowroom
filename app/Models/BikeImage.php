@@ -22,6 +22,8 @@ class BikeImage extends Model
         'image_url',
         'alt_text',
         'is_primary',
+        'is_360_frame',
+        'frame_angle',
         'sort_order',
     ];
 
@@ -34,8 +36,26 @@ class BikeImage extends Model
     {
         return [
             'is_primary' => 'boolean',
+            'is_360_frame' => 'boolean',
+            'frame_angle' => 'integer',
             'sort_order' => 'integer',
         ];
+    }
+
+    /**
+     * Scope query to standard media gallery photos (excluding 360 frames).
+     */
+    public function scopeGallery($query)
+    {
+        return $query->where('is_360_frame', false)->orderByDesc('is_primary')->orderBy('sort_order');
+    }
+
+    /**
+     * Scope query to 360-degree turntable frames.
+     */
+    public function scopeFrames360($query)
+    {
+        return $query->where('is_360_frame', true)->orderBy('frame_angle')->orderBy('sort_order');
     }
 
     /**

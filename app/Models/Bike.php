@@ -43,6 +43,11 @@ class Bike extends Model
         'status',
         'description',
         'specifications',
+        'has_360_view',
+        'viewer_type',
+        'model_3d_path',
+        'viewer_settings',
+        'hotspots',
     ];
 
     /**
@@ -67,6 +72,9 @@ class Bike extends Model
             'mileage_kmpl' => 'decimal:2',
             'is_featured' => 'boolean',
             'is_published' => 'boolean',
+            'has_360_view' => 'boolean',
+            'viewer_settings' => 'array',
+            'hotspots' => 'array',
             'specifications' => 'array',
             'category' => BikeCategory::class,
             'status' => BikeStatus::class,
@@ -78,11 +86,85 @@ class Bike extends Model
     }
 
     /**
-     * All media gallery images associated with this motorcycle.
+     * Standard media gallery images associated with this motorcycle (excluding 360 turntable frames).
      */
     public function images(): HasMany
     {
-        return $this->hasMany(BikeImage::class)->orderByDesc('is_primary')->orderBy('sort_order');
+        return $this->hasMany(BikeImage::class)
+            ->where('is_360_frame', false)
+            ->orderByDesc('is_primary')
+            ->orderBy('sort_order');
+    }
+
+    /**
+     * All media records including both gallery photos and 360-degree frames.
+     */
+    public function allImages(): HasMany
+    {
+        return $this->hasMany(BikeImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Interactive 360-degree turntable frames.
+     */
+    public function frames360(): HasMany
+    {
+        return $this->hasMany(BikeImage::class)
+            ->where('is_360_frame', true)
+            ->orderBy('frame_angle')
+            ->orderBy('sort_order');
+    }
+
+    /**
+     * Check if this motorcycle has active 360 assets ready for presentation.
+     */
+    public function has360View(): bool
+    {
+        if (! $this->has_360_view) {
+            return false;
+        }
+
+        if ($this->viewer_type === 'gltf_model' && ! empty($this->model_3d_path)) {
+            return true;
+        }
+
+        return $this->frames360()->exists();
+    }
+
+    /**
+     * Check if this motorcycle's 360 viewer is entitled and active for display.
+     */
+    public function canShow360View(): bool
+    {
+        $hasEntitlement = $this->showroom && $this->showroom->canAccessFeature('has_360_viewer');
+
+        return $hasEntitlement && $this->has360View();
+    }
+
+    /**
+     * Get normalized hotspots array.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getHotspotsListAttribute(): array
+    {
+        return is_array($this->hotspots) ? array_values($this->hotspots) : [];
+    }
+
+    /**
+     * Get merged viewer settings with default fallbacks.
+     *
+     * @return array<string, mixed>
+     */
+    public function getViewerSettingsOrDefaultAttribute(): array
+    {
+        return array_merge([
+            'auto_rotate' => true,
+            'rotation_speed' => 3,
+            'reverse_direction' => false,
+            'enable_zoom' => true,
+            'default_angle' => 0,
+        ], is_array($this->viewer_settings) ? $this->viewer_settings : []);
     }
 
     /**
@@ -90,7 +172,10 @@ class Bike extends Model
      */
     public function primaryImage(): HasOne
     {
-        return $this->hasOne(BikeImage::class)->where('is_primary', true)->latestOfMany();
+        return $this->hasOne(BikeImage::class)
+            ->where('is_360_frame', false)
+            ->where('is_primary', true)
+            ->latestOfMany();
     }
 
     /**

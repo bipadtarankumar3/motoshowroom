@@ -101,16 +101,24 @@
 | **Phase 10** | Email Notification System | ✅ COMPLETED |
 | **Phase 11** | Careers & Job Applications | ✅ COMPLETED |
 | **Phase 12** | Promotional Scratch Cards | ✅ COMPLETED |
-| **Phase 13** | Interactive 360-Degree Motorcycle Viewer | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 14** | AI Virtual Showroom Assistant | ⏳ PENDING |
+| **Phase 13** | Interactive 360-Degree Motorcycle Viewer | ✅ COMPLETED |
+| **Phase 14** | AI Virtual Showroom Assistant | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 15** | Analytics & Production Testing | ⏳ PENDING |
 | **Phase 16** | Deployment & Operational Readiness | ⏳ PENDING |
 
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 161 tests, 729 assertions, 0 failures (100% passing).
+* **PHPUnit Suite**: 177 tests, 803 assertions, 0 failures (100% passing).
 * **Coverage**: 
+  - Interactive 360-degree motorcycle turntable viewer and 3D studio (`Bike`, `BikeImage`, `Bike360ViewerController`, `PublicBike360Controller`).
+  - Dealership back-office 360 Studio workbench (`/showrooms/{showroom}/manage/bikes/{bike}/360`) with live turntable preview canvas, angle degrees indicator, auto-spin toggle, rotation speed configuration (1-10), starting angle, and bulk frame importer with automated equidistant angle distribution (0° to 359°).
+  - Interactive feature Hotspots & POI callout builder with custom coordinate positioning (`x_pct`, `y_pct`, `frame_angle`) and animated pulsing targets.
+  - Dedicated public full-screen 360 studio showcase (`/showrooms/{showroom}/bikes/{bike}/360`) with touch/pointer momentum dragging, angle scrubber, play/pause auto-spin, keyboard navigation (left/right arrows, spacebar), zoom inspection, and 1-click test ride booking.
+  - Inline 360 Studio tab integration on public motorcycle profile (`/showrooms/{showroom}/bikes/{bike}`) with graceful fallback to standard photo gallery carousel when 360 assets are disabled.
+  - Separation of 360 turntable frames from standard photo gallery relations (`images()` vs `frames360()` vs `allImages()`) preventing gallery pollution.
+  - Subscription plan entitlement gating (`has_360_viewer`) restricting back-office studio access and public presentation to Pro/Enterprise plans with upgrade callouts.
+  - Strict multi-tenant isolation guarding 360 configuration, frames, and hotspots across dealerships. 
   - Promotional scratch cards marketing engine with probability-weighted prize distribution engine (`PromotionalCampaign`, `CampaignPrize`, `ScratchCardParticipation`, `CampaignStatus`, `PrizeType`, `ScratchCardService`).
   - Interactive HTML5 Canvas scratch-off game with touch/pointer dragging, reveal percentage threshold detection (40%), instant reveal fallback, dynamic sound fx triggers, and coupon code clipboard copying.
   - Multi-tier campaign prize allocation engine with pessimistic locking (`lockForUpdate()`), inventory decrementing, and automatic fallback to non-exhaustible tiers (`better_luck`).

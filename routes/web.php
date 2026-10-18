@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Showroom\ApplicantManagementController;
+use App\Http\Controllers\Showroom\Bike360ViewerController;
 use App\Http\Controllers\Showroom\BikeController;
 use App\Http\Controllers\Showroom\BillingController;
 use App\Http\Controllers\Showroom\CampaignManagementController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Showroom\EmailPreviewController;
 use App\Http\Controllers\Showroom\EnquiryController;
 use App\Http\Controllers\Showroom\PaymentCheckoutController;
 use App\Http\Controllers\Showroom\PaymentHistoryController;
+use App\Http\Controllers\Showroom\PublicBike360Controller;
 use App\Http\Controllers\Showroom\PublicBikeController;
 use App\Http\Controllers\Showroom\PublicCareerController;
 use App\Http\Controllers\Showroom\PublicEnquiryController;
@@ -125,9 +127,11 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         return view('showrooms.public', compact('showroom'));
     })->name('showrooms.show');
 
-    // Public Motorcycle Catalog
+    // Public Motorcycle Catalog & 360 Studio
     Route::get('/bikes', [PublicBikeController::class, 'index'])->name('showrooms.bikes.index');
     Route::get('/bikes/{bike}', [PublicBikeController::class, 'show'])->name('showrooms.bikes.show');
+    Route::get('/bikes/{bike}/360', [PublicBike360Controller::class, 'viewer'])->name('showrooms.bikes.360');
+    Route::get('/bikes/{bike}/360/data', [PublicBike360Controller::class, 'data'])->name('showrooms.bikes.360.data');
 
     // Customer Enquiries & Test-Rides
     Route::get('/enquiries/create', [PublicEnquiryController::class, 'create'])->name('showrooms.enquiries.create');
@@ -195,6 +199,14 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::delete('/manage/bikes/{bike}', [BikeController::class, 'destroy'])->name('showrooms.manage.bikes.destroy');
         Route::post('/manage/bikes/{bike}/toggle-featured', [BikeController::class, 'toggleFeatured'])->name('showrooms.manage.bikes.toggle-featured');
         Route::post('/manage/bikes/{bike}/toggle-published', [BikeController::class, 'togglePublished'])->name('showrooms.manage.bikes.toggle-published');
+
+        // Motorcycle 360-Degree Studio Management
+        Route::get('/manage/bikes/{bike}/360', [Bike360ViewerController::class, 'index'])->name('showrooms.manage.bikes.360');
+        Route::put('/manage/bikes/{bike}/360/settings', [Bike360ViewerController::class, 'updateSettings'])->name('showrooms.manage.bikes.360.settings');
+        Route::post('/manage/bikes/{bike}/360/frames', [Bike360ViewerController::class, 'uploadFrames'])->name('showrooms.manage.bikes.360.frames.store');
+        Route::delete('/manage/bikes/{bike}/360/frames/{image}', [Bike360ViewerController::class, 'deleteFrame'])->name('showrooms.manage.bikes.360.frames.destroy');
+        Route::post('/manage/bikes/{bike}/360/frames/clear', [Bike360ViewerController::class, 'clearAllFrames'])->name('showrooms.manage.bikes.360.frames.clear');
+        Route::post('/manage/bikes/{bike}/360/hotspots', [Bike360ViewerController::class, 'updateHotspots'])->name('showrooms.manage.bikes.360.hotspots');
 
         // Careers & Job Openings Management
         Route::get('/manage/careers', [CareerManagementController::class, 'index'])->name('showrooms.manage.careers.index');

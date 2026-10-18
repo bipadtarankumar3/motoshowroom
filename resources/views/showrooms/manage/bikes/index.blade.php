@@ -199,9 +199,16 @@
                                                 @endif
                                             </div>
                                             <div>
-                                                <a href="{{ route('showrooms.manage.bikes.edit', [$showroom, $bike]) }}" class="font-bold text-white hover:text-rose-400 transition block text-sm leading-snug">
-                                                    {{ $bike->name }}
-                                                </a>
+                                                <div class="flex items-center gap-1.5">
+                                                    <a href="{{ route('showrooms.manage.bikes.edit', [$showroom, $bike]) }}" class="font-bold text-white hover:text-rose-400 transition block text-sm leading-snug">
+                                                        {{ $bike->name }}
+                                                    </a>
+                                                    @if($bike->has_360_view)
+                                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                                                            360°
+                                                        </span>
+                                                    @endif
+                                                </div>
                                                 <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
                                                     <span class="font-mono text-slate-300 font-bold">{{ $bike->sku }}</span>
                                                     <span>•</span>
@@ -272,6 +279,10 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                                 </a>
                                             @endif
+
+                                            <a href="{{ route('showrooms.manage.bikes.360', [$showroom, $bike]) }}" class="p-1.5 {{ $bike->has_360_view ? 'text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20' : 'text-slate-400 hover:text-cyan-300 hover:bg-slate-800' }} rounded-lg transition" title="Interactive 360° Studio">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            </a>
 
                                             <a href="{{ route('showrooms.manage.bikes.edit', [$showroom, $bike]) }}" class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Edit Motorcycle">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>

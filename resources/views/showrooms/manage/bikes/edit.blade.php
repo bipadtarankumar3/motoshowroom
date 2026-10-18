@@ -24,6 +24,12 @@
             </div>
 
             <div class="flex items-center gap-3">
+                <a href="{{ route('showrooms.manage.bikes.360', [$showroom, $bike]) }}"
+                   class="px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-xs font-semibold text-cyan-300 transition flex items-center gap-2 shadow-lg shadow-cyan-500/10">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span>360° Studio</span>
+                </a>
+
                 @if($bike->is_published)
                     <a href="{{ route('showrooms.bikes.show', [$showroom, $bike]) }}" target="_blank"
                        class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-2">

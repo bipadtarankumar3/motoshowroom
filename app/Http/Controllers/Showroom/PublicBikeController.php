@@ -71,7 +71,8 @@ class PublicBikeController extends Controller
     {
         abort_if($bike->tenant_id !== $showroom->id || ! $bike->is_published, 404);
 
-        $bike->load(['images', 'variants']);
+        $bike->load(['images', 'variants', 'frames360']);
+        $has360Viewer = $showroom->canAccessFeature('has_360_viewer') && $bike->has360View();
 
         $relatedBikes = $showroom->publishedBikes()
             ->with(['images'])
@@ -90,6 +91,6 @@ class PublicBikeController extends Controller
             $relatedBikes = $relatedBikes->merge($filler);
         }
 
-        return view('showrooms.bikes.show', compact('showroom', 'bike', 'relatedBikes'));
+        return view('showrooms.bikes.show', compact('showroom', 'bike', 'relatedBikes', 'has360Viewer'));
     }
 }
