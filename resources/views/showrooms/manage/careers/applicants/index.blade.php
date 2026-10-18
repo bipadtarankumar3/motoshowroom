@@ -124,7 +124,8 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 font-medium">
-                        @forelse($applicants as $app)
+                        @php $applicantList = $applicants ?? $applications ?? collect(); @endphp
+                        @forelse($applicantList as $app)
                             <tr class="hover:bg-slate-50/80 transition">
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-slate-900 text-sm flex items-center gap-2">
@@ -199,9 +200,9 @@
                 </table>
             </div>
 
-            @if($applicants->hasPages())
+            @if($applicantList->hasPages())
                 <div class="p-4 border-t border-slate-200 bg-white">
-                    {{ $applicants->links() }}
+                    {{ $applicantList->links() }}
                 </div>
             @endif
         </div>
