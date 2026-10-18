@@ -11,7 +11,7 @@
 ---
 
 ## 2. Current Status
-* **Current Phase**: **Phase 2: Authentication & Multi-Tenant Isolation** (COMPLETED)
+* **Current Phase**: **Phase 3: Super Admin Dashboard** (COMPLETED)
 * **Completed Features**:
   * [x] Project workspace initialized with Laravel 13 & PHP 8.5
   * [x] MySQL 8.0 database created and migrations applied on port 3306
@@ -25,21 +25,18 @@
     * `EnsureTenantContext` middleware resolving active showroom via route slug, domain, or custom domain.
     * `VerifyShowroomMembership` middleware enforcing strict cross-tenant isolation on showroom back-office management.
     * Super Admin universal platform oversight.
-  * [x] Google OAuth Integration:
-    * Laravel Socialite integration with secure callback handling.
-    * Mandatory security check preventing privilege escalation (Google public registrations strictly assigned `user` role).
-  * [x] Password Reset Lifecycle:
-    * Request reset token form (`/forgot-password`).
-    * Secure hashed token storage in `password_reset_tokens` with 60-minute expiry validation.
-    * Password update submission (`/reset-password`).
-  * [x] Showroom Storefront & Back-Office Shells:
-    * Public showroom website (`/showrooms/{showroom}`) with dynamic showroom CSS branding.
-    * Showroom staff back-office (`/showrooms/{showroom}/manage`) with tenant authorization checks.
-  * [x] Database Seeder with multiple isolated showrooms:
-    * Showroom A: Apex Moto Hub (`apex-moto`), owned by Rajesh (`rajesh@apex.example`)
-    * Showroom B: Velocity Superbikes (`velocity-superbikes`), owned by Vikram (`vikram@velocity.example`)
-    * Super Admin: `admin@motoshowroom.example`
-  * [x] Automated PHPUnit test suite passing (26 tests, 100 assertions, 0 failures)
+  * [x] Google OAuth Integration with privilege escalation protection.
+  * [x] Password Reset Lifecycle with secure token verification.
+  * [x] Showroom Storefront & Back-Office Shells.
+  * [x] Super Admin Master Control Engine (Phase 3):
+    * Central dashboard with key platform metrics: total showrooms (active, trial, suspended), total users (admin vs customer), audit events counter, and live multi-tenant health indicators.
+    * Showroom tenant management: directory with search and status filtering, provisioning wizard with automatic slug generation and owner assignment (existing user or inline new owner registration).
+    * Showroom detail view: profile metadata, brand color preview swatches, staff membership roster, inline status modification (active, trial, suspended, cancelled) with audit reasoning.
+    * Showroom edit view: brand color pickers, custom domain setting, public website toggling, and read-only mode controls.
+    * Staff membership management: add staff with departmental roles (`owner`, `sales_manager`, `service_manager`, `staff`) or revoke access.
+    * System-wide Audit Trail Ledger: filterable by action, tenant, user, or search query; inspects previous and updated JSON payloads with diff inspection.
+    * Platform Configuration & Settings: global brand metadata, central support email, default ISO currency (`INR`, `₹`), trial duration defaults, feature toggles (custom domains, 360 viewer, AI assistant), and registration control backed by cached `PlatformSetting` model.
+  * [x] Automated PHPUnit test suite passing (37 tests, 171 assertions, 0 failures)
   * [x] Code formatted with Laravel Pint
 
 ---
@@ -51,8 +48,8 @@
 | **Phase 1** | Laravel Foundation & Core Structure | ✅ COMPLETED |
 | **Phase 1.5** | User Roles (`admin` & `user`), Admin Creation & Personal Details Page | ✅ COMPLETED |
 | **Phase 2** | Authentication & Multi-Tenant Isolation | ✅ COMPLETED |
-| **Phase 3** | Super Admin Dashboard | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 4** | Subscription Management & Entitlements | ⏳ PENDING |
+| **Phase 3** | Super Admin Dashboard | ✅ COMPLETED |
+| **Phase 4** | Subscription Management & Entitlements | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 5** | Showroom Dashboard & Website Builder | ⏳ PENDING |
 | **Phase 6** | Motorcycle Inventory Management | ⏳ PENDING |
 | **Phase 7** | Purchase Enquiries & Test Rides | ⏳ PENDING |
@@ -69,6 +66,6 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 26 tests, 100 assertions, 0 failures (100% passing).
-* **Coverage**: Tenant isolation, cross-tenant 403 enforcement, public website resolution, user roles & details pages, admin user provisioning, password reset lifecycle, Google OAuth integration, and base foundation.
+* **PHPUnit Suite**: 37 tests, 171 assertions, 0 failures (100% passing).
+* **Coverage**: Super Admin dashboard, tenant provisioning, showroom status toggles & audit logs, staff role assignments, platform settings with cache management, tenant isolation, cross-tenant 403 enforcement, public website resolution, user roles & details pages, admin user provisioning, password reset lifecycle, Google OAuth integration, and base foundation.
 * **Code Styling**: Formatted with `vendor/bin/pint --format agent`.

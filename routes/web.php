@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PlatformSettingController;
+use App\Http\Controllers\Admin\ShowroomController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\SocialAuthController;
@@ -52,6 +56,28 @@ Route::middleware('auth')->group(function () {
 
     // Admin Exclusive Routes
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index']);
+
+        // Showroom Tenants Management
+        Route::get('/showrooms', [ShowroomController::class, 'index'])->name('showrooms.index');
+        Route::get('/showrooms/create', [ShowroomController::class, 'create'])->name('showrooms.create');
+        Route::post('/showrooms', [ShowroomController::class, 'store'])->name('showrooms.store');
+        Route::get('/showrooms/{showroom}', [ShowroomController::class, 'show'])->name('showrooms.show');
+        Route::get('/showrooms/{showroom}/edit', [ShowroomController::class, 'edit'])->name('showrooms.edit');
+        Route::put('/showrooms/{showroom}', [ShowroomController::class, 'update'])->name('showrooms.update');
+        Route::post('/showrooms/{showroom}/status', [ShowroomController::class, 'toggleStatus'])->name('showrooms.status');
+        Route::post('/showrooms/{showroom}/members', [ShowroomController::class, 'addMember'])->name('showrooms.members.store');
+        Route::delete('/showrooms/{showroom}/members/{membership}', [ShowroomController::class, 'removeMember'])->name('showrooms.members.destroy');
+
+        // Audit Trail Logs
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+
+        // Platform Settings
+        Route::get('/settings', [PlatformSettingController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [PlatformSettingController::class, 'update'])->name('settings.update');
+
+        // Platform Users
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');

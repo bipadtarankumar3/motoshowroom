@@ -1,4 +1,5 @@
 <x-app-layout title="User Management - Admin | MotoShowroom SaaS">
+    @include('admin.partials.nav')
     <div class="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto space-y-8">
 

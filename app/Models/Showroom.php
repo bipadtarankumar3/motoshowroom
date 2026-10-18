@@ -105,4 +105,20 @@ class Showroom extends Model
     {
         return $this->public_website_enabled && $this->status !== 'suspended';
     }
+
+    /**
+     * Audit logs related to this showroom.
+     */
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'tenant_id')->latest('created_at');
+    }
+
+    /**
+     * Get the owner user of the showroom.
+     */
+    public function getOwnerAttribute(): ?User
+    {
+        return $this->ownerMembership?->user;
+    }
 }
