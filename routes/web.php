@@ -13,6 +13,8 @@ use App\Http\Controllers\Showroom\BillingController;
 use App\Http\Controllers\Showroom\EnquiryController;
 use App\Http\Controllers\Showroom\PublicBikeController;
 use App\Http\Controllers\Showroom\PublicEnquiryController;
+use App\Http\Controllers\Showroom\PublicServiceController;
+use App\Http\Controllers\Showroom\ServiceBookingController;
 use App\Http\Controllers\Showroom\SettingController;
 use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
@@ -123,6 +125,12 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::get('/enquiries/create', [PublicEnquiryController::class, 'create'])->name('showrooms.enquiries.create');
     Route::post('/enquiries', [PublicEnquiryController::class, 'store'])->name('showrooms.enquiries.store');
 
+    // Workshop & Service Appointment Booking
+    Route::get('/services/book', [PublicServiceController::class, 'create'])->name('showrooms.services.create');
+    Route::get('/services/slots', [PublicServiceController::class, 'slots'])->name('showrooms.services.slots');
+    Route::post('/services/book', [PublicServiceController::class, 'store'])->name('showrooms.services.store');
+    Route::get('/services/track/{booking?}', [PublicServiceController::class, 'track'])->name('showrooms.services.track');
+
     // Showroom Billing & Subscription Hub
     Route::middleware(['auth', 'tenant.member'])->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('showrooms.billing.index');
@@ -138,6 +146,12 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::get('/manage/enquiries/{enquiry}', [EnquiryController::class, 'show'])->name('showrooms.manage.enquiries.show');
         Route::put('/manage/enquiries/{enquiry}', [EnquiryController::class, 'update'])->name('showrooms.manage.enquiries.update');
         Route::delete('/manage/enquiries/{enquiry}', [EnquiryController::class, 'destroy'])->name('showrooms.manage.enquiries.destroy');
+
+        // Service Booking & Workshop Bay Management
+        Route::get('/manage/services', [ServiceBookingController::class, 'index'])->name('showrooms.manage.services.index');
+        Route::get('/manage/services/{booking}', [ServiceBookingController::class, 'show'])->name('showrooms.manage.services.show');
+        Route::put('/manage/services/{booking}', [ServiceBookingController::class, 'update'])->name('showrooms.manage.services.update');
+        Route::delete('/manage/services/{booking}', [ServiceBookingController::class, 'destroy'])->name('showrooms.manage.services.destroy');
 
         // Motorcycle Inventory Management
         Route::get('/manage/bikes', [BikeController::class, 'index'])->name('showrooms.manage.bikes.index');

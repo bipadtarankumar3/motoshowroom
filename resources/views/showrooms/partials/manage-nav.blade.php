@@ -32,6 +32,11 @@
                         Enquiries & Leads
                     </a>
 
+                    <a href="{{ route('showrooms.manage.services.index', $showroom) }}"
+                       class="px-3 py-1.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('showrooms.manage.services*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
+                        Workshop & Service
+                    </a>
+
                     <a href="{{ route('showrooms.manage.website', $showroom) }}"
                        class="px-3 py-1.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('showrooms.manage.website*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
                         Website Builder

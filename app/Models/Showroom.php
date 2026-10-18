@@ -291,4 +291,28 @@ class Showroom extends Model
 
         return $now >= $open && $now <= $close;
     }
+
+    /**
+     * All service appointments booked with this showroom workshop.
+     */
+    public function serviceBookings(): HasMany
+    {
+        return $this->hasMany(ServiceBooking::class, 'tenant_id');
+    }
+
+    /**
+     * Today's scheduled service appointments.
+     */
+    public function todayServiceBookings(): HasMany
+    {
+        return $this->serviceBookings()->whereDate('booking_date', today());
+    }
+
+    /**
+     * Total physical service bays available for simultaneous vehicle maintenance.
+     */
+    public function getServiceBayCapacityAttribute(): int
+    {
+        return (int) $this->getSetting('service_bays_count', 4);
+    }
 }

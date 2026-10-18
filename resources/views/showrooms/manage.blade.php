@@ -82,11 +82,14 @@
                     <span class="text-[10px] text-slate-500">Active leads & test rides</span>
                 </a>
 
-                <div class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow">
-                    <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Service Bookings</span>
+                <a href="{{ route('showrooms.manage.services.index', $showroom) }}" class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow hover:border-emerald-500/50 transition group block">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Service Bookings</span>
+                        <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
                     <p class="text-2xl font-black font-display text-emerald-400 mt-1">{{ $metrics['today_services'] ?? 0 }}</p>
-                    <span class="text-[10px] text-slate-500">Scheduled appointments</span>
-                </div>
+                    <span class="text-[10px] text-slate-500">Today's appointments</span>
+                </a>
 
                 <div class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow">
                     <span class="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Careers</span>
@@ -178,13 +181,16 @@
                                     <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     </span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400">Phase 8</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Phase 8</span>
                                 </div>
-                                <h3 class="text-base font-bold text-white">Service Booking Concurrency</h3>
+                                <h3 class="text-base font-bold text-white">Workshop & Bays</h3>
                                 <p class="text-xs text-slate-400">Bay scheduling, service packages, customer maintenance logs, and pickup tracking.</p>
                             </div>
                             <div class="pt-4 border-t border-slate-800/80 mt-4">
-                                <span class="text-xs text-slate-500 font-medium">Coming in Phase 8</span>
+                                <a href="{{ route('showrooms.manage.services.index', $showroom) }}" class="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1">
+                                    <span>Manage Workshop</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </a>
                             </div>
                         </div>
                     </div>
