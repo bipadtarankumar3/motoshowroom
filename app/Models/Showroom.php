@@ -395,4 +395,43 @@ class Showroom extends Model
     {
         return $this->hasMany(Payment::class, 'tenant_id');
     }
+
+    /**
+     * AI Virtual Assistant configuration and settings for this showroom.
+     */
+    public function aiSetting(): HasOne
+    {
+        return $this->hasOne(AiAssistantSetting::class, 'tenant_id');
+    }
+
+    /**
+     * Retrieve or initialize default AI assistant settings for this showroom.
+     */
+    public function getOrCreateAiSetting(): AiAssistantSetting
+    {
+        return $this->aiSetting()->firstOrCreate([
+            'tenant_id' => $this->id,
+        ], [
+            'bot_name' => "{$this->name} AI Concierge",
+            'welcome_message' => "Hello! Welcome to {$this->name}. I am your AI motorcycle concierge. How can I help you find your dream bike or schedule a service today?",
+            'tone' => 'friendly',
+            'is_enabled' => true,
+            'suggested_prompts' => [
+                'Recommend a sports bike under ₹15 Lakhs',
+                'What electric motorcycles do you have in stock?',
+                'How do I schedule a test ride?',
+                'What are your workshop timings today?',
+                'Any active promotional discounts or scratch cards?',
+            ],
+            'custom_faqs' => [],
+        ]);
+    }
+
+    /**
+     * AI customer chat conversations.
+     */
+    public function aiConversations(): HasMany
+    {
+        return $this->hasMany(AiConversation::class, 'tenant_id')->latest();
+    }
 }

@@ -102,15 +102,26 @@
 | **Phase 11** | Careers & Job Applications | ✅ COMPLETED |
 | **Phase 12** | Promotional Scratch Cards | ✅ COMPLETED |
 | **Phase 13** | Interactive 360-Degree Motorcycle Viewer | ✅ COMPLETED |
-| **Phase 14** | AI Virtual Showroom Assistant | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 15** | Analytics & Production Testing | ⏳ PENDING |
+| **Phase 14** | AI Virtual Showroom Assistant | ✅ COMPLETED |
+| **Phase 15** | Analytics & Production Testing | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 16** | Deployment & Operational Readiness | ⏳ PENDING |
 
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 177 tests, 803 assertions, 0 failures (100% passing).
+* **PHPUnit Suite**: 193 tests, 888 assertions, 0 failures (100% passing).
 * **Coverage**: 
+  - AI Virtual Showroom Concierge with multi-intent heuristic NLP and contextual reasoning engine (`AiAssistantSetting`, `AiConversation`, `AiMessage`, `AiAssistantService`, `PublicAiAssistantController`, `AiAssistantManagementController`).
+  - Context-aware motorcycle recommendation engine matching user queries on budget, category (sports, cruiser, adventure, EV, scooter), and brand against live dealership inventory, returning rich cards with prices, specs, and direct booking links.
+  - Automated high-intent lead capture converting customer chat inquiries (with contact phone/name) directly into active `Enquiry` records (`type = 'test_ride'`).
+  - Showroom operational answering accurately explaining current open/closed status, operating hours matrix, address, contact phone, and workshop service options.
+  - Integration with promotional scratch card campaigns (`PromotionalCampaign`), linking active marketing rewards inside conversational replies.
+  - Custom FAQs knowledge builder allowing dealership staff to add shop-specific Q&A pairs (financing partners, trade-in bonuses, delivery radius).
+  - Floating responsive storefront chat widget (`ai-assistant-widget.blade.php`) with quick prompt chips, persistent local session tracking, live typing indicators, and message history.
+  - Back-office AI management dashboard (`/showrooms/{showroom}/manage/ai`) with concierge personality customizer (bot name, tone, welcome message, prompt chips), KPI inquiry counters, and full customer chat transcript inspection.
+  - Subscription entitlement gating (`has_ai_assistant`) restricting AI concierge to Pro/Enterprise tiers with upgrade prompts.
+  - Session rate limiting (15 queries per minute) preventing abuse and spam.
+  - Strict multi-tenant isolation guarding chat conversations, settings, and leads across showrooms. 
   - Interactive 360-degree motorcycle turntable viewer and 3D studio (`Bike`, `BikeImage`, `Bike360ViewerController`, `PublicBike360Controller`).
   - Dealership back-office 360 Studio workbench (`/showrooms/{showroom}/manage/bikes/{bike}/360`) with live turntable preview canvas, angle degrees indicator, auto-spin toggle, rotation speed configuration (1-10), starting angle, and bulk frame importer with automated equidistant angle distribution (0° to 359°).
   - Interactive feature Hotspots & POI callout builder with custom coordinate positioning (`x_pct`, `y_pct`, `frame_angle`) and animated pulsing targets.

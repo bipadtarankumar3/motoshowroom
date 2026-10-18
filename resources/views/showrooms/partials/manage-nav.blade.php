@@ -47,6 +47,11 @@
                         Scratch Cards
                     </a>
 
+                    <a href="{{ route('showrooms.manage.ai.index', $showroom) }}"
+                       class="px-3 py-1.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('showrooms.manage.ai*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
+                        AI Concierge
+                    </a>
+
                     <a href="{{ route('showrooms.manage.website', $showroom) }}"
                        class="px-3 py-1.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('showrooms.manage.website*') ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-900' }}">
                         Website Builder
@@ -105,6 +110,7 @@
             <a href="{{ route('showrooms.manage', $showroom) }}" class="px-3 py-1.5 rounded-lg shrink-0 {{ request()->routeIs('showrooms.manage') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Dashboard</a>
             <a href="{{ route('showrooms.manage.careers.index', $showroom) }}" class="px-3 py-1.5 rounded-lg shrink-0 {{ request()->routeIs('showrooms.manage.careers*', 'showrooms.manage.applicants*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Careers</a>
             <a href="{{ route('showrooms.manage.campaigns.index', $showroom) }}" class="px-3 py-1.5 rounded-lg shrink-0 {{ request()->routeIs('showrooms.manage.campaigns*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Scratch Cards</a>
+            <a href="{{ route('showrooms.manage.ai.index', $showroom) }}" class="px-3 py-1.5 rounded-lg shrink-0 {{ request()->routeIs('showrooms.manage.ai*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">AI Concierge</a>
             <a href="{{ route('showrooms.manage.website', $showroom) }}" class="px-3 py-1.5 rounded-lg shrink-0 {{ request()->routeIs('showrooms.manage.website*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Website Builder</a>
             <a href="{{ route('showrooms.billing.index', $showroom) }}" class="px-3 py-1.5 rounded-lg shrink-0 {{ request()->routeIs('showrooms.billing*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Subscription</a>
             <a href="{{ route('showrooms.manage.settings', $showroom) }}" class="px-3 py-1.5 rounded-lg shrink-0 {{ request()->routeIs('showrooms.manage.settings*') ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400' }}">Settings</a>

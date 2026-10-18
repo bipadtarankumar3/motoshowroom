@@ -39,6 +39,11 @@
         {{ $slot }}
     </div>
 
+    @if(isset($showroom))
+        @include('components.ai-assistant-widget', ['showroom' => $showroom])
+    @endif
+
     @livewireScripts
+    @stack('scripts')
 </body>
 </html>

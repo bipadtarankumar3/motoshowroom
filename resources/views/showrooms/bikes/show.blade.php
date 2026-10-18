@@ -462,6 +462,8 @@
             <p>© {{ date('Y') }} {{ $showroom->name }}. All rights reserved.</p>
         </div>
     </footer>
+
+    @include('components.ai-assistant-widget', ['showroom' => $showroom])
 </div>
 
 @if($has360Viewer)

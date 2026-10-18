@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Showroom\AiAssistantManagementController;
 use App\Http\Controllers\Showroom\ApplicantManagementController;
 use App\Http\Controllers\Showroom\Bike360ViewerController;
 use App\Http\Controllers\Showroom\BikeController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Showroom\EmailPreviewController;
 use App\Http\Controllers\Showroom\EnquiryController;
 use App\Http\Controllers\Showroom\PaymentCheckoutController;
 use App\Http\Controllers\Showroom\PaymentHistoryController;
+use App\Http\Controllers\Showroom\PublicAiAssistantController;
 use App\Http\Controllers\Showroom\PublicBike360Controller;
 use App\Http\Controllers\Showroom\PublicBikeController;
 use App\Http\Controllers\Showroom\PublicCareerController;
@@ -159,6 +161,11 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::get('/scratch/{participation:participation_token}', [PublicScratchCardController::class, 'play'])->name('showrooms.scratch.play');
     Route::post('/scratch/{participation:participation_token}/reveal', [PublicScratchCardController::class, 'reveal'])->name('showrooms.scratch.reveal');
 
+    // AI Virtual Showroom Concierge (Public Chat)
+    Route::post('/ai/chat', [PublicAiAssistantController::class, 'chat'])->name('showrooms.ai.chat');
+    Route::get('/ai/history', [PublicAiAssistantController::class, 'history'])->name('showrooms.ai.history');
+    Route::get('/ai/settings', [PublicAiAssistantController::class, 'settings'])->name('showrooms.ai.settings');
+
     // Showroom Billing & Subscription Hub
     Route::middleware(['auth', 'tenant.member'])->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('showrooms.billing.index');
@@ -237,6 +244,12 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         // Website Builder & Storefront Customizer
         Route::get('/manage/website', [WebsiteBuilderController::class, 'edit'])->name('showrooms.manage.website');
         Route::put('/manage/website', [WebsiteBuilderController::class, 'update'])->name('showrooms.manage.website.update');
+
+        // AI Virtual Assistant Management & Conversations Ledger
+        Route::get('/manage/ai', [AiAssistantManagementController::class, 'index'])->name('showrooms.manage.ai.index');
+        Route::put('/manage/ai/settings', [AiAssistantManagementController::class, 'updateSettings'])->name('showrooms.manage.ai.settings');
+        Route::get('/manage/ai/conversations/{conversation}', [AiAssistantManagementController::class, 'showConversation'])->name('showrooms.manage.ai.conversations.show');
+        Route::delete('/manage/ai/conversations/{conversation}', [AiAssistantManagementController::class, 'destroyConversation'])->name('showrooms.manage.ai.conversations.destroy');
 
         // Showroom Settings & Profile
         Route::get('/manage/settings', [SettingController::class, 'edit'])->name('showrooms.manage.settings');
