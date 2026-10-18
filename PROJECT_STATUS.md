@@ -11,7 +11,7 @@
 ---
 
 ## 2. Current Status
-* **Current Phase**: **Phase 5: Showroom Dashboard & Website Builder** (COMPLETED)
+* **Current Phase**: **Phase 6: Motorcycle Inventory Management** (COMPLETED)
 * **Completed Features**:
   * [x] Project workspace initialized with Laravel 13 & PHP 8.5
   * [x] MySQL 8.0 database created and migrations applied on port 3306
@@ -50,7 +50,18 @@
     * Storefront Customizer & Website Builder (`/showrooms/{showroom}/manage/website`): Hero headline and sub-headline editor, background banner URL, brand color hex pickers, About Us narrative story, WhatsApp 1-click hotline, Google Maps link, weekly operating hours matrix (Monday to Sunday with open/close times and closed toggle), social media handles (Instagram, YouTube, Facebook, Twitter), and live storefront publishing toggle.
     * Dynamic Public Storefront Rendering (`/showrooms/{showroom}`): Live "Open Now" / "Closed" schedule computation (`$showroom->isOpenNow()`), branded hero backdrop, 1-click WhatsApp customer chat button, story narrative, and contact card.
     * Showroom Business Settings & Personnel (`/showrooms/{showroom}/manage/settings`): Physical address, official business email and phone updater, and staff roster view.
-  * [x] Automated PHPUnit test suite passing (54 tests, 257 assertions, 0 failures)
+  * [x] Motorcycle Inventory Management (Phase 6):
+    * Database tables: `bikes`, `bike_images`, `bike_variants` with foreign keys, composite unique constraints (`[tenant_id, slug]`, `[tenant_id, sku]`), soft deletes, and index optimizations.
+    * Domain Enums: `BikeCategory` (Sports, Cruiser, Adventure, Commuter, Touring, Scooter, Electric EV) and `BikeStatus` (In Stock, Out of Stock, Incoming, Discontinued) with human-friendly labels and Tailwind badge styles.
+    * Models & Scopes: `Bike`, `BikeImage`, `BikeVariant` with `BelongsToTenant` isolation, automatic tenant ID injection, casting, image galleries, color/trim variants, and dynamic query scopes (`published`, `featured`, `inStock`, `search`, `filterCategory`, `filterStatus`).
+    * Back-Office Inventory Management (`/showrooms/{showroom}/manage/bikes`): Interactive inventory data table with stock badges, specs summary, quick featured and published status toggle buttons, search & category filters, pagination, and plan quota usage meter.
+    * Add/Edit Motorcycle Wizards (`/showrooms/{showroom}/manage/bikes/create` & `edit`): Multi-section forms for mechanical specs (cc, power bhp, torque nm, transmission, mileage, top speed, curb weight), JSON specifications, photo galleries, and color/trim variants.
+    * Subscription Quota Enforcement: Evaluates `$showroom->hasReachedLimit('max_bike_listings', $currentCount)` and blocks listings exceeding plan thresholds with upgrade call-to-actions.
+    * Public Motorcycle Catalog (`/showrooms/{showroom}/bikes`): Customer-facing inventory catalog with category pills, brand dropdown, price sorting, search, and responsive cards.
+    * Public Motorcycle Detail Profile (`/showrooms/{showroom}/bikes/{bike}`): Interactive image gallery, color/trim swatches, comprehensive powertrain/dimensions/equipment specs grid, WhatsApp dealer contact button, and related motorcycles showcase.
+    * Dealership Homepage Showcase: Featured motorcycles automatically highlighted on the public showroom storefront.
+    * System-wide Audit Trails: Logs `bike.created`, `bike.updated`, and `bike.deleted` events.
+  * [x] Automated PHPUnit test suite passing (64 tests, 320 assertions, 0 failures)
   * [x] Code formatted with Laravel Pint
 
 ---
@@ -65,8 +76,8 @@
 | **Phase 3** | Super Admin Dashboard | ✅ COMPLETED |
 | **Phase 4** | Subscription Management & Entitlements | ✅ COMPLETED |
 | **Phase 5** | Showroom Dashboard & Website Builder | ✅ COMPLETED |
-| **Phase 6** | Motorcycle Inventory Management | 🔄 READY FOR IMPLEMENTATION |
-| **Phase 7** | Purchase Enquiries & Test Rides | ⏳ PENDING |
+| **Phase 6** | Motorcycle Inventory Management | ✅ COMPLETED |
+| **Phase 7** | Purchase Enquiries & Test Rides | 🔄 READY FOR IMPLEMENTATION |
 | **Phase 8** | Service Booking Management | ⏳ PENDING |
 | **Phase 9** | Razorpay Payments & Webhooks | ⏳ PENDING |
 | **Phase 10** | Email Notification System | ⏳ PENDING |
@@ -80,6 +91,6 @@
 ---
 
 ## 4. Test & Verification Status
-* **PHPUnit Suite**: 54 tests, 257 assertions, 0 failures (100% passing).
-* **Coverage**: Showroom dashboard, website builder, public storefront dynamic updates, operating hours calculation, showroom settings & personnel, subscription plans CRUD, subscription lifecycle, manual expiry extensions, plan upgrades, dynamic feature & limit entitlement checks, back-office subscription gating, showroom billing hub with usage meters, Super Admin dashboard, tenant provisioning, showroom status toggles & audit logs, staff role assignments, platform settings with cache management, tenant isolation, cross-tenant 403 enforcement, public website resolution, user roles & details pages, admin user provisioning, password reset lifecycle, Google OAuth integration, and base foundation.
+* **PHPUnit Suite**: 64 tests, 320 assertions, 0 failures (100% passing).
+* **Coverage**: Motorcycle CRUD operations, specifications, photo gallery, variant trims, subscription listing quota enforcement (`max_bike_listings`), multi-tenant cross-dealership isolation (404/403), public inventory catalog, public bike detail profiles with interactive gallery, featured showcase on storefront homepage, showroom dashboard, website builder, operating hours computation, showroom business settings, subscription lifecycle & plans CRUD, manual expiry extensions, plan upgrades, dynamic feature & limit entitlement checks, back-office subscription gating, showroom billing hub with usage meters, Super Admin dashboard, tenant provisioning, showroom status toggles & audit logs, staff role assignments, platform settings with cache management, user roles & details pages, admin user provisioning, password reset lifecycle, Google OAuth integration, and base foundation.
 * **Code Styling**: Formatted with `vendor/bin/pint --format agent`.

@@ -8,7 +8,9 @@ use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Showroom\BikeController;
 use App\Http\Controllers\Showroom\BillingController;
+use App\Http\Controllers\Showroom\PublicBikeController;
 use App\Http\Controllers\Showroom\SettingController;
 use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
@@ -106,8 +108,14 @@ Route::middleware('auth')->group(function () {
 // Public Showroom Storefront Route (Tenant-resolved via EnsureTenantContext)
 Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::get('/', function (Showroom $showroom) {
+        $showroom->load(['featuredBikes.images']);
+
         return view('showrooms.public', compact('showroom'));
     })->name('showrooms.show');
+
+    // Public Motorcycle Catalog
+    Route::get('/bikes', [PublicBikeController::class, 'index'])->name('showrooms.bikes.index');
+    Route::get('/bikes/{bike}', [PublicBikeController::class, 'show'])->name('showrooms.bikes.show');
 
     // Showroom Billing & Subscription Hub
     Route::middleware(['auth', 'tenant.member'])->group(function () {
@@ -118,6 +126,16 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     // Authenticated Showroom Back-Office (Tenant isolation + Active Subscription check)
     Route::middleware(['auth', 'tenant.member', 'subscription.active'])->group(function () {
         Route::get('/manage', [App\Http\Controllers\Showroom\DashboardController::class, 'index'])->name('showrooms.manage');
+
+        // Motorcycle Inventory Management
+        Route::get('/manage/bikes', [BikeController::class, 'index'])->name('showrooms.manage.bikes.index');
+        Route::get('/manage/bikes/create', [BikeController::class, 'create'])->name('showrooms.manage.bikes.create');
+        Route::post('/manage/bikes', [BikeController::class, 'store'])->name('showrooms.manage.bikes.store');
+        Route::get('/manage/bikes/{bike}/edit', [BikeController::class, 'edit'])->name('showrooms.manage.bikes.edit');
+        Route::put('/manage/bikes/{bike}', [BikeController::class, 'update'])->name('showrooms.manage.bikes.update');
+        Route::delete('/manage/bikes/{bike}', [BikeController::class, 'destroy'])->name('showrooms.manage.bikes.destroy');
+        Route::post('/manage/bikes/{bike}/toggle-featured', [BikeController::class, 'toggleFeatured'])->name('showrooms.manage.bikes.toggle-featured');
+        Route::post('/manage/bikes/{bike}/toggle-published', [BikeController::class, 'togglePublished'])->name('showrooms.manage.bikes.toggle-published');
 
         // Website Builder & Storefront Customizer
         Route::get('/manage/website', [WebsiteBuilderController::class, 'edit'])->name('showrooms.manage.website');

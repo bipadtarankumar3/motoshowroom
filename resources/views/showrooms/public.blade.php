@@ -31,6 +31,7 @@
             </div>
 
             <div class="flex items-center gap-4 text-sm font-medium">
+                <a href="{{ route('showrooms.bikes.index', $showroom) }}" class="text-slate-300 hover:text-white transition">Inventory</a>
                 <a href="#about" class="text-slate-300 hover:text-white transition">About</a>
                 <a href="#hours" class="text-slate-300 hover:text-white transition">Hours</a>
                 <a href="#contact" class="text-slate-300 hover:text-white transition">Contact</a>
@@ -75,6 +76,12 @@
             </p>
 
             <div class="pt-4 flex flex-wrap justify-center gap-4">
+                <a href="{{ route('showrooms.bikes.index', $showroom) }}"
+                   class="px-6 py-3.5 rounded-xl bg-brand-primary text-white font-bold text-sm shadow-xl shadow-brand-primary/30 transition hover:brightness-110 flex items-center gap-2" id="btn-browse-inventory">
+                    <span>Explore Motorcycles</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+
                 @if($showroom->getSetting('whatsapp_number'))
                     <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $showroom->getSetting('whatsapp_number')) }}" target="_blank"
                        class="px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-xl shadow-emerald-600/30 transition flex items-center gap-2">
@@ -89,6 +96,73 @@
             </div>
         </div>
     </section>
+
+    <!-- Featured Motorcycles Section -->
+    @php
+        $displayBikes = $showroom->featuredBikes->isNotEmpty()
+            ? $showroom->featuredBikes->take(6)
+            : $showroom->publishedBikes->take(6);
+    @endphp
+    @if($displayBikes->isNotEmpty())
+        <section class="py-20 bg-slate-950 border-t border-slate-900">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-brand-primary">Premier Lineup</span>
+                        <h2 class="text-3xl sm:text-4xl font-black font-display text-white mt-1">Featured Motorcycles</h2>
+                        <p class="text-sm text-slate-400 mt-1">Hand-picked performance and touring machines available at our showroom.</p>
+                    </div>
+
+                    <a href="{{ route('showrooms.bikes.index', $showroom) }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 hover:text-white transition group self-start md:self-auto">
+                        <span>View All Inventory</span>
+                        <svg class="w-4 h-4 text-brand-primary group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    @foreach($displayBikes as $fBike)
+                        <div class="glass-panel-dark rounded-3xl border border-slate-800 hover:border-brand-primary/50 overflow-hidden flex flex-col transition-all duration-300 group hover:shadow-2xl hover:shadow-brand-primary/10">
+                            <div class="aspect-[16/10] overflow-hidden bg-slate-900 relative">
+                                <img src="{{ $fBike->primary_image_url }}" alt="{{ $fBike->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute top-3 inset-x-3 flex items-center justify-between">
+                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider {{ $fBike->category->badgeClasses() }} backdrop-blur-md">
+                                        {{ $fBike->category->label() }}
+                                    </span>
+                                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-semibold {{ $fBike->status->badgeClasses() }} backdrop-blur-md">
+                                        {{ $fBike->status->label() }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="p-6 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">{{ $fBike->brand }} • {{ $fBike->model_year }}</span>
+                                    <h3 class="font-display font-bold text-lg text-white group-hover:text-brand-primary transition mt-1 leading-snug">
+                                        <a href="{{ route('showrooms.bikes.show', [$showroom, $fBike]) }}">
+                                            {{ $fBike->name }}
+                                        </a>
+                                    </h3>
+                                </div>
+
+                                <div class="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between">
+                                    <div>
+                                        <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">Price</span>
+                                        <span class="font-mono font-black text-lg text-white">{{ $fBike->formatted_price }}</span>
+                                    </div>
+
+                                    <a href="{{ route('showrooms.bikes.show', [$showroom, $fBike]) }}"
+                                       class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-brand-primary text-slate-200 hover:text-white font-bold text-xs transition border border-slate-800 flex items-center gap-1.5 shadow">
+                                        <span>Details</span>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 
     <!-- About & Operating Schedule Section -->
     <section id="about" class="py-20 bg-slate-950 border-t border-slate-900">

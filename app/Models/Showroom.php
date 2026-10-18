@@ -91,6 +91,32 @@ class Showroom extends Model
     }
 
     /**
+     * All motorcycle inventory belonging to this showroom.
+     */
+    public function bikes(): HasMany
+    {
+        return $this->hasMany(Bike::class, 'tenant_id');
+    }
+
+    /**
+     * Published motorcycles visible to public customers.
+     */
+    public function publishedBikes(): HasMany
+    {
+        return $this->hasMany(Bike::class, 'tenant_id')->where('is_published', true);
+    }
+
+    /**
+     * Featured motorcycles highlighted on showroom showcase.
+     */
+    public function featuredBikes(): HasMany
+    {
+        return $this->hasMany(Bike::class, 'tenant_id')
+            ->where('is_published', true)
+            ->where('is_featured', true);
+    }
+
+    /**
      * Check if the showroom is active.
      */
     public function isActive(): bool

@@ -17,7 +17,7 @@ class DashboardController extends Controller
         $showroom->load(['subscription.plan', 'memberships.user']);
 
         $metrics = [
-            'bikes_count' => 0,
+            'bikes_count' => $showroom->bikes()->count(),
             'active_enquiries' => 0,
             'today_services' => 0,
             'open_jobs' => 0,

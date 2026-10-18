@@ -41,6 +41,12 @@
 
                     <!-- Quick Action Buttons -->
                     <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('showrooms.manage.bikes.index', $showroom) }}"
+                           class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition flex items-center gap-2" id="btn-bikes">
+                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            <span>Motorcycles</span>
+                        </a>
+
                         <a href="{{ route('showrooms.manage.website', $showroom) }}"
                            class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs shadow-lg shadow-rose-600/30 transition flex items-center gap-2" id="btn-customizer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -58,11 +64,14 @@
 
             <!-- Operational Metrics Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow">
-                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Inventory</span>
-                    <p class="text-2xl font-black font-display text-white mt-1">{{ $metrics['bikes_count'] ?? 0 }}</p>
-                    <span class="text-[10px] text-slate-500">Motorcycles in stock</span>
-                </div>
+                <a href="{{ route('showrooms.manage.bikes.index', $showroom) }}" class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow hover:border-rose-500/50 transition group block">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Inventory</span>
+                        <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                    <p class="text-2xl font-black font-display text-white mt-1 group-hover:text-rose-400 transition">{{ $metrics['bikes_count'] ?? 0 }}</p>
+                    <span class="text-[10px] text-slate-500">Motorcycles listed</span>
+                </a>
 
                 <div class="glass-panel-dark rounded-2xl p-4 border border-slate-800 shadow">
                     <span class="text-[10px] uppercase font-bold text-sky-400 tracking-wider">Enquiries</span>

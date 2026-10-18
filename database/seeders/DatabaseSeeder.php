@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Enums\BikeCategory;
+use App\Enums\BikeStatus;
+use App\Models\Bike;
 use App\Models\Showroom;
 use App\Models\ShowroomMembership;
 use App\Models\SubscriptionPlan;
@@ -192,5 +195,147 @@ class DatabaseSeeder extends Seeder
         $subscriptionService = app(SubscriptionService::class);
         $subscriptionService->subscribe($showroomA, $proPlan, 'monthly', $admin->id);
         $subscriptionService->subscribe($showroomB, $starterPlan, 'annual', $admin->id);
+
+        // 9. Seed Inventory for Showroom A (Apex Moto Hub)
+        $r1m = Bike::updateOrCreate(
+            ['tenant_id' => $showroomA->id, 'slug' => 'yamaha-yzf-r1m-carbon'],
+            [
+                'name' => 'Yamaha YZF-R1M Carbon Edition',
+                'sku' => 'APEX-YAM-R1M',
+                'brand' => 'Yamaha',
+                'model_year' => 2025,
+                'category' => BikeCategory::Sports->value,
+                'engine_cc' => 998,
+                'power_bhp' => 197.30,
+                'torque_nm' => 113.30,
+                'fuel_type' => 'petrol',
+                'transmission' => '6-speed with Quick Shift System (QSS)',
+                'mileage_kmpl' => 14.50,
+                'top_speed_kmh' => 299,
+                'curb_weight_kg' => 202,
+                'price' => 2850000.00,
+                'is_featured' => true,
+                'is_published' => true,
+                'status' => BikeStatus::InStock->value,
+                'description' => 'The YZF-R1M is Yamaha’s ultimate production superbike. Featuring Öhlins Electronic Racing Suspension (ERS), lightweight carbon fiber bodywork, and MotoGP-derived electronics package.',
+                'specifications' => [
+                    'Suspension' => 'Öhlins Electronic Racing Suspension (ERS) NPX gas-charged front fork',
+                    'Brakes' => 'Dual 320mm discs with 4-piston radial monobloc calipers',
+                    'ABS' => 'Lean-sensitive Brake Control (BC) system',
+                    'Fuel Tank' => '17 Litres polished aluminium',
+                ],
+            ]
+        );
+
+        $r1m->images()->delete();
+        $r1m->images()->create([
+            'tenant_id' => $showroomA->id,
+            'image_url' => 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1200&q=80',
+            'alt_text' => 'Yamaha YZF-R1M Track Stance',
+            'is_primary' => true,
+            'sort_order' => 0,
+        ]);
+        $r1m->images()->create([
+            'tenant_id' => $showroomA->id,
+            'image_url' => 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1200&q=80',
+            'alt_text' => 'Yamaha YZF-R1M Cockpit & Tank',
+            'is_primary' => false,
+            'sort_order' => 1,
+        ]);
+
+        $r1m->variants()->delete();
+        $r1m->variants()->create([
+            'tenant_id' => $showroomA->id,
+            'name' => 'Silver Blu Carbon',
+            'color_name' => 'Carbon Fiber / Yamaha Blue',
+            'color_hex' => '#002B7F',
+            'price_difference' => 0.00,
+            'stock_quantity' => 2,
+        ]);
+
+        $panigale = Bike::updateOrCreate(
+            ['tenant_id' => $showroomA->id, 'slug' => 'ducati-panigale-v4-s'],
+            [
+                'name' => 'Ducati Panigale V4 S',
+                'sku' => 'APEX-DUC-V4S',
+                'brand' => 'Ducati',
+                'model_year' => 2025,
+                'category' => BikeCategory::Sports->value,
+                'engine_cc' => 1103,
+                'power_bhp' => 215.50,
+                'torque_nm' => 123.60,
+                'fuel_type' => 'petrol',
+                'transmission' => '6-speed with Ducati Quick Shift (DQS) EVO 2',
+                'mileage_kmpl' => 13.00,
+                'top_speed_kmh' => 299,
+                'curb_weight_kg' => 195,
+                'price' => 3350000.00,
+                'is_featured' => true,
+                'is_published' => true,
+                'status' => BikeStatus::InStock->value,
+                'description' => 'The Panigale V4 represents the last step in the characteristic path of Borgo Panigale sports bikes. Desmosedici Stradale 90-degree V4 engine with counter-rotating crankshaft.',
+                'specifications' => [
+                    'Suspension' => 'Öhlins Smart EC 2.0 electronic suspension',
+                    'Wheels' => 'Forged aluminum 3-spoke Marchesini wheels',
+                    'Brakes' => 'Brembo Monobloc Stylema calipers',
+                ],
+            ]
+        );
+
+        $panigale->images()->delete();
+        $panigale->images()->create([
+            'tenant_id' => $showroomA->id,
+            'image_url' => 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?auto=format&fit=crop&w=1200&q=80',
+            'alt_text' => 'Ducati Panigale V4 S Ducati Red',
+            'is_primary' => true,
+            'sort_order' => 0,
+        ]);
+
+        $panigale->variants()->delete();
+        $panigale->variants()->create([
+            'tenant_id' => $showroomA->id,
+            'name' => 'Ducati Red',
+            'color_name' => 'Rosso Corsa Red',
+            'color_hex' => '#CC0000',
+            'price_difference' => 0.00,
+            'stock_quantity' => 1,
+        ]);
+
+        $tiger = Bike::updateOrCreate(
+            ['tenant_id' => $showroomA->id, 'slug' => 'triumph-tiger-900-rally-pro'],
+            [
+                'name' => 'Triumph Tiger 900 Rally Pro',
+                'sku' => 'APEX-TRI-T900',
+                'brand' => 'Triumph',
+                'model_year' => 2024,
+                'category' => BikeCategory::Adventure->value,
+                'engine_cc' => 888,
+                'power_bhp' => 106.50,
+                'torque_nm' => 90.00,
+                'fuel_type' => 'petrol',
+                'transmission' => '6-speed manual with slip and assist clutch',
+                'mileage_kmpl' => 21.00,
+                'top_speed_kmh' => 200,
+                'curb_weight_kg' => 228,
+                'price' => 1595000.00,
+                'is_featured' => false,
+                'is_published' => true,
+                'status' => BikeStatus::InStock->value,
+                'description' => 'The ultimate all-road, all-terrain adventure motorcycle. Triple-cylinder power with T-plane crank for supreme low-down grunt.',
+                'specifications' => [
+                    'Suspension' => 'Showa 45mm manual USD forks with 240mm travel',
+                    'Front Wheel' => '21-inch tubeless spoked wheel',
+                ],
+            ]
+        );
+
+        $tiger->images()->delete();
+        $tiger->images()->create([
+            'tenant_id' => $showroomA->id,
+            'image_url' => 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1200&q=80',
+            'alt_text' => 'Triumph Tiger 900 Rally Pro Khaki Green',
+            'is_primary' => true,
+            'sort_order' => 0,
+        ]);
     }
 }
