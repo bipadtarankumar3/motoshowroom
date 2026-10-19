@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
+use App\Models\User;
 use App\Services\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -19,12 +20,37 @@ class Phase1FoundationTest extends TestCase
      */
     public function test_welcome_page_renders_with_motoshowroom_branding(): void
     {
-        $response = $this->get('/');
+        $response = $this->get('/landing');
 
         $response->assertStatus(200);
         $response->assertSeeText('MOTOSHOWROOM');
         $response->assertSee('Multi-Tenant Architecture');
         $response->assertSee('Razorpay');
+    }
+
+    /**
+     * Test that guests visiting the root URL see the sign-in page with the showroom carousel.
+     */
+    public function test_root_url_shows_login_page_for_guests(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('form-login', false);
+        $response->assertSee('Welcome back');
+        $response->assertSee('Live Showroom Tour');
+    }
+
+    /**
+     * Test that authenticated users visiting the root URL are redirected to their console.
+     */
+    public function test_root_url_redirects_authenticated_users_to_their_console(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $customer = User::factory()->create(['role' => 'user', 'status' => 'active']);
+
+        $this->actingAs($admin)->get('/')->assertRedirect(route('admin.dashboard'));
+        $this->actingAs($customer)->get('/')->assertRedirect(route('users.show', $customer));
     }
 
     /**

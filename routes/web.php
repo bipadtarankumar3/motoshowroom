@@ -37,6 +37,7 @@ use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\UserController;
 use App\Models\Showroom;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,10 +46,30 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Public SaaS Landing Page
+// Root: guests see the sign-in page, authenticated users go to their console
 Route::get('/', function () {
-    return view('welcome');
+    $user = Auth::user();
+
+    if (! $user) {
+        return view('auth.login');
+    }
+
+    if ($user->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    $showroom = $user->showrooms()->first();
+    if ($showroom) {
+        return redirect()->route('showrooms.manage', $showroom);
+    }
+
+    return redirect()->route('users.show', $user);
 })->name('home');
+
+// Public SaaS Marketing Landing Page
+Route::get('/landing', function () {
+    return view('welcome');
+})->name('landing');
 
 // Guest Authentication Routes
 Route::middleware('guest')->group(function () {
