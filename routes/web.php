@@ -20,6 +20,7 @@ use App\Http\Controllers\Showroom\CareerManagementController;
 use App\Http\Controllers\Showroom\CategoryManagementController;
 use App\Http\Controllers\Showroom\EmailPreviewController;
 use App\Http\Controllers\Showroom\EnquiryController;
+use App\Http\Controllers\Showroom\OnboardingController;
 use App\Http\Controllers\Showroom\PaymentCheckoutController;
 use App\Http\Controllers\Showroom\PaymentHistoryController;
 use App\Http\Controllers\Showroom\PublicAiAssistantController;
@@ -233,6 +234,7 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     // Authenticated Showroom Back-Office (Tenant isolation + Active Subscription check)
     Route::middleware(['auth', 'tenant.member', 'subscription.active'])->group(function () {
         Route::get('/manage', [App\Http\Controllers\Showroom\DashboardController::class, 'index'])->name('showrooms.manage');
+        Route::post('/onboarding', [OnboardingController::class, 'save'])->name('showrooms.onboarding.save');
 
         // Financial Ledger & Payment Transactions
         Route::get('/manage/payments', [PaymentHistoryController::class, 'index'])->name('showrooms.manage.payments.index');

@@ -41,6 +41,13 @@
 
                     <!-- Quick Action Buttons -->
                     <div class="flex flex-wrap items-center gap-3">
+                        <button type="button"
+                                @click="$dispatch('open-onboarding-modal')"
+                                class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer active:scale-95" id="btn-edit-profile-showroom">
+                            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            <span>Edit Profile & Showroom</span>
+                        </button>
+
                         <a href="{{ route('showrooms.manage.bikes.index', $showroom) }}"
                            class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold transition flex items-center gap-2 shadow-2xs" id="btn-bikes">
                             <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
@@ -253,5 +260,6 @@
 
         </div>
     </div>
+    @include('showrooms.partials.onboarding-modal')
     @include('showrooms.partials.manage-nav-close')
 </x-app-layout>

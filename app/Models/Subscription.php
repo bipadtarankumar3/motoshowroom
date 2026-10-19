@@ -116,6 +116,7 @@ class Subscription extends Model
 
     /**
      * Evaluate if a specific feature flag is granted under this active subscription.
+     * During the trial period, full VIP platform capabilities are unlocked.
      */
     public function canAccessFeature(string $featureKey): bool
     {
@@ -123,16 +124,27 @@ class Subscription extends Model
             return false;
         }
 
+        // Trial users get full platform access to test all premium features
+        if ($this->isTrial()) {
+            return true;
+        }
+
         return (bool) ($this->plan->$featureKey ?? false);
     }
 
     /**
      * Evaluate if a quantitative limit has been reached or exceeded.
+     * During trial, generous testing headroom is provided.
      */
     public function hasReachedLimit(string $limitKey, int $currentCount): bool
     {
         if (! $this->isActive()) {
             return true;
+        }
+
+        // Unlimited testing in trial period
+        if ($this->isTrial()) {
+            return false;
         }
 
         $limit = $this->plan->$limitKey ?? null;

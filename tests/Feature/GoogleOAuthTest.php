@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Contracts\Provider;
@@ -39,6 +40,19 @@ class GoogleOAuthTest extends TestCase
 
         Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
+        SubscriptionPlan::firstOrCreate(
+            ['slug' => 'starter'],
+            [
+                'name' => 'Starter Dealership',
+                'description' => 'Starter plan',
+                'monthly_price' => 999.00,
+                'annual_price' => 9990.00,
+                'currency' => 'INR',
+                'trial_days' => 14,
+                'is_active' => true,
+            ]
+        );
+
         $response = $this->get(route('auth.google.callback'));
 
         $user = User::where('email', 'aarav.google@example.com')->first();
@@ -53,6 +67,12 @@ class GoogleOAuthTest extends TestCase
             'provider_id' => 'google_unique_id_999',
         ]);
 
-        $response->assertRedirect(route('profile'));
+        $showroom = $user->showrooms()->first();
+        $this->assertNotNull($showroom);
+        $this->assertSame('Aarav Google Motors', $showroom->name);
+        $this->assertNotNull($showroom->subscription);
+        $this->assertTrue($showroom->subscription->isTrial());
+
+        $response->assertRedirect(route('showrooms.manage', $showroom));
     }
 }

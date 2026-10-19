@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Showroom;
+use App\Models\ShowroomMembership;
 use App\Models\SocialAccount;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
+use App\Services\SubscriptionService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -60,8 +64,10 @@ class SocialAuthController extends Controller
 
         // 2. Check if a user with this email already exists
         $user = User::where('email', $googleUser->getEmail())->first();
+        $isNewUser = false;
 
         if (! $user) {
+            $isNewUser = true;
             // Register new user: strictly assign role 'user' (never admin)
             $user = User::create([
                 'name' => $googleUser->getName() ?: 'Google User',
@@ -71,6 +77,7 @@ class SocialAuthController extends Controller
                 'status' => 'active',
                 'avatar_url' => $googleUser->getAvatar(),
                 'email_verified_at' => now(),
+                'onboarding_completed_at' => null, // Explicitly trigger modern onboarding modal
             ]);
         }
 
@@ -87,11 +94,58 @@ class SocialAuthController extends Controller
         Auth::login($user);
         request()->session()->regenerate();
 
+        // 4. Ensure new user has an initial Showroom Dealership and 14-day evaluation trial
         $showroom = $user->showrooms()->first();
-        if ($showroom) {
-            return redirect()->intended(route('showrooms.manage', $showroom))->with('success', 'Account linked and signed in with Google successfully!');
+
+        if (! $showroom) {
+            $baseName = $user->name ? trim($user->name) : 'Dealer';
+            $showroomName = $baseName.' Motors';
+            $baseSlug = Str::slug($showroomName);
+            $slug = $baseSlug;
+            $counter = 1;
+            while (Showroom::where('slug', $slug)->exists()) {
+                $slug = $baseSlug.'-'.$counter++;
+            }
+
+            $showroom = Showroom::create([
+                'name' => $showroomName,
+                'slug' => $slug,
+                'email' => $user->email,
+                'phone' => '+91 98000 00000',
+                'address_line1' => 'Showroom Address to be configured',
+                'city' => 'Bangalore',
+                'state' => 'Karnataka',
+                'postal_code' => '560001',
+                'country' => 'India',
+                'brand_color_primary' => '#DC2626',
+                'brand_color_accent' => '#0F172A',
+                'status' => 'trial',
+                'public_website_enabled' => true,
+                'settings' => [
+                    'tagline' => 'Premium Multi-Brand Motorcycle Showroom',
+                    'about_text' => 'Welcome to '.$showroomName.'. Authorized dealer for premium motorcycles and riding accessories.',
+                ],
+            ]);
+
+            ShowroomMembership::create([
+                'showroom_id' => $showroom->id,
+                'user_id' => $user->id,
+                'role' => 'owner',
+                'status' => 'active',
+            ]);
+
+            // Provision initial 14-Day evaluation trial
+            $defaultPlan = SubscriptionPlan::first();
+            if ($defaultPlan) {
+                app(SubscriptionService::class)->startTrial($showroom, $defaultPlan);
+            }
         }
 
-        return redirect()->intended(route('profile'))->with('success', 'Account linked and signed in with Google successfully!');
+        if ($user->isAdmin()) {
+            return redirect()->intended(route('admin.dashboard'))->with('success', "Signed in with Google as {$user->name}.");
+        }
+
+        return redirect()->route('showrooms.manage', $showroom)
+            ->with('success', 'Signed in with Google successfully! Welcome to your showroom dashboard.');
     }
 }

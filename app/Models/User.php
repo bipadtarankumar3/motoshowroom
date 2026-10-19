@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role',
         'phone',
         'status',
+        'onboarding_completed_at',
         'bio',
         'address',
         'city',
@@ -51,6 +52,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'onboarding_completed_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
