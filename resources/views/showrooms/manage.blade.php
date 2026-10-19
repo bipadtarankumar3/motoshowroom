@@ -100,14 +100,14 @@
                 <!-- 2. Enquiries & Leads -->
                 <a href="{{ route('showrooms.manage.enquiries.index', $showroom) }}" class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs hover:border-sky-400 hover:shadow-xs transition group block">
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] uppercase font-bold text-sky-600 tracking-wider">Customer Leads</span>
+                        <span class="text-[10px] uppercase font-bold text-sky-600 tracking-wider">Enquiries</span>
                         <div class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                         </div>
                     </div>
                     <p class="text-2xl sm:text-3xl font-black font-display text-sky-600 mt-2">{{ $metrics['active_enquiries'] }}</p>
                     <div class="flex items-center justify-between mt-1 text-[11px] text-slate-500">
-                        <span>{{ $metrics['total_enquiries'] }} Total Received</span>
+                        <span>Active leads & test rides</span>
                         <span class="text-sky-700 font-bold">Pipeline</span>
                     </div>
                 </a>
