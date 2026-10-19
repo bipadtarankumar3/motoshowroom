@@ -177,6 +177,8 @@
                         'show_trust_pillars' => true,
                         'show_testimonials' => true,
                         'show_about' => true,
+                        'show_stats' => true,
+                        'show_news' => true,
                         'categories_title' => 'Browse By Category',
                         'featured_bikes_title' => 'Premier Showcase',
                         'featured_bikes_count' => 6,
@@ -301,7 +303,7 @@
                         </div>
 
                         <!-- 8. About & Showroom Hours -->
-                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between md:col-span-2">
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
                             <div>
                                 <span class="font-bold text-xs text-slate-900 block">About Dealership Story & Hours Matrix</span>
                                 <span class="text-[11px] text-slate-500">Showcases dealership narrative, location map, and operating hours.</span>
@@ -311,8 +313,32 @@
                                 <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
                             </label>
                         </div>
+
+                        <!-- 9. Dealership Achievements / Stats Strip -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-xs text-slate-900 block">Dealership Stats & Milestones</span>
+                                <span class="text-[11px] text-slate-500">Highlights happy customers, bike models, experience, and awards.</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" x-model="sections.show_stats" class="sr-only peer">
+                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- 10. Moto Journalism & Latest News -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between md:col-span-2">
+                            <div>
+                                <span class="font-bold text-xs text-slate-900 block">Moto Journalism & Latest News</span>
+                                <span class="text-[11px] text-slate-500">Display buyer's guides, safety standards, and road trip maintenance tips.</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" x-model="sections.show_news" class="sr-only peer">
+                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
                     </div>
-                </div>v>
+                </div>
 
                 <!-- Section 2: About Our Showroom Story -->
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6">

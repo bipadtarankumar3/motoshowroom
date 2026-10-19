@@ -151,7 +151,8 @@
         @php
             $primaryColor = $showroom->brand_color_primary ?? '#dc2626';
             $accentColor = $showroom->brand_color_accent ?? '#f97316';
-            $homepageSections = $showroom->settings['homepage_sections'] ?? [
+            $rawSections = $showroom->settings['homepage_sections'] ?? [];
+            $defaultHomepageSections = [
                 'show_hero' => true,
                 'show_categories' => true,
                 'show_featured_bikes' => true,
@@ -160,10 +161,17 @@
                 'show_trust_pillars' => true,
                 'show_testimonials' => true,
                 'show_about' => true,
-                'featured_title' => 'Featured Motorcycles',
-                'featured_limit' => 8,
+                'show_stats' => true,
+                'show_news' => true,
+                'featured_bikes_title' => 'Premier Showcase',
+                'featured_bikes_count' => 8,
                 'categories_title' => 'Browse By Category',
+                'promo_title' => 'Book a Test Ride Today',
+                'promo_subtitle' => 'Feel the surge of genuine racing power. Experience your dream motorcycle on an open track or street loop.',
+                'promo_cta_text' => 'Reserve Test Ride',
+                'promo_cta_url' => route('showrooms.enquiries.create', $showroom),
             ];
+            $homepageSections = array_merge($defaultHomepageSections, is_array($rawSections) ? $rawSections : []);
 
             // 1. Resolve Banners from Database (Active Banners first)
             $dbBanners = $showroom->activeBanners;
@@ -504,7 +512,8 @@
              ══════════════════════════════════════════════════════════════════ --}}
         @if($homepageSections['show_featured_bikes'] ?? true)
             @php
-                $featuredLimit = (int) ($homepageSections['featured_limit'] ?? 8);
+                $featuredLimit = (int) ($homepageSections['featured_bikes_count'] ?? ($homepageSections['featured_limit'] ?? 8));
+                $featuredHeading = $homepageSections['featured_bikes_title'] ?? ($homepageSections['featured_title'] ?? 'Premier Showcase');
                 $displayBikes = ($showroom->publishedBikes->isNotEmpty()
                     ? $showroom->publishedBikes
                     : $showroom->bikes)->take($featuredLimit);
@@ -520,7 +529,7 @@
                                 Premier Showcase
                             </span>
                             <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-1">
-                                {{ $homepageSections['featured_title'] ?? 'Featured Motorcycles' }}
+                                {{ $featuredHeading }}
                             </h2>
                             <p class="text-sm text-slate-500 mt-1">Hand-picked performance machines with guaranteed pricing &amp; instant purchase reservation.</p>
                         </div>
@@ -683,20 +692,20 @@
                                     Limited Time Offer
                                 </span>
                                 <h2 class="text-4xl sm:text-5xl font-black text-white leading-tight">
-                                    Get <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(135deg, {{ $accentColor }}, #fbbf24);">Exciting</span> Offers
+                                    {{ $homepageSections['promo_title'] ?? 'Book a Test Ride Today' }}
                                 </h2>
                                 <p class="text-slate-300 text-base leading-relaxed max-w-lg">
-                                    Up to ₹15,000 instant discount on selected motorcycles, digital scratch card rewards, and zero processing fee on approved financing this festive season.
+                                    {{ $homepageSections['promo_subtitle'] ?? 'Feel the surge of genuine racing power. Experience your dream motorcycle on an open track or street loop.' }}
                                 </p>
                                 <div class="flex flex-wrap gap-4 pt-2">
-                                    <a href="{{ route('showrooms.bikes.index', $showroom) }}"
+                                    <a href="{{ $homepageSections['promo_cta_url'] ?? route('showrooms.enquiries.create', $showroom) }}"
                                        class="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-black text-sm uppercase tracking-wider hover:brightness-110 transition shadow-lg"
                                        style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $accentColor }});">
-                                        View Offers →
+                                        {{ $homepageSections['promo_cta_text'] ?? 'Reserve Test Ride' }} →
                                     </a>
-                                    <a href="{{ route('showrooms.services.create', $showroom) }}"
+                                    <a href="{{ route('showrooms.bikes.index', $showroom) }}"
                                        class="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/20 bg-white/10 text-white font-bold text-sm hover:bg-white/20 transition-all">
-                                        Claim Service Voucher
+                                        Browse Motorcycles
                                     </a>
                                 </div>
                             </div>
@@ -728,26 +737,28 @@
         {{-- ══════════════════════════════════════════════════════════════════
              § 5. STATS STRIP
              ══════════════════════════════════════════════════════════════════ --}}
-        <section class="py-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-y border-slate-700">
-            <div class="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-14 xl:px-20">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                    @foreach([
-                        ['num'=>'10,000+','label'=>'Happy Customers','icon'=>'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z','color'=>'rose'],
-                        ['num'=>'50+',    'label'=>'Bike Models',     'icon'=>'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10','color'=>'orange'],
-                        ['num'=>'5+',     'label'=>'Years Experience','icon'=>'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4','color'=>'cyan'],
-                        ['num'=>'15+',    'label'=>'Awards & Recognition','icon'=>'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z','color'=>'amber'],
-                    ] as $stat)
-                        <div class="stat-card will-reveal text-center p-6 rounded-2xl bg-white/5 border border-white/10">
-                            <div class="w-12 h-12 rounded-xl bg-white/10 mx-auto flex items-center justify-center mb-4">
-                                <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $stat['icon'] }}"/></svg>
+        @if($homepageSections['show_stats'] ?? true)
+            <section class="py-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-y border-slate-700">
+                <div class="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-14 xl:px-20">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                        @foreach([
+                            ['num'=>'10,000+','label'=>'Happy Customers','icon'=>'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z','color'=>'rose'],
+                            ['num'=>'50+',    'label'=>'Bike Models',     'icon'=>'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10','color'=>'orange'],
+                            ['num'=>'5+',     'label'=>'Years Experience','icon'=>'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4','color'=>'cyan'],
+                            ['num'=>'15+',    'label'=>'Awards & Recognition','icon'=>'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z','color'=>'amber'],
+                        ] as $stat)
+                            <div class="stat-card will-reveal text-center p-6 rounded-2xl bg-white/5 border border-white/10">
+                                <div class="w-12 h-12 rounded-xl bg-white/10 mx-auto flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $stat['icon'] }}"/></svg>
+                                </div>
+                                <p class="text-3xl font-black text-white font-mono">{{ $stat['num'] }}</p>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">{{ $stat['label'] }}</p>
                             </div>
-                            <p class="text-3xl font-black text-white font-mono">{{ $stat['num'] }}</p>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">{{ $stat['label'] }}</p>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        @endif
 
         {{-- ══════════════════════════════════════════════════════════════════
              § 6. DUAL LIFESTYLE CARDS (Accessories + Finance)
@@ -866,38 +877,40 @@
         {{-- ══════════════════════════════════════════════════════════════════
              § 9. LATEST NEWS & GUIDES
              ══════════════════════════════════════════════════════════════════ --}}
-        <section class="py-20 bg-slate-50 border-t border-slate-100">
-            <div class="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-14 xl:px-20">
-                <div class="flex items-end justify-between mb-12">
-                    <div class="will-reveal">
-                        <span class="text-[11px] font-black uppercase tracking-[.18em]" style="color: {{ $primaryColor }};">Moto Journalism</span>
-                        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-1">Latest News & Updates</h2>
+        @if($homepageSections['show_news'] ?? true)
+            <section class="py-20 bg-slate-50 border-t border-slate-100">
+                <div class="w-full max-w-[1800px] mx-auto px-4 sm:px-8 lg:px-14 xl:px-20">
+                    <div class="flex items-end justify-between mb-12">
+                        <div class="will-reveal">
+                            <span class="text-[11px] font-black uppercase tracking-[.18em]" style="color: {{ $primaryColor }};">Moto Journalism</span>
+                            <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-1">Latest News & Updates</h2>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        @foreach([
+                            ['img'=>'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=600&q=80','tag'=>"Buyer's Guide","date"=>'Oct 2026','title'=>'Top 5 Superbikes to Buy in 2026 for Track and Street Riding','desc'=>'Power delivery, lean-angle electronics, and maintenance costs compared across flagships.'],
+                            ['img'=>'https://images.unsplash.com/photo-1558981359-219d6364c9c8?auto=format&fit=crop&w=600&q=80','tag'=>'Safety Standards','date'=>'Oct 2026','title'=>'Choosing the Right ECE 22.06 Helmet and Carbon Fiber Gear','desc'=>'Visor clarity, EPS foam density, ventilation channels, and emergency cheek pad removal.'],
+                            ['img'=>'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=600&q=80','tag'=>'Touring Handbook','date'=>'Oct 2026','title'=>'Pre-Touring Checklist: Chain Slack, Coolant, and Tire Care','desc'=>'Inspect tread depth, brake pads, and suspension preload before cross-country road trips.'],
+                        ] as $idx => $news)
+                            <div class="will-reveal delay-{{ $idx + 1 }} bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm group hover:shadow-xl transition-shadow duration-300">
+                                <div class="aspect-[16/10] overflow-hidden bg-slate-100">
+                                    <img src="{{ $news['img'] }}" alt="{{ $news['title'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-black uppercase tracking-wider" style="color: {{ $primaryColor }};">{{ $news['tag'] }}</span>
+                                        <span class="text-slate-300">•</span>
+                                        <span class="text-[10px] text-slate-400 font-bold">{{ $news['date'] }}</span>
+                                    </div>
+                                    <h4 class="font-black text-base text-slate-900 transition-colors leading-snug">{{ $news['title'] }}</h4>
+                                    <p class="text-xs text-slate-600 leading-relaxed">{{ $news['desc'] }}</p>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @foreach([
-                        ['img'=>'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=600&q=80','tag'=>"Buyer's Guide","date"=>'Oct 2026','title'=>'Top 5 Superbikes to Buy in 2026 for Track and Street Riding','desc'=>'Power delivery, lean-angle electronics, and maintenance costs compared across flagships.'],
-                        ['img'=>'https://images.unsplash.com/photo-1558981359-219d6364c9c8?auto=format&fit=crop&w=600&q=80','tag'=>'Safety Standards','date'=>'Oct 2026','title'=>'Choosing the Right ECE 22.06 Helmet and Carbon Fiber Gear','desc'=>'Visor clarity, EPS foam density, ventilation channels, and emergency cheek pad removal.'],
-                        ['img'=>'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=600&q=80','tag'=>'Touring Handbook','date'=>'Oct 2026','title'=>'Pre-Touring Checklist: Chain Slack, Coolant, and Tire Care','desc'=>'Inspect tread depth, brake pads, and suspension preload before cross-country road trips.'],
-                    ] as $idx => $news)
-                        <div class="will-reveal delay-{{ $idx + 1 }} bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm group hover:shadow-xl transition-shadow duration-300">
-                            <div class="aspect-[16/10] overflow-hidden bg-slate-100">
-                                <img src="{{ $news['img'] }}" alt="{{ $news['title'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
-                            </div>
-                            <div class="p-6 space-y-3">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-black uppercase tracking-wider" style="color: {{ $primaryColor }};">{{ $news['tag'] }}</span>
-                                    <span class="text-slate-300">•</span>
-                                    <span class="text-[10px] text-slate-400 font-bold">{{ $news['date'] }}</span>
-                                </div>
-                                <h4 class="font-black text-base text-slate-900 transition-colors leading-snug">{{ $news['title'] }}</h4>
-                                <p class="text-xs text-slate-600 leading-relaxed">{{ $news['desc'] }}</p>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
+            </section>
+        @endif
 
         {{-- ══════════════════════════════════════════════════════════════════
              § 10. ABOUT + OPERATING HOURS
