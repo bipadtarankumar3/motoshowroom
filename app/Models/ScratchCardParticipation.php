@@ -25,6 +25,8 @@ class ScratchCardParticipation extends Model
         'prize_id',
         'user_id',
         'service_booking_id',
+        'enquiry_id',
+        'booking_type',
         'customer_name',
         'customer_email',
         'customer_phone',
@@ -110,6 +112,14 @@ class ScratchCardParticipation extends Model
     public function serviceBooking(): BelongsTo
     {
         return $this->belongsTo(ServiceBooking::class);
+    }
+
+    /**
+     * Associated bike enquiry/test-ride booking if issued on bike booking.
+     */
+    public function enquiry(): BelongsTo
+    {
+        return $this->belongsTo(Enquiry::class);
     }
 
     /**

@@ -29,22 +29,109 @@ class CampaignManagementController extends Controller
 
         $search = $request->query('search');
         $status = $request->query('status');
+        $preset = $request->query('preset');
+        $applicableTo = $request->query('applicable_to');
+        $dateType = $request->query('date_type', 'schedule');
+        $fromDate = $request->query('from_date');
+        $toDate = $request->query('to_date');
 
         $query = $showroom->promotionalCampaigns()
             ->withCount(['prizes', 'participations'])
+            ->with(['prizes'])
             ->search($search);
+
+        // Quick Preset Filters
+        if ($preset === 'active') {
+            $query->where('status', CampaignStatus::Active->value)
+                ->whereDate('start_date', '<=', today())
+                ->whereDate('end_date', '>=', today());
+        } elseif ($preset === 'upcoming') {
+            $query->whereDate('start_date', '>', today());
+        } elseif ($preset === 'expired') {
+            $query->where(function ($q) {
+                $q->whereDate('end_date', '<', today())
+                    ->orWhere('status', CampaignStatus::Expired->value);
+            });
+        } elseif ($preset === 'drafts') {
+            $query->where('status', CampaignStatus::Draft->value);
+        } elseif ($preset === 'service') {
+            $query->where('applicable_to', 'service');
+        } elseif ($preset === 'bike') {
+            $query->where('applicable_to', 'bike');
+        } elseif ($preset === 'today') {
+            $query->whereDate('created_at', today());
+        }
 
         if (! empty($status) && $status !== 'all') {
             $query->where('status', $status);
         }
 
+        if (! empty($applicableTo) && $applicableTo !== 'all') {
+            $query->where('applicable_to', $applicableTo);
+        }
+
+        if (! empty($fromDate)) {
+            if ($dateType === 'created') {
+                $query->whereDate('created_at', '>=', $fromDate);
+            } else {
+                $query->whereDate('start_date', '>=', $fromDate);
+            }
+        }
+
+        if (! empty($toDate)) {
+            if ($dateType === 'created') {
+                $query->whereDate('created_at', '<=', $toDate);
+            } else {
+                $query->whereDate('end_date', '<=', $toDate);
+            }
+        }
+
         $campaigns = $query->latest()->paginate(15)->withQueryString();
 
+        // 8 Key KPI Counts for Metric Cards & Filter Badges
         $totalCampaigns = $showroom->promotionalCampaigns()->count();
-        $activeCampaigns = $showroom->activePromotionalCampaigns()->count();
-        $totalParticipations = $showroom->scratchCardParticipations()->count();
-        $totalScratched = $showroom->scratchCardParticipations()->where('is_scratched', true)->count();
-        $totalRedeemed = $showroom->scratchCardParticipations()->where('is_redeemed', true)->count();
+        $activeCampaigns = $showroom->promotionalCampaigns()
+            ->where('status', CampaignStatus::Active->value)
+            ->whereDate('start_date', '<=', today())
+            ->whereDate('end_date', '>=', today())
+            ->count();
+        $upcomingCampaigns = $showroom->promotionalCampaigns()->whereDate('start_date', '>', today())->count();
+        $expiredCampaigns = $showroom->promotionalCampaigns()
+            ->where(function ($q) {
+                $q->whereDate('end_date', '<', today())
+                    ->orWhere('status', CampaignStatus::Expired->value);
+            })->count();
+        $draftCampaigns = $showroom->promotionalCampaigns()->where('status', CampaignStatus::Draft->value)->count();
+        $serviceCampaigns = $showroom->promotionalCampaigns()->where('applicable_to', 'service')->count();
+        $bikeCampaigns = $showroom->promotionalCampaigns()->where('applicable_to', 'bike')->count();
+
+        // Scratch Cards & Participations Telemetry
+        $participationsQuery = $showroom->scratchCardParticipations();
+        $totalParticipations = (clone $participationsQuery)->count();
+        $participationsToday = (clone $participationsQuery)->whereDate('created_at', today())->count();
+
+        $totalScratched = (clone $participationsQuery)->where('is_scratched', true)->count();
+        $scratchedToday = (clone $participationsQuery)->where('is_scratched', true)->whereDate('scratched_at', today())->count();
+
+        $totalRedeemed = (clone $participationsQuery)->where('is_redeemed', true)->count();
+        $redeemedToday = (clone $participationsQuery)->where('is_redeemed', true)->whereDate('redeemed_at', today())->count();
+
+        $pendingRedemption = (clone $participationsQuery)->where('is_scratched', true)->where('is_redeemed', false)->whereNotNull('coupon_code')->count();
+
+        $totalPrizeValue = (float) DB::table('scratch_card_participations')
+            ->join('campaign_prizes', 'scratch_card_participations.prize_id', '=', 'campaign_prizes.id')
+            ->where('scratch_card_participations.tenant_id', $showroom->id)
+            ->where('scratch_card_participations.is_scratched', true)
+            ->whereNull('scratch_card_participations.deleted_at')
+            ->sum('campaign_prizes.discount_amount');
+
+        $wonPrizesCount = DB::table('scratch_card_participations')
+            ->join('campaign_prizes', 'scratch_card_participations.prize_id', '=', 'campaign_prizes.id')
+            ->where('scratch_card_participations.tenant_id', $showroom->id)
+            ->where('scratch_card_participations.is_scratched', true)
+            ->where('campaign_prizes.prize_type', '!=', PrizeType::BetterLuck->value)
+            ->whereNull('scratch_card_participations.deleted_at')
+            ->count();
 
         $statuses = CampaignStatus::cases();
 
@@ -54,12 +141,28 @@ class CampaignManagementController extends Controller
             'campaigns',
             'totalCampaigns',
             'activeCampaigns',
+            'upcomingCampaigns',
+            'expiredCampaigns',
+            'draftCampaigns',
+            'serviceCampaigns',
+            'bikeCampaigns',
             'totalParticipations',
+            'participationsToday',
             'totalScratched',
+            'scratchedToday',
             'totalRedeemed',
+            'redeemedToday',
+            'pendingRedemption',
+            'totalPrizeValue',
+            'wonPrizesCount',
             'statuses',
             'search',
-            'status'
+            'status',
+            'preset',
+            'applicableTo',
+            'dateType',
+            'fromDate',
+            'toDate'
         ));
     }
 
@@ -94,6 +197,7 @@ class CampaignManagementController extends Controller
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'status' => ['required', 'string', Rule::in(array_column(CampaignStatus::cases(), 'value'))],
+            'applicable_to' => ['nullable', 'string', Rule::in(['all', 'service', 'bike'])],
             'min_booking_amount' => ['nullable', 'numeric', 'min:0'],
             'max_participations_per_customer' => ['required', 'integer', 'min:1', 'max:20'],
             'terms_and_conditions' => ['nullable', 'string', 'max:3000'],
@@ -115,6 +219,7 @@ class CampaignManagementController extends Controller
                 'start_date' => $validated['start_date'],
                 'end_date' => $validated['end_date'],
                 'status' => $validated['status'],
+                'applicable_to' => $validated['applicable_to'] ?? 'all',
                 'min_booking_amount' => $validated['min_booking_amount'] ?? 0.00,
                 'max_participations_per_customer' => $validated['max_participations_per_customer'],
                 'terms_and_conditions' => $validated['terms_and_conditions'] ?? null,
@@ -176,6 +281,7 @@ class CampaignManagementController extends Controller
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'status' => ['required', 'string', Rule::in(array_column(CampaignStatus::cases(), 'value'))],
+            'applicable_to' => ['nullable', 'string', Rule::in(['all', 'service', 'bike'])],
             'min_booking_amount' => ['nullable', 'numeric', 'min:0'],
             'max_participations_per_customer' => ['required', 'integer', 'min:1', 'max:20'],
             'terms_and_conditions' => ['nullable', 'string', 'max:3000'],
@@ -189,6 +295,7 @@ class CampaignManagementController extends Controller
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'status' => $validated['status'],
+            'applicable_to' => $validated['applicable_to'] ?? 'all',
             'min_booking_amount' => $validated['min_booking_amount'] ?? 0.00,
             'max_participations_per_customer' => $validated['max_participations_per_customer'],
             'terms_and_conditions' => $validated['terms_and_conditions'] ?? null,

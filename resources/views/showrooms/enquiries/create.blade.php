@@ -39,6 +39,64 @@
             </div>
         @endif
 
+        @if (isset($scratchParticipation) && $scratchParticipation)
+            <!-- Bike Booking Scratch & Win Card Reward -->
+            <div class="mb-8 rounded-3xl bg-gradient-to-r from-purple-50 via-white to-purple-50 border-2 border-purple-200 p-6 sm:p-7 shadow-sm relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-500/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 uppercase tracking-wider">
+                                    Rider Scratch Card
+                                </span>
+                                @if($scratchParticipation->is_scratched)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Revealed</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 animate-pulse">Unscratched</span>
+                                @endif
+                            </div>
+                            <h3 class="text-lg font-black font-display text-slate-900 mt-1">
+                                @if($scratchParticipation->is_scratched)
+                                    Prize Revealed: {{ $scratchParticipation->prize?->title ?? 'Showroom Voucher' }}
+                                @else
+                                    🎉 Scratch & Win Booking Reward!
+                                @endif
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-0.5">
+                                @if($scratchParticipation->is_scratched)
+                                    @if($scratchParticipation->coupon_code)
+                                        Use code <strong class="font-mono text-purple-700">{{ $scratchParticipation->coupon_code }}</strong> on your motorcycle purchase/booking.
+                                    @else
+                                        Thank you for participating! Present your booking confirmation upon showroom visit.
+                                    @endif
+                                @else
+                                    You've unlocked an interactive dealership scratch card for this bike booking! Scratch now to win riding accessories, helmet vouchers, or purchase discounts!
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="shrink-0 flex items-center gap-2">
+                        <a href="{{ route('showrooms.scratch.play', [$showroom, $scratchParticipation]) }}"
+                           class="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-purple-600/20 transition flex items-center justify-center gap-2">
+                            @if($scratchParticipation->is_scratched)
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <span>View Voucher</span>
+                            @else
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Scratch Card Now</span>
+                            @endif
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Form Heading -->
         <div class="text-center max-w-2xl mx-auto mb-10 space-y-2">
             <span class="text-xs font-bold uppercase tracking-widest text-rose-600">Direct Dealership Access</span>

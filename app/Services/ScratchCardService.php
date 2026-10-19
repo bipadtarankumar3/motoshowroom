@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\CampaignStatus;
 use App\Enums\PrizeType;
 use App\Models\CampaignPrize;
+use App\Models\Enquiry;
 use App\Models\PromotionalCampaign;
 use App\Models\ScratchCardParticipation;
 use App\Models\ServiceBooking;
@@ -75,9 +76,11 @@ class ScratchCardService
         PromotionalCampaign $campaign,
         array $customerData,
         ?User $user = null,
-        ?ServiceBooking $booking = null
+        ?ServiceBooking $booking = null,
+        ?Enquiry $enquiry = null,
+        ?string $bookingType = null
     ): ScratchCardParticipation {
-        return DB::transaction(function () use ($campaign, $customerData, $user, $booking) {
+        return DB::transaction(function () use ($campaign, $customerData, $user, $booking, $enquiry, $bookingType) {
             $eligibility = $this->canParticipate(
                 $campaign,
                 $customerData['customer_email'],
@@ -115,6 +118,17 @@ class ScratchCardService
                 }
             }
 
+            $resolvedType = $bookingType;
+            if (! $resolvedType) {
+                if ($booking) {
+                    $resolvedType = 'service';
+                } elseif ($enquiry) {
+                    $resolvedType = 'bike';
+                } else {
+                    $resolvedType = 'direct';
+                }
+            }
+
             /** @var ScratchCardParticipation $participation */
             $participation = ScratchCardParticipation::create([
                 'tenant_id' => $campaign->tenant_id,
@@ -122,6 +136,8 @@ class ScratchCardService
                 'prize_id' => $selectedPrize?->id,
                 'user_id' => $user?->id,
                 'service_booking_id' => $booking?->id,
+                'enquiry_id' => $enquiry?->id,
+                'booking_type' => $resolvedType,
                 'customer_name' => $customerData['customer_name'],
                 'customer_email' => $customerData['customer_email'],
                 'customer_phone' => $customerData['customer_phone'],
@@ -280,5 +296,85 @@ class ScratchCardService
         } while (ScratchCardParticipation::where('tenant_id', $tenantId)->where('coupon_code', $code)->exists());
 
         return $code;
+    }
+
+    /**
+     * Find active campaign eligible for service or bike bookings.
+     */
+    public function getEligibleCampaignForBooking(Showroom $showroom, string $type = 'service'): ?PromotionalCampaign
+    {
+        if (! $showroom->canAccessFeature('has_scratch_cards')) {
+            return null;
+        }
+
+        return $showroom->activePromotionalCampaigns()
+            ->applicableTo($type)
+            ->with(['prizes'])
+            ->latest()
+            ->first();
+    }
+
+    /**
+     * Auto-issue a scratch card when a customer books a service appointment.
+     */
+    public function autoIssueForServiceBooking(ServiceBooking $booking): ?ScratchCardParticipation
+    {
+        $showroom = $booking->showroom;
+        $campaign = $this->getEligibleCampaignForBooking($showroom, 'service');
+
+        if (! $campaign) {
+            return null;
+        }
+
+        $customerData = [
+            'customer_name' => $booking->customer_name,
+            'customer_email' => $booking->customer_email,
+            'customer_phone' => $booking->customer_phone,
+        ];
+
+        try {
+            return $this->claimScratchCard(
+                $campaign,
+                $customerData,
+                $booking->user,
+                $booking,
+                null,
+                'service'
+            );
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Auto-issue a scratch card when a customer books or inquires about a bike.
+     */
+    public function autoIssueForBikeEnquiry(Enquiry $enquiry): ?ScratchCardParticipation
+    {
+        $showroom = $enquiry->showroom;
+        $campaign = $this->getEligibleCampaignForBooking($showroom, 'bike');
+
+        if (! $campaign) {
+            return null;
+        }
+
+        $customerData = [
+            'customer_name' => $enquiry->customer_name,
+            'customer_email' => $enquiry->customer_email,
+            'customer_phone' => $enquiry->customer_phone,
+        ];
+
+        try {
+            return $this->claimScratchCard(
+                $campaign,
+                $customerData,
+                $enquiry->user,
+                null,
+                $enquiry,
+                'bike'
+            );
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }

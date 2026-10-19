@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Enquiry;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
+use App\Services\ScratchCardService;
 use App\Services\ShowroomNotificationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +36,15 @@ class PublicEnquiryController extends Controller
 
         $bikes = $showroom->publishedBikes()->orderBy('name')->get();
 
-        return view('showrooms.enquiries.create', compact('showroom', 'selectedBike', 'bikes', 'type'));
+        $scratchParticipation = null;
+        if (session('scratch_token')) {
+            $scratchParticipation = $showroom->scratchCardParticipations()
+                ->with(['prize', 'campaign'])
+                ->where('participation_token', session('scratch_token'))
+                ->first();
+        }
+
+        return view('showrooms.enquiries.create', compact('showroom', 'selectedBike', 'bikes', 'type', 'scratchParticipation'));
     }
 
     /**
@@ -90,9 +99,20 @@ class PublicEnquiryController extends Controller
 
         $typeLabel = $enquiry->type->label();
 
-        return redirect()->back()->with(
+        $scratchParticipation = null;
+        if ($showroom->canAccessFeature('has_scratch_cards')) {
+            $scratchParticipation = app(ScratchCardService::class)->autoIssueForBikeEnquiry($enquiry);
+        }
+
+        $redirect = redirect()->back()->with(
             'success',
             "Thank you, {$enquiry->customer_name}! Your {$typeLabel} (#{$enquiry->enquiry_number}) has been registered. Our dealership team will get in touch with you shortly."
         );
+
+        if ($scratchParticipation) {
+            $redirect->with('scratch_token', $scratchParticipation->participation_token);
+        }
+
+        return $redirect;
     }
 }

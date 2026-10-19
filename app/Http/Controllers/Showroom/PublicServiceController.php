@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
+use App\Services\ScratchCardService;
 use App\Services\ShowroomNotificationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -135,10 +136,21 @@ class PublicServiceController extends Controller
 
         app(ShowroomNotificationService::class)->notifyServiceBookingConfirmed($booking);
 
-        return redirect()->route('showrooms.services.track', [
+        $scratchParticipation = null;
+        if ($showroom->canAccessFeature('has_scratch_cards')) {
+            $scratchParticipation = app(ScratchCardService::class)->autoIssueForServiceBooking($booking);
+        }
+
+        $redirectParams = [
             'showroom' => $showroom,
             'booking' => $booking->booking_number,
-        ])->with(
+        ];
+
+        if ($scratchParticipation) {
+            $redirectParams['scratch'] = $scratchParticipation->participation_token;
+        }
+
+        return redirect()->route('showrooms.services.track', $redirectParams)->with(
             'success',
             "Appointment successfully scheduled! Your service tracking reference is #{$booking->booking_number}."
         );
@@ -152,6 +164,7 @@ class PublicServiceController extends Controller
         $searchRef = $booking ?? $request->query('booking');
         $searched = false;
         $bookingRecord = null;
+        $scratchParticipation = null;
 
         if (! empty($searchRef)) {
             $searched = true;
@@ -165,7 +178,18 @@ class PublicServiceController extends Controller
                 ->first();
         }
 
-        return view('showrooms.services.track', compact('showroom', 'bookingRecord', 'searchRef', 'searched'));
+        if ($bookingRecord) {
+            $scratchParticipation = $bookingRecord->scratchCardParticipations()->with(['prize', 'campaign'])->latest()->first();
+        }
+
+        if (! $scratchParticipation && $request->filled('scratch')) {
+            $scratchParticipation = $showroom->scratchCardParticipations()
+                ->with(['prize', 'campaign'])
+                ->where('participation_token', $request->query('scratch'))
+                ->first();
+        }
+
+        return view('showrooms.services.track', compact('showroom', 'bookingRecord', 'searchRef', 'searched', 'scratchParticipation'));
     }
 
     /**

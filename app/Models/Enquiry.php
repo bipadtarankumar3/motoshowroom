@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -95,6 +96,14 @@ class Enquiry extends Model
     public function assignedStaff(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to_user_id');
+    }
+
+    /**
+     * Scratch card participations unlocked by this bike enquiry/booking.
+     */
+    public function scratchCardParticipations(): HasMany
+    {
+        return $this->hasMany(ScratchCardParticipation::class, 'enquiry_id');
     }
 
     /**

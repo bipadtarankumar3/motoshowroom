@@ -29,6 +29,7 @@ class PromotionalCampaign extends Model
         'start_date',
         'end_date',
         'status',
+        'applicable_to',
         'min_booking_amount',
         'max_participations_per_customer',
         'banner_image',
@@ -137,5 +138,45 @@ class PromotionalCampaign extends Model
         return $this->status === CampaignStatus::Active
             && $this->start_date->lte(today())
             && $this->end_date->gte(today());
+    }
+
+    /**
+     * Scope to campaigns applicable to a target type (e.g. all, service, bike).
+     */
+    public function scopeApplicableTo(Builder $query, ?string $type): Builder
+    {
+        if (blank($type) || $type === 'all') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($type): void {
+            $q->where('applicable_to', $type)
+                ->orWhere('applicable_to', 'all')
+                ->orWhereNull('applicable_to');
+        });
+    }
+
+    /**
+     * Human-readable label for applicable target.
+     */
+    public function applicableLabel(): string
+    {
+        return match ($this->applicable_to) {
+            'service' => 'Service & Workshop Bookings',
+            'bike' => 'Bike Purchase & Test Rides',
+            default => 'All Bookings & Visitors',
+        };
+    }
+
+    /**
+     * Badge classes for applicable target.
+     */
+    public function applicableBadgeClasses(): string
+    {
+        return match ($this->applicable_to) {
+            'service' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            'bike' => 'bg-sky-50 text-sky-700 border-sky-200',
+            default => 'bg-purple-50 text-purple-700 border-purple-200',
+        };
     }
 }

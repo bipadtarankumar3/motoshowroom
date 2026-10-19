@@ -484,6 +484,19 @@
                                                     <span>{{ $part->customer_phone }}</span>
                                                 @endif
                                             </div>
+                                            @if($part->booking_type === 'service' || $part->service_booking_id)
+                                                <div class="mt-1">
+                                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded-md">
+                                                        🔧 Service Appointment
+                                                    </span>
+                                                </div>
+                                            @elseif($part->booking_type === 'bike' || $part->enquiry_id)
+                                                <div class="mt-1">
+                                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded-md">
+                                                        🏍️ Bike Purchase / Test Ride
+                                                    </span>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

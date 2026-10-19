@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Enums\CampaignStatus;
+use App\Enums\EnquiryType;
 use App\Enums\PrizeType;
+use App\Enums\ServiceType;
 use App\Models\CampaignPrize;
 use App\Models\PromotionalCampaign;
 use App\Models\ScratchCardParticipation;
@@ -786,5 +788,106 @@ class PromotionalScratchCardTest extends TestCase
         $selectedCsv = $exportSelected->streamedContent();
         $this->assertStringContainsString('Export Rider One', $selectedCsv);
         $this->assertStringNotContainsString('Export Rider Two', $selectedCsv);
+    }
+
+    public function test_campaigns_management_index_renders_with_rich_counts_presets_and_date_filters(): void
+    {
+        $response = $this->actingAs($this->ownerA)->get(route('showrooms.manage.campaigns.index', [
+            'showroom' => $this->showroomA,
+            'preset' => 'active',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Promotional Scratch Cards');
+        $response->assertSee('In-Store Coupon Redemption Desk');
+        $response->assertSee('Active & Live');
+        $response->assertSee('Cards Issued');
+        $response->assertSee('Cards Scratched');
+        $response->assertSee('Coupons Redeemed');
+        $response->assertSee('Won Value');
+        $response->assertSee('Date Wise Search');
+        $response->assertSee('🔧 Service Bookings');
+        $response->assertSee('🏍️ Bike Bookings');
+    }
+
+    public function test_customer_gets_scratch_card_when_booking_service(): void
+    {
+        // Ensure campaignA is active
+        $this->campaignA->update([
+            'status' => CampaignStatus::Active->value,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addMonth(),
+            'applicable_to' => 'service',
+        ]);
+
+        $servicePayload = [
+            'customer_name' => 'John Service Rider',
+            'customer_email' => 'john.service@example.com',
+            'customer_phone' => '+91 91234 56789',
+            'registration_number' => 'KA-05-EM-1234',
+            'bike_make_model' => 'Yamaha MT-15',
+            'service_type' => ServiceType::GeneralService->value,
+            'booking_date' => now()->addDays(2)->format('Y-m-d'),
+            'time_slot' => '09:00 - 11:00',
+        ];
+
+        $response = $this->post(route('showrooms.services.store', $this->showroomA), $servicePayload);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('service_bookings', [
+            'tenant_id' => $this->showroomA->id,
+            'customer_email' => 'john.service@example.com',
+            'registration_number' => 'KA-05-EM-1234',
+        ]);
+
+        $this->assertDatabaseHas('scratch_card_participations', [
+            'tenant_id' => $this->showroomA->id,
+            'campaign_id' => $this->campaignA->id,
+            'customer_email' => 'john.service@example.com',
+            'booking_type' => 'service',
+        ]);
+    }
+
+    public function test_customer_gets_scratch_card_when_submitting_bike_booking_enquiry(): void
+    {
+        $this->campaignA->update([
+            'status' => CampaignStatus::Active->value,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addMonth(),
+            'applicable_to' => 'bike',
+        ]);
+
+        $enquiryPayload = [
+            'customer_name' => 'Alice Bike Buyer',
+            'customer_email' => 'alice.buyer@example.com',
+            'customer_phone' => '+91 99887 76655',
+            'type' => EnquiryType::Purchase->value,
+            'preferred_date' => now()->addDays(3)->format('Y-m-d'),
+            'preferred_time_slot' => 'Evening (4PM - 7PM)',
+        ];
+
+        $response = $this->post(route('showrooms.enquiries.store', $this->showroomA), $enquiryPayload);
+
+        $response->assertSessionHas('scratch_token');
+        $this->assertDatabaseHas('scratch_card_participations', [
+            'tenant_id' => $this->showroomA->id,
+            'campaign_id' => $this->campaignA->id,
+            'customer_email' => 'alice.buyer@example.com',
+            'booking_type' => 'bike',
+        ]);
+    }
+
+    public function test_storefront_header_is_full_width_and_has_only_specified_menus(): void
+    {
+        $response = $this->get(route('showrooms.show', $this->showroomA));
+
+        $response->assertOk();
+        // Check full width container
+        $response->assertSee('w-full px-4 sm:px-6 lg:px-8 xl:px-10');
+        // Check only Home, Motorcycles, Service & Repair, Careers are present
+        $response->assertSee('Home');
+        $response->assertSee('Motorcycles');
+        $response->assertSee('Service & Repair', false);
+        $response->assertSee('Careers');
     }
 }
