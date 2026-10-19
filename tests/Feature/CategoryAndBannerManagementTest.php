@@ -339,4 +339,36 @@ class CategoryAndBannerManagementTest extends TestCase
         $getSettingsResponse->assertSee('Custom Account Connected');
         $getSettingsResponse->assertSee('rzp_live_custom12345678');
     }
+
+    public function test_showroom_staff_can_upload_logo_in_settings(): void
+    {
+        Storage::fake('public');
+
+        $file = UploadedFile::fake()->image('showroom-brand-logo.png', 400, 200);
+
+        $response = $this->actingAs($this->owner)
+            ->put(route('showrooms.manage.settings.update', $this->showroom), [
+                'email' => 'apex.logo@example.com',
+                'phone' => '+91 9999988888',
+                'city' => 'Bengaluru',
+                'logo_file' => $file,
+            ]);
+
+        $response->assertRedirect(route('showrooms.manage.settings', $this->showroom));
+        $response->assertSessionHas('success');
+
+        $this->showroom->refresh();
+        $this->assertNotNull($this->showroom->logo_url);
+        $this->assertStringStartsWith('/storage/showrooms/'.$this->showroom->id.'/branding/', $this->showroom->logo_url);
+
+        $storedRelativePath = str_replace('/storage/', '', $this->showroom->logo_url);
+        Storage::disk('public')->assertExists($storedRelativePath);
+
+        // Verify settings page displays uploaded logo
+        $getSettingsResponse = $this->actingAs($this->owner)
+            ->get(route('showrooms.manage.settings', $this->showroom));
+        $getSettingsResponse->assertOk();
+        $getSettingsResponse->assertSee('Dealership Logo');
+        $getSettingsResponse->assertSee($this->showroom->logo_url);
+    }
 }

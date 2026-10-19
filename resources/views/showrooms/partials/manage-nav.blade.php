@@ -29,10 +29,15 @@
         {{-- Brand / Showroom Header (Catalyst-style) --}}
         <div class="flex items-center justify-between h-18 px-4 border-b border-slate-100">
             <a href="{{ route('showrooms.manage', $showroom) }}" class="flex items-center gap-3 min-w-0 group">
-                <span class="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-white text-base shadow-md group-hover:scale-105 transition-transform flex-shrink-0"
-                      style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }}">
-                    {{ strtoupper(substr($showroom->name, 0, 1)) }}
-                </span>
+                @if($showroom->logo_url)
+                    <img src="{{ $showroom->logo_url }}" alt="{{ $showroom->name }}"
+                         class="w-10 h-10 rounded-2xl object-contain bg-white border border-slate-200 shadow-xs group-hover:scale-105 transition-transform flex-shrink-0 p-1">
+                @else
+                    <span class="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-white text-base shadow-md group-hover:scale-105 transition-transform flex-shrink-0"
+                          style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }}">
+                        {{ strtoupper(substr($showroom->name, 0, 1)) }}
+                    </span>
+                @endif
                 <div class="min-w-0 leading-tight">
                     <span class="font-display font-black text-sm tracking-tight text-slate-900 block truncate">{{ $showroom->name }}</span>
                     <span class="text-[11px] text-slate-400 font-medium block truncate">{{ $showroom->city ?? 'Back-Office' }} Dealership</span>
@@ -258,10 +263,15 @@
 
                 {{-- Showroom Identity Breadcrumb --}}
                 <a href="{{ route('showrooms.manage', $showroom) }}" class="flex items-center gap-2.5 group">
-                    <span class="w-7 h-7 rounded-lg flex items-center justify-center font-black text-white text-xs flex-shrink-0 shadow-2xs group-hover:scale-105 transition-transform"
-                          style="background-color: {{ $primaryColor }}">
-                        {{ strtoupper(substr($showroom->name, 0, 1)) }}
-                    </span>
+                    @if($showroom->logo_url)
+                        <img src="{{ $showroom->logo_url }}" alt="{{ $showroom->name }}"
+                             class="w-7 h-7 rounded-lg object-contain bg-white border border-slate-200 shadow-2xs group-hover:scale-105 transition-transform flex-shrink-0 p-0.5">
+                    @else
+                        <span class="w-7 h-7 rounded-lg flex items-center justify-center font-black text-white text-xs flex-shrink-0 shadow-2xs group-hover:scale-105 transition-transform"
+                              style="background-color: {{ $primaryColor }}">
+                            {{ strtoupper(substr($showroom->name, 0, 1)) }}
+                        </span>
+                    @endif
                     <div class="leading-tight">
                         <span class="font-display font-black text-sm tracking-tight text-slate-900 block truncate group-hover:text-slate-700 transition">{{ $showroom->name }}</span>
                         <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Back-Office</span>

@@ -40,9 +40,85 @@
             @endif
 
             <!-- Contact & Address Form -->
-            <form method="POST" action="{{ route('showrooms.manage.settings.update', $showroom) }}" class="space-y-8">
+            <form method="POST" action="{{ route('showrooms.manage.settings.update', $showroom) }}" enctype="multipart/form-data" class="space-y-8">
                 @csrf
                 @method('PUT')
+
+                {{-- Section: Dealership Brand & Logo Upload --}}
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6" x-data="{
+                    previewUrl: '{{ $showroom->logo_url ? asset($showroom->logo_url) : '' }}',
+                    handleFileSelect(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            this.previewUrl = URL.createObjectURL(file);
+                        }
+                    }
+                }">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-lg font-bold font-display text-slate-900 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                                Dealership Logo &amp; Identity
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Upload your official brand logo for your public storefront header, invoice headers, and customer communications.</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            PNG, JPG, WEBP, SVG (Max 5MB)
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                        {{-- Live Logo Preview Box --}}
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col items-center justify-center text-center space-y-3">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Live Logo Preview</span>
+                            <div class="w-28 h-28 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center p-3 overflow-hidden relative group">
+                                <template x-if="previewUrl">
+                                    <img :src="previewUrl" alt="{{ $showroom->name }}" class="max-h-full max-w-full object-contain">
+                                </template>
+                                <template x-if="!previewUrl">
+                                    <div class="w-full h-full rounded-xl flex flex-col items-center justify-center font-display font-black text-white text-2xl shadow-xs"
+                                         style="background: linear-gradient(135deg, {{ $showroom->brand_color_primary ?? '#dc2626' }}, {{ $showroom->brand_color_accent ?? '#991b1b' }})">
+                                        <span>{{ strtoupper(substr($showroom->name, 0, 1)) }}</span>
+                                        <span class="text-[9px] uppercase tracking-widest font-sans font-bold text-white/80 mt-1">Default</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <span class="text-xs font-semibold text-slate-700 truncate max-w-full px-2">{{ $showroom->name }}</span>
+                        </div>
+
+                        {{-- Upload controls --}}
+                        <div class="md:col-span-2 space-y-4">
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">
+                                    Upload Logo File
+                                </label>
+                                <input type="file" name="logo_file" id="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                       @change="handleFileSelect($event)"
+                                       class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white hover:file:bg-slate-800 cursor-pointer border border-slate-200 rounded-xl bg-slate-50/50 p-1.5 transition">
+                                <p class="text-[11px] text-slate-400 mt-1.5">For optimal visual quality, use a transparent PNG or SVG logo at least 400x120px.</p>
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center gap-3">
+                                <div class="flex-1">
+                                    <label for="logo_url" class="block text-[11px] font-bold text-slate-600 mb-1">
+                                        Or External Logo URL <span class="text-slate-400 font-normal">(CDN or hosted asset)</span>
+                                    </label>
+                                    <input type="text" name="logo_url" id="logo_url" value="{{ old('logo_url', $showroom->logo_url) }}"
+                                           placeholder="https://example.com/logo.png"
+                                           @input="if (!$event.target.value.startsWith('blob:')) previewUrl = $event.target.value"
+                                           class="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs font-mono focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                </div>
+
+                                @if($showroom->logo_url)
+                                    <label class="inline-flex items-center gap-2 text-xs font-bold text-rose-600 hover:text-rose-700 cursor-pointer pt-4 sm:pt-6">
+                                        <input type="checkbox" name="remove_logo" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500">
+                                        <span>Remove Logo</span>
+                                    </label>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 {{-- Section 1: Commercial Contact & Physical Address --}}
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6">

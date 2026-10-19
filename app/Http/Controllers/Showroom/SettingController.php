@@ -34,12 +34,24 @@ class SettingController extends Controller
             'city' => ['required', 'string', 'max:100'],
             'state' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
+            'logo_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
+            'logo_url' => ['nullable', 'string', 'max:1024'],
             'razorpay_enabled' => ['nullable', 'boolean'],
             'razorpay_key_id' => ['nullable', 'string', 'max:150'],
             'razorpay_key_secret' => ['nullable', 'string', 'max:150'],
             'razorpay_webhook_secret' => ['nullable', 'string', 'max:150'],
             'booking_token_amount' => ['nullable', 'numeric', 'min:100'],
         ]);
+
+        $logoUrl = $showroom->logo_url;
+        if ($request->hasFile('logo_file')) {
+            $path = $request->file('logo_file')->store("showrooms/{$showroom->id}/branding", 'public');
+            $logoUrl = "/storage/{$path}";
+        } elseif ($request->filled('logo_url')) {
+            $logoUrl = trim($request->input('logo_url'));
+        } elseif ($request->has('remove_logo') && $request->boolean('remove_logo')) {
+            $logoUrl = null;
+        }
 
         $settings = $showroom->settings ?? [];
         $settings['razorpay_enabled'] = $request->boolean('razorpay_enabled');
@@ -71,21 +83,22 @@ class SettingController extends Controller
             'city' => $validated['city'],
             'state' => $validated['state'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
+            'logo_url' => $logoUrl,
             'settings' => $settings,
         ];
 
-        $oldValues = $showroom->only(['email', 'phone', 'address_line1', 'address_line2', 'city', 'state', 'postal_code', 'settings']);
+        $oldValues = $showroom->only(['email', 'phone', 'address_line1', 'address_line2', 'city', 'state', 'postal_code', 'logo_url', 'settings']);
         $showroom->update($coreFields);
 
         AuditLogger::log(
             action: 'showroom.settings_updated',
             auditable: $showroom,
             oldValues: $oldValues,
-            newValues: $showroom->only(['email', 'phone', 'address_line1', 'address_line2', 'city', 'state', 'postal_code']),
+            newValues: $showroom->only(['email', 'phone', 'address_line1', 'address_line2', 'city', 'state', 'postal_code', 'logo_url']),
             tenantId: $showroom->id
         );
 
         return redirect()->route('showrooms.manage.settings', $showroom)
-            ->with('success', 'Showroom settings & Razorpay gateway credentials updated successfully.');
+            ->with('success', 'Showroom settings, logo & payment gateway updated successfully.');
     }
 }
