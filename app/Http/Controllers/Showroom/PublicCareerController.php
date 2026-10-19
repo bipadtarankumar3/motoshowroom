@@ -15,6 +15,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PublicCareerController extends Controller
 {
@@ -93,6 +95,7 @@ class PublicCareerController extends Controller
             'experience_years' => ['required', 'numeric', 'min:0', 'max:50'],
             'resume_file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'], // 5MB max
             'video_file' => ['nullable', 'file', 'mimetypes:video/webm,video/mp4,video/quicktime,video/ogg,video/x-matroska,application/octet-stream', 'max:51200'], // 50MB max
+            'video_base64' => ['nullable', 'string'],
             'video_duration_seconds' => ['nullable', 'integer', 'min:1', 'max:300'],
             'portfolio_url' => ['nullable', 'url', 'max:255'],
             'cover_letter' => ['nullable', 'string', 'max:3000'],
@@ -103,10 +106,7 @@ class PublicCareerController extends Controller
             $resumePath = $request->file('resume_file')->store('resumes/'.$showroom->id, 'public');
         }
 
-        $videoPath = null;
-        if ($request->hasFile('video_file')) {
-            $videoPath = $request->file('video_file')->store('candidate-videos/'.$showroom->id, 'public');
-        }
+        $videoPath = $this->storeCandidateVideo($request, $showroom);
 
         /** @var JobApplication $application */
         $application = $showroom->jobApplications()->create([
@@ -170,6 +170,7 @@ class PublicCareerController extends Controller
             'experience_years' => ['required', 'numeric', 'min:0', 'max:50'],
             'resume_file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'], // 5MB max
             'video_file' => ['nullable', 'file', 'mimetypes:video/webm,video/mp4,video/quicktime,video/ogg,video/x-matroska,application/octet-stream', 'max:51200'], // 50MB max
+            'video_base64' => ['nullable', 'string'],
             'video_duration_seconds' => ['nullable', 'integer', 'min:1', 'max:300'],
             'portfolio_url' => ['nullable', 'url', 'max:255'],
             'cover_letter' => ['nullable', 'string', 'max:3000'],
@@ -180,10 +181,7 @@ class PublicCareerController extends Controller
             $resumePath = $request->file('resume_file')->store('resumes/'.$showroom->id, 'public');
         }
 
-        $videoPath = null;
-        if ($request->hasFile('video_file')) {
-            $videoPath = $request->file('video_file')->store('candidate-videos/'.$showroom->id, 'public');
-        }
+        $videoPath = $this->storeCandidateVideo($request, $showroom);
 
         /** @var JobApplication $application */
         $application = $jobOpening->applications()->create([
@@ -229,5 +227,33 @@ class PublicCareerController extends Controller
             'success',
             "Application successfully submitted! Your candidate reference tracking number is #{$application->applicant_number}."
         );
+    }
+
+    /**
+     * Store candidate video from either uploaded file or Base64 recorded blob.
+     */
+    protected function storeCandidateVideo(Request $request, Showroom $showroom): ?string
+    {
+        if ($request->hasFile('video_file')) {
+            return $request->file('video_file')->store('candidate-videos/'.$showroom->id, 'public');
+        }
+
+        if ($request->filled('video_base64')) {
+            $base64 = (string) $request->input('video_base64');
+            if (str_contains($base64, ';base64,')) {
+                [$meta, $data] = explode(';base64,', $base64, 2);
+                $binary = base64_decode($data, true);
+                if ($binary !== false && strlen($binary) > 0) {
+                    $ext = str_contains(strtolower($meta), 'mp4') ? 'mp4' : 'webm';
+                    $filename = 'pitch_'.Str::random(16).'_'.time().'.'.$ext;
+                    $path = 'candidate-videos/'.$showroom->id.'/'.$filename;
+                    Storage::disk('public')->put($path, $binary);
+
+                    return $path;
+                }
+            }
+        }
+
+        return null;
     }
 }

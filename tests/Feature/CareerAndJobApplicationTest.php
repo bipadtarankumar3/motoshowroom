@@ -778,4 +778,35 @@ class CareerAndJobApplicationTest extends TestCase
         $responseIndex->assertSee('47s Video');
         $responseIndex->assertSee('Superbike Sales Consultant');
     }
+
+    public function test_candidate_can_submit_video_pitch_via_base64_blob(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        $fakeWebmBinary = 'RIFF....WEBM....TEST_VIDEO_BYTES';
+        $base64Data = 'data:video/webm;codecs=vp8,opus;base64,'.base64_encode($fakeWebmBinary);
+
+        $payload = [
+            'applicant_name' => 'Aditya Verma',
+            'applicant_email' => 'aditya@example.com',
+            'applicant_phone' => '+91 9988776655',
+            'experience_years' => 3,
+            'desired_role' => 'Motorsport Mechanic',
+            'video_base64' => $base64Data,
+            'video_duration_seconds' => 38,
+        ];
+
+        $response = $this->post(route('showrooms.careers.store-general', $this->showroomA), $payload);
+
+        $response->assertSessionHas('success');
+        $response->assertRedirect(route('showrooms.careers.index', $this->showroomA));
+
+        $applicant = JobApplication::where('applicant_email', 'aditya@example.com')->firstOrFail();
+        $this->assertNotNull($applicant->video_path);
+        $this->assertEquals(38, $applicant->video_duration_seconds);
+        $this->assertStringEndsWith('.webm', $applicant->video_path);
+        Storage::disk('public')->assertExists($applicant->video_path);
+        $this->assertEquals($fakeWebmBinary, Storage::disk('public')->get($applicant->video_path));
+    }
 }

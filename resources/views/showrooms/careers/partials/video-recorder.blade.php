@@ -43,6 +43,7 @@
            class="sr-only"
            x-ref="fileInput"
            @change="handleManualFile($event)">
+    <input type="hidden" name="video_base64" id="video_base64" :value="videoBase64">
     <input type="hidden" name="video_duration_seconds" :value="durationRecorded">
 
     <!-- RECORD LIVE MODE -->
@@ -134,29 +135,32 @@
 
         <!-- 3. PREVIEW & PLAYBACK REVIEW STATE -->
         <div x-show="state === 'preview'" class="space-y-3">
-            <div class="rounded-2xl overflow-hidden bg-slate-950 border border-slate-300 shadow-md relative group aspect-video">
+            <div class="rounded-2xl overflow-hidden bg-slate-950 border border-slate-300 shadow-md relative group aspect-video flex items-center justify-center cursor-pointer select-none"
+                 @click="togglePlay()">
                 <!-- Video Element with poster thumbnail -->
                 <video x-ref="previewVideo"
+                       :src="previewUrl"
                        :poster="previewPoster"
                        controls
                        playsinline
                        preload="auto"
+                       @play="isPlaying = true"
+                       @pause="isPlaying = false"
+                       @ended="isPlaying = false"
                        class="w-full h-full object-contain bg-black"></video>
+
+                <!-- Center Big Play Button Overlay when paused -->
+                <div x-show="!isPlaying"
+                     class="absolute inset-0 m-auto w-16 h-16 rounded-full bg-rose-600/90 text-white flex items-center justify-center shadow-2xl backdrop-blur-xs transition hover:scale-110 active:scale-95 z-20 pointer-events-none"
+                     title="Click to play video pitch with audio">
+                    <svg class="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
 
                 <!-- Top Status Badge -->
                 <div class="absolute top-3 left-3 bg-emerald-600/90 backdrop-blur-xs text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-md pointer-events-none z-10">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     <span>Pitch Recorded (<span x-text="durationRecorded"></span>s)</span>
                 </div>
-
-                <!-- Unmute Overlay Badge if playing muted -->
-                <button type="button"
-                        x-show="isMuted"
-                        @click="unmutePreview()"
-                        class="absolute bottom-12 right-3 z-10 bg-slate-900/90 hover:bg-rose-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-xs flex items-center gap-1.5 transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-                    <span>Click to Hear Audio</span>
-                </button>
             </div>
 
             <!-- Preview Actions Toolbar -->
@@ -167,16 +171,21 @@
                     </div>
                     <div>
                         <span class="font-bold text-slate-900 block">Video Attached & Ready</span>
-                        <span class="text-[11px] text-slate-500">Review your recording above before submitting.</span>
+                        <span class="text-[11px] text-slate-500">Click play above to preview your pitch with audio before submitting.</span>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <button type="button"
-                            @click="playPreviewWithSound()"
-                            class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Play with Sound
+                            @click.stop="togglePlay()"
+                            class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                        <template x-if="!isPlaying">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </template>
+                        <template x-if="isPlaying">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </template>
+                        <span x-text="isPlaying ? 'Pause' : 'Play with Sound'"></span>
                     </button>
                     <button type="button"
                             @click="rerecord()"
@@ -258,11 +267,12 @@ function careerVideoRecorder() {
         mode: 'record', // 'record' | 'upload'
         state: 'idle', // 'idle' | 'ready' | 'recording' | 'preview'
         isInitializing: false,
-        isMuted: true,
+        isPlaying: false,
         mediaStream: null,
         mediaRecorder: null,
         recordedChunks: [],
         recordedBlob: null,
+        videoBase64: '',
         previewUrl: null,
         previewPoster: null,
         durationRecorded: 0,
@@ -273,8 +283,22 @@ function careerVideoRecorder() {
         uploadedFileName: '',
         uploadedFileUrl: null,
 
+        init() {
+            this.$nextTick(() => {
+                const form = this.$el.closest('form');
+                if (form) {
+                    form.addEventListener('submit', () => {
+                        const el = document.getElementById('video_base64');
+                        if (this.videoBase64 && el && !el.value) {
+                            el.value = this.videoBase64;
+                        }
+                    });
+                }
+            });
+        },
+
         get hasAttachedVideo() {
-            return (this.state === 'preview' && this.recordedBlob !== null) || (this.mode === 'upload' && this.uploadedFileName !== '');
+            return (this.state === 'preview' && (this.recordedBlob !== null || this.videoBase64 !== '')) || (this.mode === 'upload' && this.uploadedFileName !== '');
         },
 
         get attachedVideoInfo() {
@@ -376,11 +400,12 @@ function careerVideoRecorder() {
             this.timeElapsed = 0;
             this.timeRemaining = 60;
 
-            // Pick supported mime type
+            // Pick supported container type, prioritizing WebM for reliable Chromium & Firefox recording
             const mimeCandidates = [
                 'video/webm;codecs=vp8,opus',
                 'video/webm;codecs=vp9,opus',
                 'video/webm',
+                'video/mp4;codecs=avc1,mp4a.40.2',
                 'video/mp4'
             ];
             let selectedMime = mimeCandidates.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || '';
@@ -402,8 +427,8 @@ function careerVideoRecorder() {
             };
 
             this.mediaRecorder.onstop = () => {
-                const finalMime = this.mediaRecorder.mimeType || selectedMime || 'video/webm';
-                this.recordedBlob = new Blob(this.recordedChunks, { type: finalMime });
+                const mimeType = this.mediaRecorder.mimeType || selectedMime || 'video/webm';
+                this.recordedBlob = new Blob(this.recordedChunks, { type: mimeType });
                 this.durationRecorded = Math.max(1, this.timeElapsed);
 
                 // Stop live camera tracks
@@ -414,29 +439,40 @@ function careerVideoRecorder() {
                 }
                 this.previewUrl = URL.createObjectURL(this.recordedBlob);
 
-                // Populate native file input via DataTransfer
+                // Convert Blob to Base64 for guaranteed form submission across all browsers
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    this.videoBase64 = reader.result;
+                    const el = document.getElementById('video_base64');
+                    if (el) el.value = reader.result;
+                };
+                reader.readAsDataURL(this.recordedBlob);
+
+                // Also populate native file input via DataTransfer as secondary mechanism
                 this.populateFileInput(this.recordedBlob);
 
                 // Switch UI to preview mode
                 this.state = 'preview';
-                this.isMuted = true;
+                this.isPlaying = false;
 
-                // Assign to preview player element and trigger playback
+                // Assign to preview player element and load properly
                 this.$nextTick(() => {
                     const previewEl = this.$refs.previewVideo;
                     if (previewEl) {
-                        if (this.previewPoster) {
-                            previewEl.poster = this.previewPoster;
-                        }
                         previewEl.src = this.previewUrl;
                         previewEl.controls = true;
-                        previewEl.muted = true; // Muted playback is permitted by browser policy
-                        previewEl.currentTime = 0;
-                        previewEl.load();
 
-                        previewEl.play().catch(err => {
-                            console.log('Autoplay muted caught:', err);
-                        });
+                        // Fix Chrome's MediaRecorder WebM duration Infinity bug
+                        previewEl.onloadedmetadata = () => {
+                            if (previewEl.duration === Infinity) {
+                                previewEl.currentTime = 1e101;
+                                previewEl.ontimeupdate = () => {
+                                    previewEl.ontimeupdate = null;
+                                    previewEl.currentTime = 0;
+                                };
+                            }
+                        };
+                        previewEl.load();
                     }
                 });
             };
@@ -465,7 +501,7 @@ function careerVideoRecorder() {
                     canvas.width = live.videoWidth;
                     canvas.height = live.videoHeight;
                     const ctx = canvas.getContext('2d');
-                    // Unmirror the image for a normal recorded portrait look
+                    // Unmirror the image for a natural recorded look
                     ctx.translate(canvas.width, 0);
                     ctx.scale(-1, 1);
                     ctx.drawImage(live, 0, 0, canvas.width, canvas.height);
@@ -485,11 +521,19 @@ function careerVideoRecorder() {
             // Capture poster while live webcam feed is still active!
             this.capturePosterSnapshot();
 
-            if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-                try {
-                    this.mediaRecorder.requestData();
-                } catch (e) {}
+            if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
                 this.mediaRecorder.stop();
+            }
+        },
+
+        togglePlay() {
+            const previewEl = this.$refs.previewVideo;
+            if (!previewEl) return;
+            if (previewEl.paused || previewEl.ended) {
+                this.playPreviewWithSound();
+            } else {
+                previewEl.pause();
+                this.isPlaying = false;
             }
         },
 
@@ -497,17 +541,24 @@ function careerVideoRecorder() {
             const previewEl = this.$refs.previewVideo;
             if (previewEl) {
                 previewEl.muted = false;
-                this.isMuted = false;
-                previewEl.currentTime = 0;
-                previewEl.play().catch(e => console.warn('Play error:', e));
-            }
-        },
-
-        unmutePreview() {
-            const previewEl = this.$refs.previewVideo;
-            if (previewEl) {
-                previewEl.muted = false;
-                this.isMuted = false;
+                if (previewEl.ended) {
+                    previewEl.currentTime = 0;
+                }
+                const playPromise = previewEl.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        this.isPlaying = true;
+                    }).catch(e => {
+                        console.warn('Play preview with sound error, retrying muted:', e);
+                        previewEl.muted = true;
+                        previewEl.play().then(() => {
+                            this.isPlaying = true;
+                            setTimeout(() => { previewEl.muted = false; }, 150);
+                        }).catch(mutedErr => {
+                            console.error('Playback failed completely:', mutedErr);
+                        });
+                    });
+                }
             }
         },
 
@@ -538,10 +589,14 @@ function careerVideoRecorder() {
             this.previewPoster = null;
             this.recordedChunks = [];
             this.recordedBlob = null;
+            this.videoBase64 = '';
+            const el = document.getElementById('video_base64');
+            if (el) el.value = '';
             this.durationRecorded = 0;
             this.timeElapsed = 0;
             this.timeRemaining = 60;
             this.state = 'idle';
+            this.isPlaying = false;
             this.$refs.fileInput.value = '';
             if (this.$refs.previewVideo) {
                 this.$refs.previewVideo.src = '';
@@ -560,6 +615,14 @@ function careerVideoRecorder() {
             }
             this.uploadedFileUrl = URL.createObjectURL(file);
             this.durationRecorded = 60;
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                this.videoBase64 = reader.result;
+                const hiddenEl = document.getElementById('video_base64');
+                if (hiddenEl) hiddenEl.value = reader.result;
+            };
+            reader.readAsDataURL(file);
         },
 
         formatTime(seconds) {
