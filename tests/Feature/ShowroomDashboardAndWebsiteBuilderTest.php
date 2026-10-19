@@ -234,4 +234,21 @@ class ShowroomDashboardAndWebsiteBuilderTest extends TestCase
         $builderResponse = $this->get("/showrooms/{$this->showroom->slug}/manage/website");
         $builderResponse->assertOk();
     }
+
+    public function test_public_storefront_shows_offline_page_when_disabled(): void
+    {
+        $this->showroom->update(['public_website_enabled' => false]);
+
+        // Unauthenticated customer visiting offline showroom gets 503 with offline page
+        $response = $this->get("/showrooms/{$this->showroom->slug}");
+        $response->assertStatus(503);
+        $response->assertSee('Storefront Currently Offline');
+        $response->assertSee($this->showroom->name);
+
+        // Showroom manager visiting offline showroom sees preview banner
+        $this->actingAs($this->owner);
+        $managerResponse = $this->get("/showrooms/{$this->showroom->slug}");
+        $managerResponse->assertOk();
+        $managerResponse->assertSee('Storefront Offline Mode');
+    }
 }

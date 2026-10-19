@@ -145,6 +145,14 @@
 
     <main class="w-full bg-white text-slate-800">
 
+        @if(! $showroom->public_website_enabled)
+            <div class="bg-amber-500 text-slate-950 px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wider sticky top-20 z-30 shadow-md flex items-center justify-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-slate-950 animate-pulse"></span>
+                <span>Storefront Offline Mode: Customers cannot see this website right now. You are previewing it as a dealership manager.</span>
+                <a href="{{ route('showrooms.manage.website', $showroom) }}" class="underline ml-2 hover:text-white">Enable in Builder</a>
+            </div>
+        @endif
+
         {{-- ══════════════════════════════════════════════════════════════════
              § 1. HERO — Cinematic Taller Multi-Banner Carousel (Alpine.js)
              ══════════════════════════════════════════════════════════════════ --}}
@@ -163,7 +171,8 @@
                 'show_about' => true,
                 'show_stats' => true,
                 'show_news' => true,
-                'featured_bikes_title' => 'Premier Showcase',
+                'featured_title' => 'Featured Motorcycles',
+                'featured_bikes_title' => 'Featured Motorcycles',
                 'featured_bikes_count' => 8,
                 'categories_title' => 'Browse By Category',
                 'promo_title' => 'Book a Test Ride Today',
@@ -513,7 +522,7 @@
         @if($homepageSections['show_featured_bikes'] ?? true)
             @php
                 $featuredLimit = (int) ($homepageSections['featured_bikes_count'] ?? ($homepageSections['featured_limit'] ?? 8));
-                $featuredHeading = $homepageSections['featured_bikes_title'] ?? ($homepageSections['featured_title'] ?? 'Premier Showcase');
+                $featuredHeading = $homepageSections['featured_bikes_title'] ?? ($homepageSections['featured_title'] ?? 'Featured Motorcycles');
                 $displayBikes = ($showroom->publishedBikes->isNotEmpty()
                     ? $showroom->publishedBikes
                     : $showroom->bikes)->take($featuredLimit);

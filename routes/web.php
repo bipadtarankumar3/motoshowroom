@@ -168,6 +168,14 @@ Route::middleware('auth')->group(function () {
 // Public Showroom Storefront Route (Tenant-resolved via EnsureTenantContext)
 Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::get('/', function (Showroom $showroom) {
+        if (! $showroom->isWebsiteAccessible()) {
+            if (auth()->check() && (auth()->user()->isAdmin() || auth()->user()->canAccessTenant($showroom))) {
+                session()->flash('offline_preview', true);
+            } else {
+                return response()->view('showrooms.offline', compact('showroom'), 503);
+            }
+        }
+
         $showroom->load([
             'featuredBikes.images',
             'publishedBikes.images',
