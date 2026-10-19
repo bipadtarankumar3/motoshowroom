@@ -115,13 +115,13 @@
             </header>
 
             <!-- Showroom 360 Carousel Visual -->
-            <div class="relative z-10 my-auto py-2 flex flex-col justify-center">
-                <div class="relative w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200/90 bg-white group"
+            <div class="relative z-10 flex-1 my-3 flex flex-col justify-center min-h-0">
+                <div class="relative w-full h-full min-h-[460px] 2xl:min-h-[520px] rounded-2xl overflow-hidden shadow-xl border border-slate-200/90 bg-white group flex flex-col"
                      @mouseenter="paused = true"
                      @mouseleave="paused = false">
 
-                    <!-- Carousel Image Container (Taller, Prominent Showcase) -->
-                    <div class="relative h-[320px] sm:h-[400px] lg:h-[440px] xl:h-[500px] 2xl:h-[550px] w-full overflow-hidden bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-100/70">
+                    <!-- Carousel Image Container (Dynamically fills vertical space) -->
+                    <div class="relative flex-1 w-full min-h-[380px] overflow-hidden bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-100/70">
                         <template x-for="(slide, index) in slides" :key="index">
                             <div class="absolute inset-0 transition-opacity duration-700 ease-in-out"
                                  x-show="activeSlide === index"
@@ -300,11 +300,11 @@
         <!-- ======================================================== -->
         <!-- RIGHT SECTION (STRICTLY 30%): Modern Login & Demo Panel  -->
         <!-- ======================================================== -->
-        <section class="w-full lg:w-[32%] xl:w-[30%] min-w-[360px] h-full flex flex-col justify-between p-6 sm:p-8 xl:p-10 bg-white border-l border-slate-200/90 relative z-20 overflow-y-auto order-1 lg:order-2">
+        <section class="w-full lg:w-[32%] xl:w-[30%] min-w-[360px] h-full flex flex-col justify-center p-5 sm:p-7 xl:p-8 bg-slate-100/50 border-l border-slate-200/90 relative z-20 overflow-y-auto order-1 lg:order-2">
             <!-- Top Accent Gradient Line -->
             <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-600 via-rose-500 to-amber-500"></div>
 
-            <div class="w-full max-w-[420px] mx-auto my-auto space-y-5">
+            <div class="w-full max-w-[440px] mx-auto my-auto bg-white rounded-2xl border border-slate-200/90 shadow-xl shadow-slate-200/50 p-6 sm:p-7 xl:p-8 space-y-4 relative">
 
                 <!-- Header / Brand -->
                 <div class="space-y-1">
