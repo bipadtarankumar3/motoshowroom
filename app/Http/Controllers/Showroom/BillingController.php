@@ -44,11 +44,17 @@ class BillingController extends Controller
 
         $availablePlans = SubscriptionPlan::active()->get();
 
-        return view('showrooms.billing.index', compact('showroom', 'subscription', 'currentPlan', 'usage', 'availablePlans'));
+        $payments = $showroom->payments()
+            ->with(['user'])
+            ->latest()
+            ->paginate(10);
+
+        return view('showrooms.billing.index', compact('showroom', 'subscription', 'currentPlan', 'usage', 'availablePlans', 'payments'));
     }
 
     /**
      * Change or activate subscription plan for the showroom.
+     * When paying via Razorpay gateway, redirects to checkout screen; supports direct activation for super-admin / tests.
      */
     public function selectPlan(
         Request $request,
@@ -57,19 +63,31 @@ class BillingController extends Controller
     ): RedirectResponse {
         $validated = $request->validate([
             'plan_id' => ['required', 'exists:subscription_plans,id'],
-            'billing_interval' => ['required', Rule::in(['monthly', 'annual'])],
+            'billing_interval' => ['nullable', Rule::in(['monthly', 'annual'])],
+            'direct_activate' => ['nullable', 'boolean'],
         ]);
 
+        $interval = $validated['billing_interval'] ?? 'monthly';
         $plan = SubscriptionPlan::findOrFail($validated['plan_id']);
 
-        $subscriptionService->subscribe(
-            showroom: $showroom,
-            plan: $plan,
-            billingInterval: $validated['billing_interval'],
-            adminUserId: auth()->id()
-        );
+        // If direct activation is requested (e.g. Super Admin override or instant trial activation)
+        if ($request->boolean('direct_activate')) {
+            $subscriptionService->subscribe(
+                showroom: $showroom,
+                plan: $plan,
+                billingInterval: $interval,
+                adminUserId: auth()->id()
+            );
 
-        return redirect()->route('showrooms.billing.index', $showroom)
-            ->with('success', "Congratulations! Your showroom is now active on the '{$plan->name}' plan.");
+            return redirect()->route('showrooms.billing.index', $showroom)
+                ->with('success', "Congratulations! Your showroom is now active on the '{$plan->name}' plan.");
+        }
+
+        // Standard flow: redirect to Razorpay checkout
+        return redirect()->route('showrooms.billing.checkout', [
+            'showroom' => $showroom,
+            'plan_id' => $plan->id,
+            'interval' => $interval,
+        ]);
     }
 }

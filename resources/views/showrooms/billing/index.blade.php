@@ -59,9 +59,9 @@
                     <div>
                         <h2 class="text-2xl font-black font-display text-slate-900">{{ $currentPlan->name }}</h2>
                         <div class="text-xs text-slate-500 mt-1 flex items-center gap-2">
-                            <span>{{ $currentPlan->formatted_monthly_price }}/mo</span>
+                            <span class="font-bold text-slate-700">{{ $currentPlan->formatted_monthly_price }}</span>
                             <span>•</span>
-                            <span class="capitalize">{{ $subscription->billing_interval }} Billing</span>
+                            <span>Valid until <strong class="text-slate-900 font-mono">{{ $subscription->current_period_end->format('M d, Y') }}</strong></span>
                         </div>
                     </div>
 
@@ -177,12 +177,9 @@
                             <div>
                                 <h3 class="text-xl font-black font-display text-slate-900">{{ $plan->name }}</h3>
                                 <p class="text-xs text-slate-500 mt-1 min-h-[32px]">{{ $plan->description }}</p>
-                            </div>
-
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            </div>                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
                                 <span class="text-3xl font-black font-display text-slate-900">{{ $plan->formatted_monthly_price }}</span>
-                                <span class="text-xs text-slate-500">/month</span>
-                                <span class="text-[11px] text-slate-500 block mt-0.5">or {{ $plan->formatted_annual_price }} billed annually</span>
+                                <span class="text-xs text-slate-500 font-medium block mt-1">Tier Subscription with Validity Period</span>
                             </div>
 
                             <ul class="space-y-2 text-xs text-slate-600">
@@ -220,31 +217,160 @@
                         <!-- Plan Selection Form -->
                         <div class="pt-6 border-t border-slate-100 mt-6">
                             @if($isCurrent && $subscription->isActive())
-                                <button disabled class="w-full py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 text-xs font-bold cursor-not-allowed">
+                                <button disabled class="w-full py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 text-xs font-bold cursor-not-allowed">
                                     Current Active Tier
                                 </button>
                             @else
                                 <form method="POST" action="{{ route('showrooms.billing.select-plan', $showroom) }}" class="space-y-3">
                                     @csrf
                                     <input type="hidden" name="plan_id" value="{{ $plan->id }}">
-                                    <div class="flex items-center justify-center gap-4 text-[11px] text-slate-600">
-                                        <label class="flex items-center gap-1.5 cursor-pointer">
-                                            <input type="radio" name="billing_interval" value="monthly" checked class="text-rose-600">
-                                            <span>Monthly</span>
-                                        </label>
-                                        <label class="flex items-center gap-1.5 cursor-pointer">
-                                            <input type="radio" name="billing_interval" value="annual" class="text-rose-600">
-                                            <span>Annual</span>
-                                        </label>
-                                    </div>
-                                    <button type="submit" class="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition">
+                                    <input type="hidden" name="billing_interval" value="monthly">
+                                    <button type="submit" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
                                         {{ $isCurrent ? 'Renew Current Plan' : 'Choose '.$plan->name }}
                                     </button>
                                 </form>
                             @endif
-                        </div>
+                        </div>iv>
                     </div>
                 @endforeach
+            </div>
+        </div>
+
+        <!-- Payment & Billing Transaction Ledger -->
+        <div class="space-y-4 pt-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-black font-display text-slate-900 tracking-tight">Payment &amp; Billing History</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Detailed records of all subscription purchases, renewals, and Razorpay transactions for this showroom.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <span>Admin Gateway: Razorpay</span>
+                    </span>
+                    <a href="{{ route('showrooms.manage.payments.index', $showroom) }}" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 transition shadow-xs">
+                        View Full Ledger
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+                @if(isset($payments) && $payments->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-200 bg-slate-50 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                                    <th class="py-3 px-4">Transaction / Order</th>
+                                    <th class="py-3 px-4">Purpose / Plan</th>
+                                    <th class="py-3 px-4">Paid By</th>
+                                    <th class="py-3 px-4">Amount</th>
+                                    <th class="py-3 px-4">Gateway &amp; Status</th>
+                                    <th class="py-3 px-4">Date</th>
+                                    <th class="py-3 px-4 text-right">Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 font-medium">
+                                @foreach($payments as $pm)
+                                    <tr class="hover:bg-slate-50/80 transition">
+                                        <!-- Transaction & Order ID -->
+                                        <td class="py-3.5 px-4 font-mono">
+                                            <a href="{{ route('showrooms.manage.payments.show', [$showroom, $pm]) }}" class="font-bold text-rose-600 hover:underline block">
+                                                #PAY-{{ str_pad($pm->id, 6, '0', STR_PAD_LEFT) }}
+                                            </a>
+                                            <span class="text-[10px] text-slate-500 block mt-0.5 truncate max-w-[160px]" title="{{ $pm->razorpay_order_id }}">
+                                                {{ $pm->razorpay_order_id ?? 'Direct Offline' }}
+                                            </span>
+                                            @if($pm->razorpay_payment_id)
+                                                <span class="text-[10px] text-slate-400 block font-mono truncate max-w-[160px]" title="{{ $pm->razorpay_payment_id }}">
+                                                    {{ $pm->razorpay_payment_id }}
+                                                </span>
+                                            @endif
+                                        </td>
+
+                                        <!-- Purpose / Plan -->
+                                        <td class="py-3.5 px-4">
+                                            <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 border border-slate-200 text-slate-700">
+                                                {{ str_replace('_', ' ', $pm->purpose) }}
+                                            </span>
+                                            @if(isset($pm->notes['plan_slug']))
+                                                <span class="text-[11px] text-slate-700 font-bold block mt-1 capitalize">
+                                                    {{ str_replace('-', ' ', $pm->notes['plan_slug']) }} Plan
+                                                </span>
+                                            @endif
+                                        </td>
+
+                                        <!-- Paid By -->
+                                        <td class="py-3.5 px-4">
+                                            <div class="font-bold text-slate-900 text-xs">
+                                                {{ $pm->user?->name ?? 'Dealership Admin' }}
+                                            </div>
+                                            <div class="text-[10px] text-slate-500 font-mono">
+                                                {{ $pm->user?->email ?? 'N/A' }}
+                                            </div>
+                                        </td>
+
+                                        <!-- Amount -->
+                                        <td class="py-3.5 px-4">
+                                            <div class="font-mono text-sm font-black text-emerald-700">
+                                                ₹{{ number_format($pm->amount) }}
+                                            </div>
+                                            <span class="text-[10px] text-slate-400 uppercase font-mono">{{ $pm->currency }}</span>
+                                        </td>
+
+                                        <!-- Gateway & Status -->
+                                        <td class="py-3.5 px-4">
+                                            <div class="space-y-1">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold {{ $pm->status->badgeClasses() }}">
+                                                    {{ $pm->status->label() }}
+                                                </span>
+                                                @if($pm->signature_verified)
+                                                    <span class="inline-flex items-center gap-1 text-[10px] text-emerald-700 block font-mono">
+                                                        <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                        Razorpay Verified
+                                                    </span>
+                                                @endif
+                                                @if($pm->method)
+                                                    <span class="text-[10px] text-slate-400 uppercase font-mono block">via {{ $pm->method }}</span>
+                                                @endif
+                                            </div>
+                                        </td>
+
+                                        <!-- Date -->
+                                        <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">
+                                            <div class="text-xs font-bold text-slate-800">{{ $pm->created_at->format('M d, Y') }}</div>
+                                            <span class="text-[10px] text-slate-400 font-mono">{{ $pm->created_at->format('h:i A') }}</span>
+                                        </td>
+
+                                        <!-- Receipt Action -->
+                                        <td class="py-3.5 px-4 text-right">
+                                            <a href="{{ route('showrooms.manage.payments.show', [$showroom, $pm]) }}"
+                                               class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 rounded-xl font-bold text-[11px] transition shadow-xs">
+                                                <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                <span>Receipt</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if($payments->hasPages())
+                        <div class="p-4 border-t border-slate-200 bg-white">
+                            {{ $payments->links() }}
+                        </div>
+                    @endif
+                @else
+                    <div class="text-center py-12 px-4 space-y-2">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900">No Payment History Yet</h3>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                            When you purchase or upgrade a subscription tier, your Razorpay transaction records, invoices, and tax receipts will appear here.
+                        </p>
+                    </div>
+                @endif
             </div>
         </div>
 

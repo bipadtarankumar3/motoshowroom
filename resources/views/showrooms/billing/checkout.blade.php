@@ -1,18 +1,19 @@
 <x-app-layout :title="'Checkout - ' . $plan->name . ' - ' . $showroom->name">
-<div class="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto space-y-8">
+    @include('showrooms.partials.manage-nav')
+    <div class="w-full bg-slate-50 text-slate-900 py-8 px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div class="max-w-4xl mx-auto space-y-6">
 
-        <!-- Back to Billing Navigation -->
-        <div class="flex items-center justify-between text-xs text-slate-500">
-            <a href="{{ route('showrooms.billing.index', $showroom) }}" class="inline-flex items-center gap-1.5 hover:text-slate-900 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                <span>Back to Billing & Plans</span>
-            </a>
-            <span class="inline-flex items-center gap-1.5 text-emerald-600 font-medium">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                <span>256-Bit SSL Encrypted Checkout</span>
-            </span>
-        </div>
+            <!-- Back to Billing Navigation -->
+            <div class="flex items-center justify-between text-xs text-slate-500">
+                <a href="{{ route('showrooms.billing.index', $showroom) }}" class="inline-flex items-center gap-1.5 hover:text-slate-900 font-bold transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <span>Back to Subscription & Billing</span>
+                </a>
+                <span class="inline-flex items-center gap-1.5 text-emerald-600 font-semibold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span>Admin Razorpay Verified Gateway</span>
+                </span>
+            </div>
 
         <!-- Header Card -->
         <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
@@ -32,7 +33,7 @@
                         Complete Plan Purchase
                     </h1>
                     <p class="text-xs text-slate-500">
-                        Showroom: <span class="text-slate-900 font-semibold">{{ $showroom->name }}</span> • Billed {{ ucfirst($interval) }}
+                        Showroom: <span class="text-slate-900 font-semibold">{{ $showroom->name }}</span> • Tier Access &amp; Validity
                     </p>
                 </div>
 
@@ -62,7 +63,7 @@
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="font-bold text-slate-900 text-base">{{ $plan->name }} Tier</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 uppercase">{{ $interval }}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 uppercase tracking-wider">Valid Tier</span>
                     </div>
                     <p class="text-xs text-slate-600 leading-relaxed">{{ $plan->description }}</p>
                     <div class="pt-2 border-t border-slate-200 text-xs space-y-1.5 text-slate-600">
@@ -145,8 +146,8 @@
             </div>
 
         </div>
-
     </div>
+    @include('showrooms.partials.manage-nav-close')
 </div>
 
 <!-- Razorpay Checkout Script Integration -->
@@ -160,7 +161,7 @@ document.getElementById('btn-rzp-pay')?.addEventListener('click', function(e) {
         amount: {{ (int) round($payment->amount * 100) }},
         currency: "{{ $payment->currency }}",
         name: "MotoShowroom SaaS",
-        description: "{{ $plan->name }} Subscription ({{ ucfirst($interval) }})",
+        description: "{{ $plan->name }} Plan Subscription",
         order_id: "{{ $payment->razorpay_order_id }}",
         prefill: {
             name: "{{ auth()->user()?->name }}",

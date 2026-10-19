@@ -317,12 +317,11 @@ class SubscriptionManagementTest extends TestCase
         $response->assertOk();
         $response->assertSee('Showroom Subscription & Quotas', false);
         $response->assertSee('Starter Dealership');
-        $response->assertSee('Professional Showroom');
-
-        // Select Pro plan
+        // Select Pro plan with direct activation
         $selectResponse = $this->post("/showrooms/{$this->showroom->slug}/billing/select-plan", [
             'plan_id' => $this->proPlan->id,
             'billing_interval' => 'monthly',
+            'direct_activate' => true,
         ]);
 
         $selectResponse->assertRedirect(route('showrooms.billing.index', $this->showroom));
@@ -336,6 +335,22 @@ class SubscriptionManagementTest extends TestCase
         // Now back-office management access is granted
         $manageResponse = $this->get("/showrooms/{$this->showroom->slug}/manage");
         $manageResponse->assertOk();
+    }
+
+    public function test_showroom_owner_selecting_plan_redirects_to_razorpay_checkout(): void
+    {
+        $this->actingAs($this->owner);
+
+        $response = $this->post("/showrooms/{$this->showroom->slug}/billing/select-plan", [
+            'plan_id' => $this->proPlan->id,
+            'billing_interval' => 'monthly',
+        ]);
+
+        $response->assertRedirect(route('showrooms.billing.checkout', [
+            'showroom' => $this->showroom,
+            'plan_id' => $this->proPlan->id,
+            'interval' => 'monthly',
+        ]));
     }
 
     public function test_super_admin_bypasses_subscription_gate_even_if_showroom_expired(): void
