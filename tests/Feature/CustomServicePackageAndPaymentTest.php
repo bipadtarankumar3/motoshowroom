@@ -232,7 +232,7 @@ class CustomServicePackageAndPaymentTest extends TestCase
         ]);
 
         $booking = $this->showroom->serviceBookings()->where('registration_number', 'KA-04-DU-9999')->first();
-        $response->assertRedirect(route('showrooms.services.checkout', [$this->showroom, $booking]));
+        $response->assertRedirect(route('showrooms.services.track', ['showroom' => $this->showroom, 'booking' => $booking->booking_number]));
     }
 
     public function test_customer_booking_pay_at_bay_service_redirects_to_tracking(): void

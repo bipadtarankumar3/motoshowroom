@@ -571,11 +571,37 @@
                                         </div>
                                     </div>
 
-                                    <a href="{{ route('showrooms.services.checkout', [$showroom, $bookingRecord]) }}"
-                                       class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                                        <span>Pay Invoice Online Now</span>
-                                    </a>
+                                    @if(isset($payment) && $payment)
+                                        <div class="space-y-2 pt-1">
+                                            <button type="button"
+                                                    id="btn-rzp-pay-service"
+                                                    onclick="launchTrackerRazorpay()"
+                                                    class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 cursor-pointer">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                                <span>Pay ₹{{ number_format($payment->amount) }} via Razorpay</span>
+                                            </button>
+
+                                            {{-- Sandbox Instant Simulation Form --}}
+                                            <form method="POST" action="{{ route('showrooms.payments.verify', $showroom) }}" id="service-payment-verify-form">
+                                                @csrf
+                                                <input type="hidden" name="payment_id" value="{{ $payment->id }}">
+                                                <input type="hidden" name="razorpay_order_id" value="{{ $payment->razorpay_order_id }}">
+                                                <input type="hidden" name="razorpay_payment_id" value="{{ $simulatedPaymentId }}" id="service_rzp_payment_id">
+                                                <input type="hidden" name="razorpay_signature" value="{{ $simulatedSignature }}" id="service_rzp_signature">
+                                                <input type="hidden" name="method" value="upi">
+                                                <input type="hidden" name="terms_accepted" value="1">
+
+                                                <button type="submit"
+                                                        class="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                                    <span>⚡ Simulate Instant Payment (Sandbox)</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @endif
+
+                                    <p class="text-[11px] text-slate-500 text-center pt-1 border-t border-amber-200/60">
+                                        You can also pay cash/card at the workshop bay upon delivery.
+                                    </p>
                                 </div>
                             @else
                                 <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1.5 text-xs text-emerald-800">
@@ -719,6 +745,39 @@
 
         </div>
     </div>
+
+    @if(isset($payment) && $payment)
+        {{-- Direct Modal Razorpay Script --}}
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script>
+        function launchTrackerRazorpay() {
+            const options = {
+                key: "{{ $keyId }}",
+                amount: {{ $payment->amount * 100 }},
+                currency: "{{ $payment->currency }}",
+                name: "{{ addslashes($showroom->name) }}",
+                description: "Service Invoice #{{ $bookingRecord->booking_number }} - {{ addslashes($bookingRecord->bike_make_model) }}",
+                order_id: "{{ $payment->razorpay_order_id }}",
+                prefill: {
+                    name: "{{ addslashes($bookingRecord->customer_name) }}",
+                    email: "{{ addslashes($bookingRecord->customer_email) }}",
+                    contact: "{{ addslashes($bookingRecord->customer_phone) }}"
+                },
+                theme: {
+                    color: "#059669"
+                },
+                handler: function (response) {
+                    document.getElementById('service_rzp_payment_id').value = response.razorpay_payment_id;
+                    document.getElementById('service_rzp_signature').value = response.razorpay_signature;
+                    document.getElementById('service-payment-verify-form').submit();
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+        </script>
+    @endif
 
     {{-- Motorcycle Showroom Footer --}}
     @include('showrooms.partials.footer')

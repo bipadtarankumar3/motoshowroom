@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
+use App\Services\PaymentProcessingService;
+use App\Services\RazorpayService;
 use App\Services\ScratchCardService;
 use App\Services\ShowroomNotificationService;
 use Illuminate\Contracts\View\View;
@@ -188,17 +190,6 @@ class PublicServiceController extends Controller
             $scratchParticipation = app(ScratchCardService::class)->autoIssueForServiceBooking($booking);
         }
 
-        if ($isPaymentRequired) {
-            return redirect()->route('showrooms.services.checkout', [
-                'showroom' => $showroom,
-                'booking' => $booking,
-                'scratch' => $scratchParticipation?->participation_token,
-            ])->with(
-                'success',
-                "Appointment reserved! Reference #{$booking->booking_number}. Please accept terms and complete payment to confirm your booking slot."
-            );
-        }
-
         $redirectParams = [
             'showroom' => $showroom,
             'booking' => $booking->booking_number,
@@ -208,10 +199,12 @@ class PublicServiceController extends Controller
             $redirectParams['scratch'] = $scratchParticipation->participation_token;
         }
 
-        return redirect()->route('showrooms.services.track', $redirectParams)->with(
-            'success',
-            "Appointment successfully scheduled! Your service tracking reference is #{$booking->booking_number}."
-        );
+        $message = "Appointment successfully scheduled! Your service reference is #{$booking->booking_number}.";
+        if ($isPaymentRequired) {
+            $message .= ' You can complete payment online or pay at the workshop counter upon delivery.';
+        }
+
+        return redirect()->route('showrooms.services.track', $redirectParams)->with('success', $message);
     }
 
     /**
@@ -223,6 +216,10 @@ class PublicServiceController extends Controller
         $searched = false;
         $bookingRecord = null;
         $scratchParticipation = null;
+        $payment = null;
+        $keyId = null;
+        $simulatedPaymentId = null;
+        $simulatedSignature = null;
 
         if (! empty($searchRef)) {
             $searched = true;
@@ -238,6 +235,14 @@ class PublicServiceController extends Controller
 
         if ($bookingRecord) {
             $scratchParticipation = $bookingRecord->scratchCardParticipations()->with(['prize', 'campaign'])->latest()->first();
+
+            // Prepare instant 1-click Razorpay payment directly on the tracker without extra checkout page
+            if ($bookingRecord->payment_status->value !== 'captured') {
+                $payment = app(PaymentProcessingService::class)->initiateServicePayment($showroom, $bookingRecord);
+                $keyId = app(RazorpayService::class)->getKeyId();
+                $simulatedPaymentId = 'pay_'.substr(md5($payment->razorpay_order_id.'sim'), 0, 14);
+                $simulatedSignature = app(RazorpayService::class)->generateSignature($payment->razorpay_order_id, $simulatedPaymentId);
+            }
         }
 
         if (! $scratchParticipation && $request->filled('scratch')) {
@@ -247,7 +252,17 @@ class PublicServiceController extends Controller
                 ->first();
         }
 
-        return view('showrooms.services.track', compact('showroom', 'bookingRecord', 'searchRef', 'searched', 'scratchParticipation'));
+        return view('showrooms.services.track', compact(
+            'showroom',
+            'bookingRecord',
+            'searchRef',
+            'searched',
+            'scratchParticipation',
+            'payment',
+            'keyId',
+            'simulatedPaymentId',
+            'simulatedSignature'
+        ));
     }
 
     /**

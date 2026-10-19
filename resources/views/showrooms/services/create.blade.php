@@ -570,12 +570,12 @@
                         <!-- Big Submit Button -->
                         <div>
                             <button type="submit" id="btn-submit-service-booking"
-                                    class="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
-                                <span x-text="isPaymentRequired ? 'Proceed to Advance Payment' : 'Confirm Service Appointment'"></span>
+                                    class="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 cursor-pointer">
+                                <span x-text="isPaymentRequired ? 'Confirm & Book Service Appointment' : 'Confirm Service Appointment'"></span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                             </button>
                             <p class="text-[10px] text-center text-slate-400 mt-2">
-                                Instant confirmation • No bay wait times • 100% Genuine
+                                Instant confirmation • Pay online or at workshop counter • 100% Genuine
                             </p>
                         </div>
                     </div>
