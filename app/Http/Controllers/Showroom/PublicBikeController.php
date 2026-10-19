@@ -93,4 +93,17 @@ class PublicBikeController extends Controller
 
         return view('showrooms.bikes.show', compact('showroom', 'bike', 'relatedBikes', 'has360Viewer'));
     }
+
+    /**
+     * Display dedicated reservation checkout page for a specific motorcycle.
+     */
+    public function checkout(Request $request, Showroom $showroom, Bike $bike): View
+    {
+        abort_if($bike->tenant_id !== $showroom->id || ! $bike->is_published, 404);
+
+        $bike->load(['images', 'variants']);
+        $selectedVariant = $request->query('variant', $bike->variants->first()?->name ?? 'Standard');
+
+        return view('showrooms.bikes.checkout', compact('showroom', 'bike', 'selectedVariant'));
+    }
 }

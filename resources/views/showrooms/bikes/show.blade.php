@@ -6,6 +6,9 @@
 <div class="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans selection:bg-rose-500 selection:text-white"
      x-data="{
          buyModalOpen: false,
+         bookingTermsModalOpen: false,
+         termsAccepted: false,
+         bookingPaymentMethod: 'razorpay',
          selectedVariant: '{{ $bike->variants->first()?->name ?? 'Standard' }}',
          selectedColorHex: '{{ $bike->variants->first()?->color_hex ?? '#CC0000' }}',
          downPaymentPct: 20,
@@ -580,13 +583,12 @@
 
                     {{-- ═══ THE PRIMARY BUY / RESERVE ACTION BUTTON ═══ --}}
                     <div class="space-y-3 pt-2">
-                        <button type="button"
-                                @click="buyModalOpen = true"
-                                id="btn-book-buy-bike"
-                                class="w-full py-4 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2.5 text-center cursor-pointer">
+                        <a :href="'{{ route('showrooms.bikes.checkout', [$showroom, $bike]) }}?variant=' + encodeURIComponent(selectedVariant)"
+                           id="btn-book-buy-bike"
+                           class="w-full py-4 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2.5 text-center cursor-pointer">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                             <span>Book / Reserve to Buy</span>
-                        </button>
+                        </a>
                         <p class="text-[11px] text-center text-slate-500 leading-tight">
                             Reserve with ₹10,000 refundable advance token • 100% Price Lock Guaranteed
                         </p>
@@ -755,7 +757,7 @@
         <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity" @click="buyModalOpen = false"></div>
         <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
             <div class="relative bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 text-left shadow-2xl border border-slate-200 my-8 overflow-hidden"
-                 @click.away="buyModalOpen = false">
+                 @click.away="if (!bookingTermsModalOpen) buyModalOpen = false">
 
                 <div class="flex items-start justify-between pb-4 border-b border-slate-100">
                     <div>
@@ -775,6 +777,8 @@
                     @csrf
                     <input type="hidden" name="bike_id" value="{{ $bike->id }}">
                     <input type="hidden" name="type" value="purchase">
+                    <input type="hidden" name="booking_amount" value="10000">
+                    <input type="hidden" name="payment_method" :value="bookingPaymentMethod">
 
                     {{-- Selected Machine Badge --}}
                     <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
@@ -786,7 +790,61 @@
                         <div class="text-right">
                             <span class="text-[10px] uppercase font-bold text-slate-400">Booking Token</span>
                             <p class="text-lg font-black font-mono text-emerald-600">₹10,000</p>
-                            <span class="text-[10px] text-slate-500">Refundable Advance</span>
+                            <span class="text-[10px] text-slate-500" x-text="bookingPaymentMethod === 'razorpay' ? 'Online Token (Refundable)' : 'Pay at Showroom (Refundable)'"></span>
+                        </div>
+                    </div>
+
+                    {{-- Booking & Payment Method Choice --}}
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1.5">Select Booking &amp; Payment Method <span class="text-rose-600">*</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            {{-- Razorpay Online Booking --}}
+                            <div @click="bookingPaymentMethod = 'razorpay'"
+                                 :class="bookingPaymentMethod === 'razorpay' ? 'border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-600 shadow-xs' : 'border-slate-200 bg-white hover:border-slate-300'"
+                                 class="p-3 rounded-2xl border cursor-pointer transition flex flex-col justify-between">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-900 text-xs">Razorpay Online Booking</p>
+                                            <p class="text-[10px] font-semibold text-emerald-700">Instant Digital Confirmation</p>
+                                        </div>
+                                    </div>
+                                    <span class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5"
+                                          :class="bookingPaymentMethod === 'razorpay' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 bg-white'">
+                                        <svg x-show="bookingPaymentMethod === 'razorpay'" class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
+                                    Pay ₹10,000 refundable advance online via UPI, Credit/Debit card, or NetBanking to lock chassis instantly.
+                                </p>
+                            </div>
+
+                            {{-- Normal Booking (Pay at Showroom) --}}
+                            <div @click="bookingPaymentMethod = 'offline'"
+                                 :class="bookingPaymentMethod === 'offline' ? 'border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-600 shadow-xs' : 'border-slate-200 bg-white hover:border-slate-300'"
+                                 class="p-3 rounded-2xl border cursor-pointer transition flex flex-col justify-between">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-900 text-xs">Normal Booking</p>
+                                            <p class="text-[10px] font-semibold text-slate-500">Pay Token at Dealership</p>
+                                        </div>
+                                    </div>
+                                    <span class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5"
+                                          :class="bookingPaymentMethod === 'offline' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 bg-white'">
+                                        <svg x-show="bookingPaymentMethod === 'offline'" class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
+                                    Reserve priority chassis offline. Visit dealership within 48 hours to complete document KYC &amp; deposit token.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -833,24 +891,151 @@
                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs font-medium focus:bg-white"></textarea>
                     </div>
 
+                    {{-- Terms & Conditions Checkbox with Modal Trigger --}}
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="flex items-start gap-2.5">
+                            <input type="checkbox"
+                                   name="terms_accepted"
+                                   id="booking_terms_accepted"
+                                   value="1"
+                                   x-model="termsAccepted"
+                                   required
+                                   class="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                            <div class="text-xs text-slate-700 leading-snug">
+                                <label for="booking_terms_accepted" class="cursor-pointer select-none">
+                                    I agree to the
+                                </label>
+                                <button type="button"
+                                        @click.prevent.stop="bookingTermsModalOpen = true"
+                                        class="font-bold text-emerald-600 hover:text-emerald-800 underline underline-offset-2 cursor-pointer transition inline-block">
+                                    Terms &amp; Conditions and Reservation Policy
+                                </button>
+                                <span class="text-rose-600">*</span>
+                                <span class="block text-[11px] text-slate-500 mt-0.5">
+                                    View policy on 100% refundable token, priority chassis lock, and cancellation guidelines.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
                         <p class="font-bold flex items-center gap-1.5 text-xs">
-                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             <span>100% Refundable Booking Guarantee</span>
                         </p>
                         <p class="text-[11px] text-emerald-800 leading-relaxed">
-                            Submitting this reservation locks your chassis number immediately. You may inspect the bike at the dealership or cancel anytime prior to invoicing for a full refund.
+                            Submitting this reservation locks your vehicle chassis priority. You may inspect the bike at {{ $showroom->name }} or cancel anytime prior to invoicing for a 100% full refund.
                         </p>
                     </div>
 
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <div class="pt-3 border-t border-slate-100">
                         <button type="submit"
-                                class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs uppercase tracking-wider transition shadow-md shadow-emerald-600/20 cursor-pointer flex items-center justify-center gap-2">
-                            <span>Confirm &amp; Reserve for Purchase</span>
+                                :disabled="!termsAccepted"
+                                :class="termsAccepted ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-600/20 cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
+                                class="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2">
+                            <span x-text="bookingPaymentMethod === 'razorpay' ? 'Proceed to Pay ₹10,000 via Razorpay' : 'Confirm Normal Booking (Pay at Showroom)'"></span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </button>
+                        <p x-show="!termsAccepted" class="text-center text-[10px] text-amber-600 font-medium mt-1.5">
+                            * Please review and check the Terms &amp; Conditions to proceed.
+                        </p>
                     </div>
                 </form>
+
+            </div>
+        </div>
+    </div>
+
+    {{-- ═══ TERMS & CONDITIONS POPUP MODAL ═══ --}}
+    <div x-cloak x-show="bookingTermsModalOpen"
+         class="fixed inset-0 z-60 overflow-y-auto"
+         role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" @click="bookingTermsModalOpen = false"></div>
+        <div class="min-h-screen px-4 text-center flex items-center justify-center p-4">
+            <div class="relative bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 text-left shadow-2xl border border-slate-200 my-8 overflow-hidden"
+                 @click.away="bookingTermsModalOpen = false">
+
+                {{-- Header --}}
+                <div class="flex items-start justify-between pb-4 border-b border-slate-100">
+                    <div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
+                            Legal &amp; Dealership Guidelines
+                        </span>
+                        <h3 class="text-xl font-black font-display text-slate-900 mt-1">Booking Terms &amp; Reservation Policy</h3>
+                        <p class="text-xs text-slate-500">{{ $showroom->name }} • Authorized Customer Agreement</p>
+                    </div>
+                    <button type="button" @click="bookingTermsModalOpen = false" class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                {{-- Terms Body --}}
+                <div class="py-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2 text-xs text-slate-700 leading-relaxed">
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                        <h4 class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-mono text-[11px] font-bold inline-flex items-center justify-center">1</span>
+                            Token Advance &amp; Chassis Allocation
+                        </h4>
+                        <p class="text-[11px] text-slate-600 pl-6.5">
+                            The booking token amount of <strong>₹10,000</strong> secures your vehicle queue priority for <strong>{{ $bike->name }}</strong>. Submitting a reservation blocks the vehicle VIN/chassis against your contact details.
+                        </p>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-1">
+                        <h4 class="font-bold text-emerald-950 text-xs flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-600 text-white font-mono text-[11px] font-bold inline-flex items-center justify-center">2</span>
+                            100% Full Refund Guarantee
+                        </h4>
+                        <p class="text-[11px] text-emerald-900 pl-6.5">
+                            Your reservation advance is <strong>100% refundable</strong> with zero cancellation charges prior to final commercial invoicing and RTO tax registration. If you change your mind for any reason, the advance will be credited back via original payment channel within 3–5 working days.
+                        </p>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                        <h4 class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-mono text-[11px] font-bold inline-flex items-center justify-center">3</span>
+                            Normal Booking (Pay at Showroom)
+                        </h4>
+                        <p class="text-[11px] text-slate-600 pl-6.5">
+                            If choosing Normal Booking, your provisional allocation is held for <strong>48 hours</strong>. You must visit {{ $showroom->name }} with valid ID/Address proofs to inspect the motorcycle and deposit the booking advance in person; unconfirmed bookings may be released thereafter.
+                        </p>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                        <h4 class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-mono text-[11px] font-bold inline-flex items-center justify-center">4</span>
+                            Razorpay Online Booking
+                        </h4>
+                        <p class="text-[11px] text-slate-600 pl-6.5">
+                            Online transactions are encrypted with 256-bit SSL and processed via Razorpay. Supported modes include UPI (GPay, PhonePe, Paytm), Credit &amp; Debit Cards, NetBanking, and authorized wallets. A digital receipt and tracking ID will be generated immediately upon authorization.
+                        </p>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                        <h4 class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-mono text-[11px] font-bold inline-flex items-center justify-center">5</span>
+                            On-Road Pricing &amp; Delivery Settlement
+                        </h4>
+                        <p class="text-[11px] text-slate-600 pl-6.5">
+                            The ₹10,000 token is adjusted against your final invoice. The final on-road amount is subject to state RTO road tax rates, mandatory insurance coverages, and any manufacturer ex-showroom price revisions applicable on the invoice generation date.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Modal Action Footer --}}
+                <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-3">
+                    <button type="button"
+                            @click="bookingTermsModalOpen = false"
+                            class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-xs transition cursor-pointer">
+                        Close
+                    </button>
+                    <button type="button"
+                            @click="termsAccepted = true; bookingTermsModalOpen = false"
+                            class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm cursor-pointer flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>I Read &amp; Accept Booking Terms</span>
+                    </button>
+                </div>
 
             </div>
         </div>

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -35,6 +36,10 @@ class Enquiry extends Model
         'preferred_time_slot',
         'driving_license_number',
         'status',
+        'booking_amount',
+        'payment_method',
+        'payment_status',
+        'terms_accepted',
         'customer_notes',
         'staff_notes',
         'assigned_to_user_id',
@@ -53,6 +58,8 @@ class Enquiry extends Model
         return [
             'type' => EnquiryType::class,
             'status' => EnquiryStatus::class,
+            'booking_amount' => 'decimal:2',
+            'terms_accepted' => 'boolean',
             'preferred_date' => 'date',
             'scheduled_at' => 'datetime',
             'contacted_at' => 'datetime',
@@ -104,6 +111,14 @@ class Enquiry extends Model
     public function scratchCardParticipations(): HasMany
     {
         return $this->hasMany(ScratchCardParticipation::class, 'enquiry_id');
+    }
+
+    /**
+     * Financial payment ledger entries associated with this vehicle booking.
+     */
+    public function payments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable');
     }
 
     /**

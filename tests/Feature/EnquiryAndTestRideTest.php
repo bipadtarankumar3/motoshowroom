@@ -608,4 +608,141 @@ class EnquiryAndTestRideTest extends TestCase
         $response->assertSee('Active leads');
         $this->assertEquals(2, $response->viewData('metrics')['active_enquiries']);
     }
+
+    public function test_customer_can_submit_normal_booking_with_accepted_terms(): void
+    {
+        $response = $this->post(route('showrooms.enquiries.store', $this->showroomA), [
+            'customer_name' => 'Aditya Sharma',
+            'customer_email' => 'aditya@example.com',
+            'customer_phone' => '+91 9123456789',
+            'type' => EnquiryType::Purchase->value,
+            'bike_id' => $this->bikeA->id,
+            'payment_method' => 'offline',
+            'booking_amount' => 10000,
+            'terms_accepted' => '1',
+            'delivery_method' => 'showroom_handover',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $enquiry = Enquiry::where('customer_email', 'aditya@example.com')->first();
+        $this->assertNotNull($enquiry);
+        $response->assertRedirect(route('showrooms.booking.success', [$this->showroomA, $enquiry]));
+
+        $this->assertDatabaseHas('enquiries', [
+            'tenant_id' => $this->showroomA->id,
+            'customer_email' => 'aditya@example.com',
+            'status' => EnquiryStatus::Booked->value,
+            'payment_method' => 'offline',
+            'payment_status' => 'unpaid',
+            'terms_accepted' => true,
+        ]);
+    }
+
+    public function test_customer_booking_submission_fails_if_terms_not_accepted(): void
+    {
+        $response = $this->post(route('showrooms.enquiries.store', $this->showroomA), [
+            'customer_name' => 'Aditya Sharma',
+            'customer_email' => 'aditya@example.com',
+            'customer_phone' => '+91 9123456789',
+            'type' => EnquiryType::Purchase->value,
+            'bike_id' => $this->bikeA->id,
+            'payment_method' => 'offline',
+            'booking_amount' => 10000,
+            // terms_accepted missing
+        ]);
+
+        $response->assertSessionHasErrors(['terms_accepted']);
+        $this->assertDatabaseMissing('enquiries', [
+            'customer_email' => 'aditya@example.com',
+        ]);
+    }
+
+    public function test_customer_can_submit_razorpay_booking_and_redirects_to_checkout(): void
+    {
+        $response = $this->post(route('showrooms.enquiries.store', $this->showroomA), [
+            'customer_name' => 'Rohan Mehta',
+            'customer_email' => 'rohan@example.com',
+            'customer_phone' => '+91 9988776655',
+            'type' => EnquiryType::Purchase->value,
+            'bike_id' => $this->bikeA->id,
+            'payment_method' => 'razorpay',
+            'booking_amount' => 10000,
+            'terms_accepted' => '1',
+        ]);
+
+        $enquiry = Enquiry::where('customer_email', 'rohan@example.com')->first();
+        $this->assertNotNull($enquiry);
+        $this->assertEquals(EnquiryStatus::BookingPending->value, $enquiry->status->value);
+        $this->assertEquals('razorpay', $enquiry->payment_method);
+        $this->assertEquals('pending', $enquiry->payment_status);
+        $this->assertTrue((bool) $enquiry->terms_accepted);
+
+        $response->assertRedirect(route('showrooms.bikes.booking.checkout', [$this->showroomA, $enquiry]));
+
+        // Check checkout page renders
+        $checkoutResponse = $this->get(route('showrooms.bikes.booking.checkout', [$this->showroomA, $enquiry]));
+        $checkoutResponse->assertStatus(200);
+        $checkoutResponse->assertSee('Pay Vehicle Booking Advance');
+        $checkoutResponse->assertSee('₹10,000');
+        $checkoutResponse->assertSee($this->bikeA->name);
+    }
+
+    public function test_dedicated_bike_checkout_page_renders_successfully(): void
+    {
+        $response = $this->get(route('showrooms.bikes.checkout', [$this->showroomA, $this->bikeA]));
+        $response->assertStatus(200);
+        $response->assertSee('Complete Vehicle Reservation');
+        $response->assertSee($this->bikeA->name);
+        $response->assertSee('₹10,000');
+        $response->assertSee('Razorpay Online Booking');
+        $response->assertSee('Normal Booking');
+    }
+
+    public function test_booking_success_page_renders_with_details(): void
+    {
+        $enquiry = Enquiry::factory()->create([
+            'tenant_id' => $this->showroomA->id,
+            'bike_id' => $this->bikeA->id,
+            'type' => EnquiryType::Purchase->value,
+            'status' => EnquiryStatus::Booked->value,
+            'payment_method' => 'razorpay',
+            'payment_status' => 'captured',
+            'booking_amount' => 10000,
+            'terms_accepted' => true,
+        ]);
+
+        $response = $this->get(route('showrooms.booking.success', [$this->showroomA, $enquiry]));
+        $response->assertStatus(200);
+        $response->assertSee('Booking Confirmed');
+        $response->assertSee($enquiry->enquiry_number);
+        $response->assertSee($this->bikeA->name);
+    }
+
+    public function test_booking_failed_page_renders_and_supports_switching_to_offline(): void
+    {
+        $enquiry = Enquiry::factory()->create([
+            'tenant_id' => $this->showroomA->id,
+            'bike_id' => $this->bikeA->id,
+            'type' => EnquiryType::Purchase->value,
+            'status' => EnquiryStatus::BookingPending->value,
+            'payment_method' => 'razorpay',
+            'payment_status' => 'pending',
+            'booking_amount' => 10000,
+            'terms_accepted' => true,
+        ]);
+
+        $response = $this->get(route('showrooms.booking.failed', [$this->showroomA, $enquiry]));
+        $response->assertStatus(200);
+        $response->assertSee('Payment Authorization Incomplete');
+
+        // Test switching to normal offline booking
+        $switchResponse = $this->post(route('showrooms.booking.switch-offline', [$this->showroomA, $enquiry]));
+        $switchResponse->assertRedirect(route('showrooms.booking.success', [$this->showroomA, $enquiry]));
+
+        $enquiry->refresh();
+        $this->assertEquals(EnquiryStatus::Booked->value, $enquiry->status->value);
+        $this->assertEquals('offline', $enquiry->payment_method);
+        $this->assertEquals('unpaid', $enquiry->payment_status);
+    }
 }

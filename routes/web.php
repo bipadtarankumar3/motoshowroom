@@ -159,6 +159,7 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     // Public Motorcycle Catalog & 360 Studio
     Route::get('/bikes', [PublicBikeController::class, 'index'])->name('showrooms.bikes.index');
     Route::get('/bikes/{bike}', [PublicBikeController::class, 'show'])->name('showrooms.bikes.show');
+    Route::get('/bikes/{bike}/checkout', [PublicBikeController::class, 'checkout'])->name('showrooms.bikes.checkout');
     Route::get('/bikes/{bike}/360', [PublicBike360Controller::class, 'viewer'])->name('showrooms.bikes.360');
     Route::get('/bikes/{bike}/360/data', [PublicBike360Controller::class, 'data'])->name('showrooms.bikes.360.data');
 
@@ -172,6 +173,12 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::post('/services/book', [PublicServiceController::class, 'store'])->name('showrooms.services.store');
     Route::get('/services/track/{booking?}', [PublicServiceController::class, 'track'])->name('showrooms.services.track');
     Route::get('/services/{booking}/checkout', [PaymentCheckoutController::class, 'serviceCheckout'])->name('showrooms.services.checkout');
+
+    // Motorcycle Booking Checkout, Success & Error Resolution
+    Route::get('/bikes/booking/{enquiry}/checkout', [PaymentCheckoutController::class, 'bikeBookingCheckout'])->name('showrooms.bikes.booking.checkout');
+    Route::get('/bikes/booking/{enquiry}/success', [PaymentCheckoutController::class, 'bikeBookingSuccess'])->name('showrooms.booking.success');
+    Route::get('/bikes/booking/{enquiry}/failed', [PaymentCheckoutController::class, 'bikeBookingFailed'])->name('showrooms.booking.failed');
+    Route::post('/bikes/booking/{enquiry}/switch-offline', [PaymentCheckoutController::class, 'switchBookingToOffline'])->name('showrooms.booking.switch-offline');
 
     // Payment Signature Verification
     Route::post('/payments/verify', [PaymentCheckoutController::class, 'verifyPayment'])->name('showrooms.payments.verify');

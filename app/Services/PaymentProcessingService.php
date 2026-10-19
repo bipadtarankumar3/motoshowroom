@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\PaymentStatus;
+use App\Models\Enquiry;
 use App\Models\Payment;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
@@ -88,6 +89,44 @@ class PaymentProcessingService
             'payable_type' => ServiceBooking::class,
             'payable_id' => $booking->id,
             'purpose' => 'service_invoice',
+            'amount' => $amount,
+            'currency' => 'INR',
+            'razorpay_order_id' => $order['id'],
+            'status' => PaymentStatus::Pending->value,
+            'signature_verified' => false,
+            'notes' => $notes,
+        ]);
+    }
+
+    /**
+     * Initiate a Razorpay Order and create a pending Payment record for customer motorcycle purchase reservation.
+     */
+    public function initiateBookingPayment(
+        Showroom $showroom,
+        Enquiry $enquiry,
+        float $amount = 10000.0,
+        ?User $user = null
+    ): Payment {
+        $receipt = 'BKG-'.$enquiry->id.'-'.time();
+        $bikeName = $enquiry->bike?->name ?? 'Motorcycle Reservation';
+
+        $notes = [
+            'tenant_id' => (string) $showroom->id,
+            'enquiry_id' => (string) $enquiry->id,
+            'enquiry_number' => $enquiry->enquiry_number,
+            'bike_name' => $bikeName,
+            'customer_name' => $enquiry->customer_name,
+            'purpose' => 'vehicle_reservation_advance',
+        ];
+
+        $order = $this->razorpay->createOrder($amount, $receipt, $notes);
+
+        return Payment::create([
+            'tenant_id' => $showroom->id,
+            'user_id' => $user?->id ?? $enquiry->user_id,
+            'payable_type' => Enquiry::class,
+            'payable_id' => $enquiry->id,
+            'purpose' => 'vehicle_reservation',
             'amount' => $amount,
             'currency' => 'INR',
             'razorpay_order_id' => $order['id'],

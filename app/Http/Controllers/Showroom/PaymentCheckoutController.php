@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Showroom;
 
+use App\Enums\EnquiryStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Enquiry;
 use App\Models\Payment;
 use App\Models\ServiceBooking;
 use App\Models\Showroom;
@@ -85,6 +87,30 @@ class PaymentCheckoutController extends Controller
     }
 
     /**
+     * Show checkout screen for customer motorcycle purchase reservation advance.
+     */
+    public function bikeBookingCheckout(Showroom $showroom, Enquiry $enquiry): View
+    {
+        abort_if($enquiry->tenant_id !== $showroom->id, 404);
+
+        $amount = (float) ($enquiry->booking_amount ?: 10000.0);
+        $payment = $this->paymentProcessor->initiateBookingPayment($showroom, $enquiry, $amount);
+        $keyId = $this->razorpay->getKeyId();
+
+        $simulatedPaymentId = 'pay_'.substr(md5($payment->razorpay_order_id.'sim'), 0, 14);
+        $simulatedSignature = $this->razorpay->generateSignature($payment->razorpay_order_id, $simulatedPaymentId);
+
+        return view('showrooms.bikes.booking-checkout', compact(
+            'showroom',
+            'enquiry',
+            'payment',
+            'keyId',
+            'simulatedPaymentId',
+            'simulatedSignature'
+        ));
+    }
+
+    /**
      * Confirm and finalize payment submission via HMAC-SHA256 signature verification.
      */
     public function verifyPayment(Request $request, Showroom $showroom): RedirectResponse
@@ -108,6 +134,11 @@ class PaymentCheckoutController extends Controller
         );
 
         if (! $success) {
+            if ($payment->payable_type === Enquiry::class) {
+                return redirect()->route('showrooms.booking.failed', [$showroom, $payment->payable_id])
+                    ->with('error', 'Payment verification failed: HMAC signature mismatch detected.');
+            }
+
             return back()->with('error', 'Payment verification failed: HMAC signature mismatch detected.');
         }
 
@@ -133,7 +164,66 @@ class PaymentCheckoutController extends Controller
             ])->with('success', 'Payment of ₹'.number_format($payment->amount).' captured successfully! Invoice settled.');
         }
 
+        if ($payment->payable_type === Enquiry::class) {
+            /** @var Enquiry|null $enquiry */
+            $enquiry = Enquiry::find($payment->payable_id);
+            if ($enquiry) {
+                $enquiry->update([
+                    'status' => EnquiryStatus::Booked->value,
+                    'payment_status' => PaymentStatus::Captured->value,
+                    'booking_amount' => $payment->amount,
+                    'payment_method' => 'razorpay',
+                    'terms_accepted' => true,
+                ]);
+            }
+
+            return redirect()->route('showrooms.booking.success', [$showroom, $enquiry])
+                ->with('success', 'Booking Advance of ₹'.number_format($payment->amount).' received via Razorpay! Your motorcycle reservation (#'.$enquiry?->enquiry_number.') is confirmed.');
+        }
+
         return redirect()->route('showrooms.manage', $showroom)
             ->with('success', 'Payment verified and recorded successfully.');
+    }
+
+    /**
+     * Display motorcycle booking confirmation & receipt screen.
+     */
+    public function bikeBookingSuccess(Showroom $showroom, Enquiry $enquiry): View
+    {
+        abort_if($enquiry->tenant_id !== $showroom->id, 404);
+        $enquiry->load(['bike.images', 'bike.variants']);
+
+        $latestPayment = $enquiry->payments()->latest()->first();
+
+        return view('showrooms.bikes.booking-success', compact('showroom', 'enquiry', 'latestPayment'));
+    }
+
+    /**
+     * Display payment failed/cancelled screen with retry options.
+     */
+    public function bikeBookingFailed(Showroom $showroom, Enquiry $enquiry): View
+    {
+        abort_if($enquiry->tenant_id !== $showroom->id, 404);
+        $enquiry->load(['bike.images', 'bike.variants']);
+
+        return view('showrooms.bikes.booking-failed', compact('showroom', 'enquiry'));
+    }
+
+    /**
+     * Switch an uncompleted online booking to Normal Booking (Pay at Showroom).
+     */
+    public function switchBookingToOffline(Showroom $showroom, Enquiry $enquiry): RedirectResponse
+    {
+        abort_if($enquiry->tenant_id !== $showroom->id, 404);
+
+        $enquiry->update([
+            'status' => EnquiryStatus::Booked->value,
+            'payment_method' => 'offline',
+            'payment_status' => 'unpaid',
+            'terms_accepted' => true,
+        ]);
+
+        return redirect()->route('showrooms.booking.success', [$showroom, $enquiry])
+            ->with('success', 'Your reservation has been switched to Normal Booking (Pay at Showroom). Please visit our dealership within 48 hours to complete your refundable advance token.');
     }
 }
