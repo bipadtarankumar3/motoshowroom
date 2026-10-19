@@ -34,6 +34,7 @@ use App\Http\Controllers\Showroom\ServiceBookingController;
 use App\Http\Controllers\Showroom\SettingController;
 use App\Http\Controllers\Showroom\ShowroomAnalyticsController;
 use App\Http\Controllers\Showroom\ShowroomServicePackageController;
+use App\Http\Controllers\Showroom\SupportController;
 use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\UserController;
@@ -354,5 +355,8 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         // Showroom Settings & Profile
         Route::get('/manage/settings', [SettingController::class, 'edit'])->name('showrooms.manage.settings');
         Route::put('/manage/settings', [SettingController::class, 'update'])->name('showrooms.manage.settings.update');
+
+        // Showroom Technical Support & Help Center
+        Route::get('/manage/support', [SupportController::class, 'index'])->name('showrooms.manage.support');
     });
 });

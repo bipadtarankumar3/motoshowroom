@@ -251,4 +251,17 @@ class ShowroomDashboardAndWebsiteBuilderTest extends TestCase
         $managerResponse->assertOk();
         $managerResponse->assertSee('Storefront Offline Mode');
     }
+
+    public function test_manager_can_access_support_hub(): void
+    {
+        $this->actingAs($this->owner);
+
+        $response = $this->get("/showrooms/{$this->showroom->slug}/manage/support");
+        $response->assertOk();
+        $response->assertSee('Dealership Support & Help Center');
+        $response->assertSee('Official Support Channels & Contact Desk');
+        $response->assertSee('+91 (800) 555-0199');
+        $response->assertSee('support@motoshowroom.com');
+        $response->assertSee('Frequently Asked Questions');
+    }
 }

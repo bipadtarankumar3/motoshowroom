@@ -170,10 +170,20 @@
                 @endif
             </a>
 
-            <a href="mailto:support@motoshowroom.com"
-               class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition group">
-                <svg class="w-[18px] h-[18px] text-slate-400 group-hover:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824-2.126a5 5 0 017.072 0"/></svg>
-                <span>Support</span>
+            @php $supportActive = request()->routeIs('showrooms.manage.support*'); @endphp
+            <a href="{{ route('showrooms.manage.support', $showroom) }}"
+               class="group relative flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium transition
+                      {{ $supportActive ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                @if($supportActive)
+                    <span class="absolute -left-3 inset-y-1 w-1 rounded-r-full" style="background-color: {{ $primaryColor }}"></span>
+                @endif
+                <div class="flex items-center gap-3">
+                    <svg class="w-[18px] h-[18px] {{ $supportActive ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824-2.126a5 5 0 017.072 0"/></svg>
+                    <span>Support</span>
+                </div>
+                @if($supportActive)
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                @endif
             </a>
         </div>
 
@@ -381,6 +391,11 @@
                                 </div>
                                 <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Toggle</span>
                             </button>
+
+                            <a href="{{ route('showrooms.manage.support', $showroom) }}" class="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition font-medium">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824-2.126a5 5 0 017.072 0"/></svg>
+                                <span>Help &amp; Support Hub</span>
+                            </a>
 
                             <a href="{{ route('showrooms.show', $showroom) }}" target="_blank" class="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition font-medium">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
