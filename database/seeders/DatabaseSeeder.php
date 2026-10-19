@@ -337,5 +337,34 @@ class DatabaseSeeder extends Seeder
             'is_primary' => true,
             'sort_order' => 0,
         ]);
+
+        // Seed 360-degree turntable frames for all showroom motorcycles
+        $turntableFrames = [
+            0 => ['url' => 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?auto=format&fit=crop&w=1400&q=85', 'label' => '0° Front Facia Stance'],
+            45 => ['url' => 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1400&q=85', 'label' => '45° Front-Right Dynamic Angle'],
+            90 => ['url' => 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1400&q=85', 'label' => '90° Right Side Flank Profile'],
+            135 => ['url' => 'https://images.unsplash.com/photo-1558981420-87aa9dad1c89?auto=format&fit=crop&w=1400&q=85', 'label' => '135° Rear-Right Quarter Exhaust'],
+            180 => ['url' => 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1400&q=85', 'label' => '180° Rear Tail Aero Section'],
+            225 => ['url' => 'https://images.unsplash.com/photo-1558980664-769d59546b3d?auto=format&fit=crop&w=1400&q=85', 'label' => '225° Rear-Left Quarter Monoshock'],
+            270 => ['url' => 'https://images.unsplash.com/photo-1558980664-3a031cf67ea8?auto=format&fit=crop&w=1400&q=85', 'label' => '270° Left Flank Transmission Profile'],
+            315 => ['url' => 'https://images.unsplash.com/photo-1558981285-6f0c94958bb6?auto=format&fit=crop&w=1400&q=85', 'label' => '315° Front-Left Dynamic Angle'],
+        ];
+
+        foreach ([$r1m, $panigale, $tiger] as $seededBike) {
+            $seededBike->update(['has_360_view' => true]);
+            $seededBike->frames360()->delete();
+            $order = 0;
+            foreach ($turntableFrames as $deg => $fData) {
+                $seededBike->frames360()->create([
+                    'tenant_id' => $showroomA->id,
+                    'image_url' => $fData['url'],
+                    'alt_text' => $seededBike->name.' '.$fData['label'],
+                    'is_primary' => false,
+                    'is_360_frame' => true,
+                    'frame_angle' => $deg,
+                    'sort_order' => $order++,
+                ]);
+            }
+        }
     }
 }
