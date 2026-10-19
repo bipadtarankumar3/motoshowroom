@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Enums\BikeCategory;
 use App\Enums\BikeStatus;
+use App\Models\Banner;
 use App\Models\Bike;
+use App\Models\Category;
 use App\Models\Showroom;
 use App\Models\ShowroomMembership;
 use App\Models\SubscriptionPlan;
@@ -364,6 +366,111 @@ class DatabaseSeeder extends Seeder
                     'frame_angle' => $deg,
                     'sort_order' => $order++,
                 ]);
+            }
+        }
+
+        // 10. Seed Categories and Banners for Showrooms
+        foreach ([$showroomA, $showroomB] as $showroom) {
+            $catList = [
+                ['name' => 'Sports Bikes', 'slug' => 'sports', 'subtitle' => 'Track & Superbikes', 'image_url' => 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?auto=format&fit=crop&w=500&q=80'],
+                ['name' => 'Street Bikes', 'slug' => 'commuter', 'subtitle' => 'Naked & Roadsters', 'image_url' => 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=500&q=80'],
+                ['name' => 'Adventure Bikes', 'slug' => 'adventure', 'subtitle' => 'Dual Sport & Off-Road', 'image_url' => 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=500&q=80'],
+                ['name' => 'Scooters', 'slug' => 'scooter', 'subtitle' => 'Urban & Maxi Commuters', 'image_url' => 'https://images.unsplash.com/photo-1591637333184-19aa84b3e01f?auto=format&fit=crop&w=500&q=80'],
+                ['name' => 'Electric Bikes', 'slug' => 'electric', 'subtitle' => 'Clean Tech EVs', 'image_url' => 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=500&q=80'],
+                ['name' => 'Cruiser Bikes', 'slug' => 'cruiser', 'subtitle' => 'Highway Heritage', 'image_url' => 'https://images.unsplash.com/photo-1558980664-769d59546b3d?auto=format&fit=crop&w=500&q=80'],
+            ];
+
+            foreach ($catList as $order => $catData) {
+                Category::updateOrCreate(
+                    ['tenant_id' => $showroom->id, 'slug' => $catData['slug']],
+                    [
+                        'name' => $catData['name'],
+                        'subtitle' => $catData['subtitle'],
+                        'image_url' => $catData['image_url'],
+                        'is_active' => true,
+                        'sort_order' => $order,
+                    ]
+                );
+            }
+
+            $bannerList = [
+                [
+                    'badge' => 'NEW COLLECTION 2026',
+                    'title_prefix' => 'Fuel Your',
+                    'title_highlight' => 'Next',
+                    'title_suffix' => 'Adventure',
+                    'subtitle' => 'Explore the latest bikes with unmatched performance, style and technology.',
+                    'btn_primary_text' => 'Explore Bikes',
+                    'btn_primary_url' => '',
+                    'btn_secondary_text' => 'Book a Test Ride',
+                    'btn_secondary_url' => '',
+                    'feature_1_title' => 'Trusted Showroom',
+                    'feature_1_sub' => '100% Genuine Bikes',
+                    'feature_2_title' => 'After Sales Support',
+                    'feature_2_sub' => 'Always Here for You',
+                    'feature_3_title' => 'Best Price Guarantee',
+                    'feature_3_sub' => 'Unbeatable Offers',
+                    'image_url' => '/images/hero/hero_adventure_red.jpg',
+                    'is_active' => true,
+                    'sort_order' => 0,
+                ],
+                [
+                    'badge' => 'SPEED & PRECISION',
+                    'title_prefix' => 'Pure Track',
+                    'title_highlight' => 'Domination',
+                    'title_suffix' => 'Awaits',
+                    'subtitle' => 'Aerodynamic winglets, race-tuned suspension, and championship electronics.',
+                    'btn_primary_text' => 'View Superbikes',
+                    'btn_primary_url' => '',
+                    'btn_secondary_text' => 'Book Test Ride',
+                    'btn_secondary_url' => '',
+                    'feature_1_title' => 'Track Ready',
+                    'feature_1_sub' => 'Factory Tuned',
+                    'feature_2_title' => 'Warranty',
+                    'feature_2_sub' => '5 Years Coverage',
+                    'feature_3_title' => 'Fast Delivery',
+                    'feature_3_sub' => '48hr Handover',
+                    'image_url' => '/images/hero/yamaha_blue.jpg',
+                    'is_active' => true,
+                    'sort_order' => 1,
+                ],
+                [
+                    'badge' => 'POWER CRUISER',
+                    'title_prefix' => 'Command The',
+                    'title_highlight' => 'Open Highway',
+                    'title_suffix' => 'In Comfort',
+                    'subtitle' => 'Torque-heavy twin engines, laid-back ergonomics, and custom styling.',
+                    'btn_primary_text' => 'Explore Cruisers',
+                    'btn_primary_url' => '',
+                    'btn_secondary_text' => 'Calculate EMI',
+                    'btn_secondary_url' => '',
+                    'feature_1_title' => 'Premium Finish',
+                    'feature_1_sub' => 'Chrome & Matte',
+                    'feature_2_title' => 'Low Interest',
+                    'feature_2_sub' => 'From 6.99%',
+                    'feature_3_title' => 'Exchange Bonus',
+                    'feature_3_sub' => 'Top Valuation',
+                    'image_url' => '/images/hero/ducati_diavel_red.jpg',
+                    'is_active' => true,
+                    'sort_order' => 2,
+                ],
+            ];
+
+            foreach ($bannerList as $order => $bannerData) {
+                Banner::updateOrCreate(
+                    ['tenant_id' => $showroom->id, 'sort_order' => $order],
+                    $bannerData
+                );
+            }
+        }
+
+        // Link existing bikes to categories
+        foreach (Bike::all() as $bike) {
+            $cat = Category::where('tenant_id', $bike->tenant_id)
+                ->where('slug', is_object($bike->category) ? $bike->category->value : $bike->category)
+                ->first();
+            if ($cat) {
+                $bike->update(['category_id' => $cat->id]);
             }
         }
     }

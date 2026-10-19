@@ -6,6 +6,7 @@ use App\Enums\BikeCategory;
 use App\Enums\BikeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Bike;
+use App\Models\Category;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
 use Illuminate\Contracts\View\View;
@@ -75,10 +76,19 @@ class BikeController extends Controller
                 ->with('error', "Your plan allows a maximum of {$limit} bike listings. Please upgrade your subscription to add more motorcycles.");
         }
 
+        if ($showroom->categories()->count() === 0) {
+            Category::seedDefaultsForShowroom($showroom);
+        }
+
         $categories = BikeCategory::cases();
+        $customCategories = $showroom->categories()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
         $statuses = BikeStatus::cases();
 
-        return view('showrooms.manage.bikes.create', compact('showroom', 'categories', 'statuses'));
+        return view('showrooms.manage.bikes.create', compact('showroom', 'categories', 'customCategories', 'statuses'));
     }
 
     /**
@@ -94,11 +104,17 @@ class BikeController extends Controller
                 ->with('error', "Maximum bike listing limit of {$limit} reached. Please upgrade to list more motorcycles.");
         }
 
+        $allowedCategories = array_unique(array_merge(
+            array_column(BikeCategory::cases(), 'value'),
+            $showroom->categories()->pluck('slug')->all()
+        ));
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'brand' => ['required', 'string', 'max:100'],
             'model_year' => ['required', 'integer', 'min:1980', 'max:2035'],
-            'category' => ['required', 'string', Rule::in(array_column(BikeCategory::cases(), 'value'))],
+            'category' => ['required', 'string', Rule::in($allowedCategories)],
+            'category_id' => ['nullable', 'integer', Rule::exists('categories', 'id')->where('tenant_id', $showroom->id)],
             'sku' => [
                 'nullable',
                 'string',
@@ -158,14 +174,27 @@ class BikeController extends Controller
             ? strtoupper(trim($validated['sku']))
             : 'MOTO-'.strtoupper(Str::substr($validated['brand'], 0, 3)).'-'.strtoupper(Str::random(4));
 
-        $bike = DB::transaction(function () use ($showroom, $validated, $slug, $sku, $specifications) {
+        $categoryId = $validated['category_id'] ?? null;
+        if (! $categoryId) {
+            $matchedCat = $showroom->categories()->where('slug', $validated['category'])->first();
+            if ($matchedCat) {
+                $categoryId = $matchedCat->id;
+            }
+        }
+
+        $categoryValue = in_array($validated['category'], array_column(BikeCategory::cases(), 'value'), true)
+            ? $validated['category']
+            : BikeCategory::Sports->value;
+
+        $bike = DB::transaction(function () use ($showroom, $validated, $slug, $sku, $specifications, $categoryId, $categoryValue) {
             $bike = $showroom->bikes()->create([
                 'name' => $validated['name'],
                 'slug' => $slug,
                 'sku' => $sku,
                 'brand' => $validated['brand'],
                 'model_year' => (int) $validated['model_year'],
-                'category' => $validated['category'],
+                'category' => $categoryValue,
+                'category_id' => $categoryId,
                 'price' => $validated['price'],
                 'engine_cc' => $validated['engine_cc'] ?? null,
                 'power_bhp' => $validated['power_bhp'] ?? null,
@@ -235,11 +264,21 @@ class BikeController extends Controller
     {
         abort_if($bike->tenant_id !== $showroom->id, 404);
 
-        $bike->load(['images', 'variants']);
+        $bike->load(['images', 'variants', 'categoryMaster']);
+
+        if ($showroom->categories()->count() === 0) {
+            Category::seedDefaultsForShowroom($showroom);
+        }
+
         $categories = BikeCategory::cases();
+        $customCategories = $showroom->categories()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
         $statuses = BikeStatus::cases();
 
-        return view('showrooms.manage.bikes.edit', compact('showroom', 'bike', 'categories', 'statuses'));
+        return view('showrooms.manage.bikes.edit', compact('showroom', 'bike', 'categories', 'customCategories', 'statuses'));
     }
 
     /**
@@ -249,11 +288,17 @@ class BikeController extends Controller
     {
         abort_if($bike->tenant_id !== $showroom->id, 404);
 
+        $allowedCategories = array_unique(array_merge(
+            array_column(BikeCategory::cases(), 'value'),
+            $showroom->categories()->pluck('slug')->all()
+        ));
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'brand' => ['required', 'string', 'max:100'],
             'model_year' => ['required', 'integer', 'min:1980', 'max:2035'],
-            'category' => ['required', 'string', Rule::in(array_column(BikeCategory::cases(), 'value'))],
+            'category' => ['required', 'string', Rule::in($allowedCategories)],
+            'category_id' => ['nullable', 'integer', Rule::exists('categories', 'id')->where('tenant_id', $showroom->id)],
             'sku' => [
                 'required',
                 'string',
@@ -301,15 +346,28 @@ class BikeController extends Controller
             }
         }
 
+        $categoryId = $validated['category_id'] ?? $bike->category_id;
+        if (empty($validated['category_id'])) {
+            $matchedCat = $showroom->categories()->where('slug', $validated['category'])->first();
+            if ($matchedCat) {
+                $categoryId = $matchedCat->id;
+            }
+        }
+
+        $categoryValue = in_array($validated['category'], array_column(BikeCategory::cases(), 'value'), true)
+            ? $validated['category']
+            : BikeCategory::Sports->value;
+
         $oldValues = $bike->only(['name', 'sku', 'price', 'status', 'is_featured', 'is_published']);
 
-        DB::transaction(function () use ($bike, $showroom, $validated, $specifications) {
+        DB::transaction(function () use ($bike, $showroom, $validated, $specifications, $categoryId, $categoryValue) {
             $bike->update([
                 'name' => $validated['name'],
                 'sku' => strtoupper(trim($validated['sku'])),
                 'brand' => $validated['brand'],
                 'model_year' => (int) $validated['model_year'],
-                'category' => $validated['category'],
+                'category' => $categoryValue,
+                'category_id' => $categoryId,
                 'price' => $validated['price'],
                 'engine_cc' => $validated['engine_cc'] ?? null,
                 'power_bhp' => $validated['power_bhp'] ?? null,

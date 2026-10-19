@@ -71,15 +71,35 @@
                                class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
                     </div>
 
-                    <!-- Category -->
-                    <div>
-                        <label for="category" class="block text-xs font-semibold text-slate-700 mb-1.5">Category <span class="text-rose-500">*</span></label>
-                        <select name="category" id="category" required
-                                class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->value }}" {{ old('category') === $cat->value ? 'selected' : '' }}>{{ $cat->label() }}</option>
+                    <!-- Category Master -->
+                    <div x-data="{
+                        selectedCategory: '{{ old('category', $customCategories->first()?->slug ?? 'sports') }}',
+                        customMap: {
+                            @foreach($customCategories as $cc)
+                                '{{ $cc->slug }}': {{ $cc->id }},
                             @endforeach
+                        }
+                    }">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="category" class="block text-xs font-semibold text-slate-700">Category Master <span class="text-rose-500">*</span></label>
+                            <a href="{{ route('showrooms.manage.categories.index', $showroom) }}" target="_blank" class="text-[11px] font-bold text-rose-600 hover:text-rose-700 inline-flex items-center gap-1">
+                                + Manage Category Master
+                            </a>
+                        </div>
+                        <input type="hidden" name="category_id" :value="customMap[selectedCategory] || ''">
+                        <select name="category" id="category" x-model="selectedCategory" required
+                                class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                            @if(isset($customCategories) && $customCategories->isNotEmpty())
+                                @foreach($customCategories as $cat)
+                                    <option value="{{ $cat->slug }}" {{ old('category') === $cat->slug ? 'selected' : '' }}>
+                                        {{ $cat->name }} @if($cat->subtitle) &bull; {{ $cat->subtitle }} @endif
+                                    </option>
+                                @endforeach
+                            @else
+                                <option value="" disabled selected>No active categories in Master. Please add one first.</option>
+                            @endif
                         </select>
+                        <p class="text-[11px] text-slate-400 mt-1">Classified directly under your dealership's Category Master.</p>
                     </div>
 
                     <!-- SKU -->

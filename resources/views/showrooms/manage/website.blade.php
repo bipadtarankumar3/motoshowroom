@@ -85,8 +85,234 @@
                                        class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
                             </div>
                         </div>
+
+                        <div class="md:col-span-2 pt-2 border-t border-slate-100">
+                            <label class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">Instant Brand Color Themes</label>
+                            <p class="text-xs text-slate-500 mb-3">Choose a pre-tuned dealership theme. Changes update instantly across your storefront and user back-office.</p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                @php
+                                    $palettes = [
+                                        ['name' => 'Crimson Red', 'primary' => '#dc2626', 'accent' => '#0f172a'],
+                                        ['name' => 'Blaze Orange', 'primary' => '#f97316', 'accent' => '#0f172a'],
+                                        ['name' => 'Racing Blue', 'primary' => '#2563eb', 'accent' => '#0f172a'],
+                                        ['name' => 'Emerald Green', 'primary' => '#059669', 'accent' => '#0f172a'],
+                                        ['name' => 'Royal Purple', 'primary' => '#7c3aed', 'accent' => '#0f172a'],
+                                        ['name' => 'Amber Gold', 'primary' => '#d97706', 'accent' => '#0f172a'],
+                                        ['name' => 'Neon Cyan', 'primary' => '#06b6d4', 'accent' => '#0f172a'],
+                                        ['name' => 'Rose Pink', 'primary' => '#e11d48', 'accent' => '#0f172a'],
+                                    ];
+                                @endphp
+                                @foreach($palettes as $p)
+                                    <button type="button"
+                                            onclick="document.getElementById('brand_color_primary').value = '{{ $p['primary'] }}'; document.getElementById('primary_picker').value = '{{ $p['primary'] }}'; document.getElementById('brand_color_accent').value = '{{ $p['accent'] }}'; document.getElementById('accent_picker').value = '{{ $p['accent'] }}';"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-400 bg-white text-xs font-semibold text-slate-700 transition shadow-xs active:scale-95">
+                                        <span class="w-3.5 h-3.5 rounded-full shadow-xs" style="background-color: {{ $p['primary'] }}"></span>
+                                        <span>{{ $p['name'] }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Dedicated Category & Banner Hub Navigation -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Hero Banners Card -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                                    Hero Showcase
+                                </span>
+                                <span class="text-xs font-bold text-slate-500 font-mono">{{ $showroom->banners()->count() }} Banners</span>
+                            </div>
+                            <h3 class="text-base font-black text-slate-900 mt-2">Hero Showcase Banners</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Upload cinematic hero banners with custom photos, interactive badges, headlines, and call-to-action buttons for the homepage slider.
+                            </p>
+                        </div>
+                        <div class="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Rotates dynamically on home</span>
+                            <a href="{{ route('showrooms.manage.banners.index', $showroom) }}"
+                               class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs">
+                                <span>Manage Banners</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Category Master Card -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                                    Inventory Taxonomy
+                                </span>
+                                <span class="text-xs font-bold text-slate-500 font-mono">{{ $showroom->categories()->count() }} Categories</span>
+                            </div>
+                            <h3 class="text-base font-black text-slate-900 mt-2">Category Master</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Upload category images, manage custom titles and subtitles, reorder categories, and classify inventory motorcycles directly under your master.
+                            </p>
+                        </div>
+                        <div class="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-400">Used across inventory &amp; frontend</span>
+                            <a href="{{ route('showrooms.manage.categories.index', $showroom) }}"
+                               class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs">
+                                <span>Manage Categories</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Homepage Sections Visibility & Content Control -->
+                @php
+                    $defaultSections = [
+                        'show_hero' => true,
+                        'show_categories' => true,
+                        'show_featured_bikes' => true,
+                        'show_services' => true,
+                        'show_promo_banner' => true,
+                        'show_trust_pillars' => true,
+                        'show_testimonials' => true,
+                        'show_about' => true,
+                        'categories_title' => 'Browse By Category',
+                        'featured_bikes_title' => 'Premier Showcase',
+                        'featured_bikes_count' => 6,
+                        'promo_title' => 'Book a Test Ride Today',
+                        'promo_subtitle' => 'Feel the surge of genuine racing power. Experience your dream motorcycle on an open track or street loop.',
+                        'promo_cta_text' => 'Reserve Test Ride',
+                        'promo_cta_url' => route('showrooms.enquiries.create', $showroom),
+                    ];
+                    $sectionsData = array_merge($defaultSections, is_array($homepageSections ?? null) ? $homepageSections : []);
+                @endphp
+
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6" id="homepage-sections-management"
+                     x-data="{
+                        sections: {{ json_encode($sectionsData) }}
+                     }">
+
+                    {{-- Hidden Serialized Homepage Sections JSON --}}
+                    <input type="hidden" name="homepage_sections" :value="JSON.stringify(sections)">
+
+                    <div class="border-b border-slate-100 pb-4">
+                        <h2 class="text-lg font-bold font-display text-slate-900 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                            Full Homepage Sections & Layout Management
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Toggle visibility, customize section titles, inventory counts, and promotional banners across your public storefront.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 1. Hero Showcase -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-xs text-slate-900 block">Hero Banners Section</span>
+                                <span class="text-[11px] text-slate-500">Full-bleed slider with high-impact superbike hero cards.</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" x-model="sections.show_hero" class="sr-only peer">
+                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- 2. Category Strip -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-900">Category Strip</span>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input type="checkbox" x-model="sections.show_categories" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                                </label>
+                            </div>
+                            <input type="text" x-model="sections.categories_title" placeholder="Browse By Category"
+                                   class="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs">
+                        </div>
+
+                        <!-- 3. Featured Inventory -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-900">Featured Inventory Showcase</span>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input type="checkbox" x-model="sections.show_featured_bikes" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="text" x-model="sections.featured_bikes_title" placeholder="Premier Showcase"
+                                       class="flex-1 px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs">
+                                <input type="number" x-model="sections.featured_bikes_count" min="3" max="24"
+                                       class="w-20 px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-mono">
+                            </div>
+                        </div>
+
+                        <!-- 4. Certified Workshop & Services -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-xs text-slate-900 block">Certified Workshop & Service</span>
+                                <span class="text-[11px] text-slate-500">Showcases maintenance services, booking CTAs, and certified technicians.</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" x-model="sections.show_services" class="sr-only peer">
+                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- 5. Promotional Offer Banner -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2 md:col-span-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-900">Special Promo / Test Ride Banner</span>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input type="checkbox" x-model="sections.show_promo_banner" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <input type="text" x-model="sections.promo_title" placeholder="Promo Title"
+                                       class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs">
+                                <input type="text" x-model="sections.promo_subtitle" placeholder="Promo Description"
+                                       class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs sm:col-span-2">
+                            </div>
+                        </div>
+
+                        <!-- 6. Trust Pillars ("Why Us") -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-xs text-slate-900 block">Dealership Trust Pillars</span>
+                                <span class="text-[11px] text-slate-500">Certified inspections, transparent pricing, warranties.</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" x-model="sections.show_trust_pillars" class="sr-only peer">
+                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- 7. Rider Reviews / Testimonials -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-xs text-slate-900 block">Customer Rider Stories</span>
+                                <span class="text-[11px] text-slate-500">Verified buyer reviews, ratings, and testimonials.</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" x-model="sections.show_testimonials" class="sr-only peer">
+                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- 8. About & Showroom Hours -->
+                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between md:col-span-2">
+                            <div>
+                                <span class="font-bold text-xs text-slate-900 block">About Dealership Story & Hours Matrix</span>
+                                <span class="text-[11px] text-slate-500">Showcases dealership narrative, location map, and operating hours.</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" x-model="sections.show_about" class="sr-only peer">
+                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>v>
 
                 <!-- Section 2: About Our Showroom Story -->
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6">
@@ -203,7 +429,10 @@
                         Cancel
                     </a>
 
-                    <button type="submit" class="px-7 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-sm shadow-xs transition flex items-center gap-2" id="btn-save-website">
+                    <button type="submit"
+                            class="px-7 py-3 rounded-xl text-white font-bold text-sm shadow-md transition flex items-center gap-2 hover:brightness-110 active:scale-95"
+                            style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }}"
+                            id="btn-save-website">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Save Storefront Settings</span>
                     </button>

@@ -1,6 +1,8 @@
 @php
     $aiAvailable = $showroom->canAccessFeature('has_ai_assistant');
     $aiSetting = $showroom->getOrCreateAiSetting();
+    $primaryColor = $showroom->brand_color_primary ?? '#dc2626';
+    $accentColor = $showroom->brand_color_accent ?? '#0f172a';
 @endphp
 
 @if($aiAvailable && $aiSetting->is_enabled)
@@ -8,7 +10,8 @@
 
     <!-- Floating Chat Launcher Button -->
     <button type="button" id="ai-launcher-btn"
-            class="group relative flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white shadow-xl shadow-rose-600/30 hover:scale-105 transition-all duration-300 focus:outline-none">
+            class="group relative flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:scale-105 transition-all duration-300 focus:outline-none text-white shadow-xl"
+            style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $accentColor }}); box-shadow: 0 10px 25px -5px {{ $primaryColor }}55;">
         <!-- Bot Avatar with Pulse Ring -->
         <div class="relative w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -27,7 +30,8 @@
         <!-- Chat Header -->
         <div class="px-5 py-4 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-600 to-rose-400 flex items-center justify-center shadow-md shadow-rose-600/20">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-md text-white"
+                     style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $accentColor }});">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <div>
@@ -87,7 +91,9 @@
                    class="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:bg-white transition">
 
             <button type="submit" id="ai-send-btn"
-                    class="p-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition shrink-0 focus:outline-none" title="Send Message">
+                    class="p-2.5 rounded-xl text-white shadow-xs transition shrink-0 focus:outline-none hover:brightness-110 active:scale-95"
+                    style="background-color: {{ $primaryColor }}"
+                    title="Send Message">
                 <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
             </button>
         </form>

@@ -140,6 +140,44 @@ class Showroom extends Model
     }
 
     /**
+     * Custom motorcycle categories created by this showroom.
+     */
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class, 'tenant_id')->orderBy('sort_order')->orderBy('name');
+    }
+
+    /**
+     * Active categories for storefront display.
+     */
+    public function activeCategories(): HasMany
+    {
+        return $this->hasMany(Category::class, 'tenant_id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name');
+    }
+
+    /**
+     * Hero and promotional banners created by this showroom.
+     */
+    public function banners(): HasMany
+    {
+        return $this->hasMany(Banner::class, 'tenant_id')->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Active hero banners for storefront showcase.
+     */
+    public function activeBanners(): HasMany
+    {
+        return $this->hasMany(Banner::class, 'tenant_id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    /**
      * All job openings posted by this dealership.
      */
     public function jobOpenings(): HasMany

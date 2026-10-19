@@ -11,11 +11,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Showroom\AiAssistantManagementController;
 use App\Http\Controllers\Showroom\ApplicantManagementController;
+use App\Http\Controllers\Showroom\BannerManagementController;
 use App\Http\Controllers\Showroom\Bike360ViewerController;
 use App\Http\Controllers\Showroom\BikeController;
 use App\Http\Controllers\Showroom\BillingController;
 use App\Http\Controllers\Showroom\CampaignManagementController;
 use App\Http\Controllers\Showroom\CareerManagementController;
+use App\Http\Controllers\Showroom\CategoryManagementController;
 use App\Http\Controllers\Showroom\EmailPreviewController;
 use App\Http\Controllers\Showroom\EnquiryController;
 use App\Http\Controllers\Showroom\PaymentCheckoutController;
@@ -144,7 +146,12 @@ Route::middleware('auth')->group(function () {
 // Public Showroom Storefront Route (Tenant-resolved via EnsureTenantContext)
 Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
     Route::get('/', function (Showroom $showroom) {
-        $showroom->load(['featuredBikes.images']);
+        $showroom->load([
+            'featuredBikes.images',
+            'publishedBikes.images',
+            'activePromotionalCampaigns',
+            'activeServices',
+        ]);
 
         return view('showrooms.public', compact('showroom'));
     })->name('showrooms.show');
@@ -279,6 +286,20 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         // Website Builder & Storefront Customizer
         Route::get('/manage/website', [WebsiteBuilderController::class, 'edit'])->name('showrooms.manage.website');
         Route::put('/manage/website', [WebsiteBuilderController::class, 'update'])->name('showrooms.manage.website.update');
+
+        // Motorcycle Category Master Management
+        Route::get('/manage/categories', [CategoryManagementController::class, 'index'])->name('showrooms.manage.categories.index');
+        Route::post('/manage/categories', [CategoryManagementController::class, 'store'])->name('showrooms.manage.categories.store');
+        Route::put('/manage/categories/{category}', [CategoryManagementController::class, 'update'])->name('showrooms.manage.categories.update');
+        Route::delete('/manage/categories/{category}', [CategoryManagementController::class, 'destroy'])->name('showrooms.manage.categories.destroy');
+        Route::post('/manage/categories/{category}/toggle-active', [CategoryManagementController::class, 'toggleActive'])->name('showrooms.manage.categories.toggle-active');
+
+        // Hero & Promotional Banners Management
+        Route::get('/manage/banners', [BannerManagementController::class, 'index'])->name('showrooms.manage.banners.index');
+        Route::post('/manage/banners', [BannerManagementController::class, 'store'])->name('showrooms.manage.banners.store');
+        Route::put('/manage/banners/{banner}', [BannerManagementController::class, 'update'])->name('showrooms.manage.banners.update');
+        Route::delete('/manage/banners/{banner}', [BannerManagementController::class, 'destroy'])->name('showrooms.manage.banners.destroy');
+        Route::post('/manage/banners/{banner}/toggle-active', [BannerManagementController::class, 'toggleActive'])->name('showrooms.manage.banners.toggle-active');
 
         // AI Virtual Assistant Management & Conversations Ledger
         Route::get('/manage/ai', [AiAssistantManagementController::class, 'index'])->name('showrooms.manage.ai.index');

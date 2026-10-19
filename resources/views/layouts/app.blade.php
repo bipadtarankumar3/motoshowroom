@@ -15,6 +15,21 @@
     <!-- Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+
+    @if(isset($showroom) && !empty($showroom->brand_color_primary))
+        <style>
+            :root {
+                --brand-primary: {{ $showroom->brand_color_primary }};
+                --brand-accent: {{ $showroom->brand_color_accent ?? '#0f172a' }};
+            }
+            .bg-brand-primary { background-color: var(--brand-primary) !important; }
+            .text-brand-primary { color: var(--brand-primary) !important; }
+            .border-brand-primary { border-color: var(--brand-primary) !important; }
+            .ring-brand-primary { --tw-ring-color: var(--brand-primary) !important; }
+            .hover\:bg-brand-primary:hover { background-color: var(--brand-primary) !important; }
+            .hover\:text-brand-primary:hover { color: var(--brand-primary) !important; }
+        </style>
+    @endif
 </head>
 <body class="font-sans antialiased min-h-full flex flex-col bg-slate-50 text-slate-900">
     {{-- Super Admin Impersonation Top Banner --}}

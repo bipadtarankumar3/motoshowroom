@@ -18,11 +18,21 @@
     @livewireStyles
 
     <!-- Dynamic Showroom Branding Styles -->
+    @php
+        $brandPrimary = $showroom->brand_color_primary ?? '#DC2626';
+        $brandAccent = $showroom->brand_color_accent ?? '#0F172A';
+    @endphp
     <style>
         :root {
-            --brand-primary: {{ $showroom->brand_color_primary ?? '#DC2626' }};
-            --brand-accent: {{ $showroom->brand_color_accent ?? '#0F172A' }};
+            --brand-primary: {{ $brandPrimary }};
+            --brand-accent: {{ $brandAccent }};
         }
+        .bg-brand-primary { background-color: var(--brand-primary) !important; }
+        .text-brand-primary { color: var(--brand-primary) !important; }
+        .border-brand-primary { border-color: var(--brand-primary) !important; }
+        .ring-brand-primary { --tw-ring-color: var(--brand-primary) !important; }
+        .hover\:bg-brand-primary:hover { background-color: var(--brand-primary) !important; }
+        .hover\:text-brand-primary:hover { color: var(--brand-primary) !important; }
     </style>
 </head>
 <body class="font-sans antialiased min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-brand-primary selection:text-white">
