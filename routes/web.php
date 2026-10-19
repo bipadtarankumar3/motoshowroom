@@ -30,6 +30,7 @@ use App\Http\Controllers\Showroom\PublicServiceController;
 use App\Http\Controllers\Showroom\ServiceBookingController;
 use App\Http\Controllers\Showroom\SettingController;
 use App\Http\Controllers\Showroom\ShowroomAnalyticsController;
+use App\Http\Controllers\Showroom\ShowroomServicePackageController;
 use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\UserController;
@@ -215,6 +216,11 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
 
         // Service Booking & Workshop Bay Management
         Route::get('/manage/services', [ServiceBookingController::class, 'index'])->name('showrooms.manage.services.index');
+        Route::post('/manage/services/packages', [ShowroomServicePackageController::class, 'store'])->name('showrooms.manage.services.packages.store');
+        Route::put('/manage/services/packages/{service}', [ShowroomServicePackageController::class, 'update'])->name('showrooms.manage.services.packages.update');
+        Route::delete('/manage/services/packages/{service}', [ShowroomServicePackageController::class, 'destroy'])->name('showrooms.manage.services.packages.destroy');
+        Route::post('/manage/services/packages/{service}/toggle-payment', [ShowroomServicePackageController::class, 'togglePayment'])->name('showrooms.manage.services.packages.toggle-payment');
+        Route::post('/manage/services/packages/{service}/toggle-active', [ShowroomServicePackageController::class, 'toggleActive'])->name('showrooms.manage.services.packages.toggle-active');
         Route::post('/manage/services/bulk-delete', [ServiceBookingController::class, 'bulkDestroy'])->name('showrooms.manage.services.bulk-destroy');
         Route::post('/manage/services/bulk-destroy-alias', [ServiceBookingController::class, 'bulkDestroy'])->name('showrooms.manage.services.bulk-delete');
         Route::get('/manage/services/export', [ServiceBookingController::class, 'export'])->name('showrooms.manage.services.export');

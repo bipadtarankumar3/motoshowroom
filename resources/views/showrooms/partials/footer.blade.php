@@ -4,11 +4,11 @@
 <footer class="bg-white border-t border-slate-200 text-slate-600 relative overflow-hidden">
 
     {{-- ═══ MOTORCYCLE RACING / SPEEDLINE TOP ACCENT ═══ --}}
-    <div class="h-1.5 w-full bg-gradient-to-r from-slate-900 via-rose-600 to-amber-500 opacity-90"></div>
+    <div class="h-1.5 w-full bg-gradient-to-r from-slate-900 via-rose-600 to-[#FF6B00] opacity-90"></div>
 
     {{-- ═══ RIDER ASSURANCE STRIP (4 MOTORBIKE PILLARS) ═══ --}}
     <div class="border-b border-slate-100 bg-slate-50/70 py-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 
                 {{-- Pillar 1 --}}
@@ -24,8 +24,8 @@
 
                 {{-- Pillar 2 --}}
                 <div class="flex items-center gap-3.5">
-                    <div class="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-center text-amber-600 flex-shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 via-[#FF6B00] to-orange-600 shadow-md shadow-orange-500/25 flex items-center justify-center text-white flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                     <div>
                         <p class="text-xs font-black text-slate-900 uppercase tracking-tight">Express Service Bay</p>
@@ -60,7 +60,7 @@
     </div>
 
     {{-- ═══ MAIN 4-COLUMN MOTORCYCLE FOOTER ═══ --}}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12">
+    <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-14 pb-12">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-100">
 
             {{-- ═══ COL 1: DEALERSHIP HERITAGE & SOCIAL ═══ --}}
@@ -149,7 +149,7 @@
             {{-- ═══ COL 3: PITSTOP & RIDER CARE ═══ --}}
             <div>
                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span class="w-2 h-2 rounded-full bg-[#FF6B00]"></span>
                     <span>Pitstop & Care</span>
                 </h3>
                 <ul class="space-y-2.5 text-sm">

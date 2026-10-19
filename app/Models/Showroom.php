@@ -365,6 +365,111 @@ class Showroom extends Model
     }
 
     /**
+     * Custom workshop service packages configured by this showroom.
+     */
+    public function services(): HasMany
+    {
+        return $this->hasMany(ShowroomService::class, 'tenant_id');
+    }
+
+    /**
+     * Active custom workshop service packages ordered by display priority.
+     */
+    public function activeServices(): HasMany
+    {
+        return $this->services()->where('is_active', true)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Seed initial customizable workshop services if none exist yet.
+     */
+    public function seedDefaultServicesIfNeeded(): void
+    {
+        if ($this->services()->exists()) {
+            return;
+        }
+
+        $defaults = [
+            [
+                'name' => 'Periodic General Maintenance',
+                'slug' => 'periodic-general-maintenance',
+                'description' => 'Comprehensive 32-point inspection, spark plug service, chain cleaning & slack adjustment, filter clean, fluid top-up, and full pressure wash.',
+                'price' => 1499.00,
+                'estimated_duration_minutes' => 90,
+                'is_payment_enabled' => true,
+                'is_active' => true,
+                'badge' => 'Popular',
+                'features' => ['32-Point Comprehensive Inspection', 'Spark Plug Inspection & Clean', 'Chain Degrease, Slack Adjust & Lube', 'Air Filter Clean / Replace Check', 'Full Foam Wash & Polish'],
+                'sort_order' => 1,
+            ],
+            [
+                'name' => 'Engine Oil & Filter Service',
+                'slug' => 'engine-oil-filter-service',
+                'description' => 'Premium synthetic engine oil replacement, OEM oil filter replacement, chain degrease & high-temp wax lubrication.',
+                'price' => 799.00,
+                'estimated_duration_minutes' => 45,
+                'is_payment_enabled' => false,
+                'is_active' => true,
+                'badge' => 'Express',
+                'features' => ['100% Synthetic Engine Oil', 'Genuine OEM Oil Filter', 'Chain Lubrication & Degrease', 'Tire Pressure & Tread Check'],
+                'sort_order' => 2,
+            ],
+            [
+                'name' => 'Brake System Overhaul',
+                'slug' => 'brake-system-overhaul',
+                'description' => 'Front and rear brake pad inspection/replacement, DOT4 brake fluid flush & bleed, caliper pin greasing, and rotor true check.',
+                'price' => 1199.00,
+                'estimated_duration_minutes' => 60,
+                'is_payment_enabled' => true,
+                'is_active' => true,
+                'badge' => 'Safety First',
+                'features' => ['Brake Pads Wear Inspection', 'DOT4 Hydraulic Fluid Flush', 'Caliper Pin & Piston Degrease', 'Rotor Trueness & Alignment Check'],
+                'sort_order' => 3,
+            ],
+            [
+                'name' => 'Performance & Engine Tuning',
+                'slug' => 'performance-engine-tuning',
+                'description' => 'Electronic throttle body cleaning, EFI sensor diagnostics, valve tappet clearance check, and spark ignition timing sync.',
+                'price' => 2499.00,
+                'estimated_duration_minutes' => 120,
+                'is_payment_enabled' => true,
+                'is_active' => true,
+                'badge' => 'Recommended',
+                'features' => ['Electronic Throttle Body Clean', 'OBD-II ECU Diagnostic Scan', 'Valve Clearance (Tappet) Adjust', 'Fuel Injector Ultrasonic Clean'],
+                'sort_order' => 4,
+            ],
+            [
+                'name' => 'Electrical & Battery Diagnostic',
+                'slug' => 'electrical-battery-diagnostic',
+                'description' => 'Digital battery load testing, charging stator check, wiring harness resistance scan, and high-output LED alignment.',
+                'price' => 699.00,
+                'estimated_duration_minutes' => 45,
+                'is_payment_enabled' => false,
+                'is_active' => true,
+                'badge' => 'Diagnostic',
+                'features' => ['Digital Battery Cranking Load Test', 'Stator Coil Output & RR Unit Check', 'Wiring Harness Ground Check', 'Headlamp Beam Alignment'],
+                'sort_order' => 5,
+            ],
+            [
+                'name' => 'Accident & Body Restoration',
+                'slug' => 'accident-body-restoration',
+                'description' => 'Structural chassis alignment, fairing/body panel repair, fork straightness verification, and OEM paint refinishing.',
+                'price' => 4999.00,
+                'estimated_duration_minutes' => 240,
+                'is_payment_enabled' => true,
+                'is_active' => true,
+                'badge' => 'Specialist',
+                'features' => ['Chassis & Swingarm Laser Alignment', 'Fork True & Triple Tree Calibration', 'OEM Fairing & Panel Repair', 'High-Gloss Finish Refinishing'],
+                'sort_order' => 6,
+            ],
+        ];
+
+        foreach ($defaults as $data) {
+            $this->services()->create($data);
+        }
+    }
+
+    /**
      * All service appointments booked with this showroom workshop.
      */
     public function serviceBookings(): HasMany

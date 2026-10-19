@@ -25,11 +25,22 @@ class PublicServiceController extends Controller
      */
     public function create(Request $request, Showroom $showroom): View
     {
+        $showroom->seedDefaultServicesIfNeeded();
+
         $selectedDate = $request->query('date', now()->addDay()->format('Y-m-d'));
+        $customServices = $showroom->activeServices()->get();
         $packages = ServiceType::cases();
+
+        $selectedServiceId = $request->query('service_id');
         $selectedPackage = $request->query('package', ServiceType::GeneralService->value);
-        if (! in_array($selectedPackage, array_column(ServiceType::cases(), 'value'), true)) {
-            $selectedPackage = ServiceType::GeneralService->value;
+
+        $currentCustomService = null;
+        if (! empty($selectedServiceId)) {
+            $currentCustomService = $customServices->firstWhere('id', (int) $selectedServiceId);
+        }
+        if (! $currentCustomService && $customServices->isNotEmpty()) {
+            $currentCustomService = $customServices->first();
+            $selectedServiceId = $currentCustomService->id;
         }
 
         $bikeSlug = $request->query('bike');
@@ -43,6 +54,9 @@ class PublicServiceController extends Controller
 
         return view('showrooms.services.create', compact(
             'showroom',
+            'customServices',
+            'currentCustomService',
+            'selectedServiceId',
             'packages',
             'selectedPackage',
             'selectedBike',
@@ -79,7 +93,16 @@ class PublicServiceController extends Controller
             'bike_make_model' => ['required', 'string', 'max:150'],
             'registration_number' => ['required', 'string', 'max:50'],
             'odometer_reading' => ['nullable', 'integer', 'min:0', 'max:500000'],
-            'service_type' => ['required', 'string', Rule::in(array_column(ServiceType::cases(), 'value'))],
+            'showroom_service_id' => [
+                'nullable',
+                Rule::exists('showroom_services', 'id')->where('tenant_id', $showroom->id),
+            ],
+            'service_type' => [
+                Rule::requiredIf(fn () => empty($request->input('showroom_service_id'))),
+                'nullable',
+                'string',
+                Rule::in(array_column(ServiceType::cases(), 'value')),
+            ],
             'booking_date' => ['required', 'date', 'after_or_equal:today'],
             'time_slot' => ['required', 'string', Rule::in(ServiceBooking::TIME_SLOTS)],
             'bike_id' => [
@@ -87,6 +110,7 @@ class PublicServiceController extends Controller
                 Rule::exists('bikes', 'id')->where('tenant_id', $showroom->id),
             ],
             'customer_notes' => ['nullable', 'string', 'max:1500'],
+            'terms_accepted' => ['nullable'],
         ]);
 
         // Concurrency Guard: Ensure showroom bay capacity is not exceeded for the requested slot
@@ -98,23 +122,46 @@ class PublicServiceController extends Controller
                 ]);
         }
 
-        $serviceTypeEnum = ServiceType::from($validated['service_type']);
+        $customService = null;
+        if (! empty($validated['showroom_service_id'])) {
+            $customService = $showroom->services()->find($validated['showroom_service_id']);
+        }
+
+        if (! $customService && ! empty($validated['service_type'])) {
+            $customService = $showroom->services()->where('slug', $validated['service_type'])->first();
+        }
+
+        if ($customService) {
+            $serviceTypeEnum = ServiceType::tryFrom($customService->slug) ?? ServiceType::Custom;
+            $estimatedCost = (float) $customService->price;
+            $isPaymentRequired = (bool) $customService->is_payment_enabled;
+            $showroomServiceId = $customService->id;
+        } else {
+            $serviceTypeVal = $validated['service_type'] ?? ServiceType::GeneralService->value;
+            $serviceTypeEnum = ServiceType::tryFrom($serviceTypeVal) ?? ServiceType::GeneralService;
+            $estimatedCost = $serviceTypeEnum->estimatedPrice();
+            $isPaymentRequired = false;
+            $showroomServiceId = null;
+        }
 
         $booking = $showroom->serviceBookings()->create([
             'user_id' => Auth::id(),
             'bike_id' => $validated['bike_id'] ?? null,
+            'showroom_service_id' => $showroomServiceId,
             'customer_name' => $validated['customer_name'],
             'customer_email' => $validated['customer_email'],
             'customer_phone' => $validated['customer_phone'],
             'bike_make_model' => $validated['bike_make_model'],
             'registration_number' => strtoupper(trim($validated['registration_number'])),
             'odometer_reading' => $validated['odometer_reading'] ?? null,
-            'service_type' => $validated['service_type'],
+            'service_type' => $serviceTypeEnum->value,
             'booking_date' => $validated['booking_date'],
             'time_slot' => $validated['time_slot'],
             'status' => BookingStatus::Pending->value,
-            'estimated_cost' => $serviceTypeEnum->estimatedPrice(),
+            'estimated_cost' => $estimatedCost,
             'payment_status' => PaymentStatus::Pending->value,
+            'terms_accepted' => $request->boolean('terms_accepted', true),
+            'payment_required' => $isPaymentRequired,
             'customer_notes' => $validated['customer_notes'] ?? null,
         ]);
 
@@ -139,6 +186,17 @@ class PublicServiceController extends Controller
         $scratchParticipation = null;
         if ($showroom->canAccessFeature('has_scratch_cards')) {
             $scratchParticipation = app(ScratchCardService::class)->autoIssueForServiceBooking($booking);
+        }
+
+        if ($isPaymentRequired) {
+            return redirect()->route('showrooms.services.checkout', [
+                'showroom' => $showroom,
+                'booking' => $booking,
+                'scratch' => $scratchParticipation?->participation_token,
+            ])->with(
+                'success',
+                "Appointment reserved! Reference #{$booking->booking_number}. Please accept terms and complete payment to confirm your booking slot."
+            );
         }
 
         $redirectParams = [

@@ -42,6 +42,14 @@ class ServiceBookingController extends Controller
         $readyCount = $showroom->serviceBookings()->where('status', BookingStatus::ReadyForCollection->value)->count();
         $pendingCount = $showroom->serviceBookings()->where('status', BookingStatus::Pending->value)->count();
 
+        $showroom->seedDefaultServicesIfNeeded();
+        $customServices = $showroom->services()->orderBy('sort_order')->orderBy('id')->get();
+        $totalServicesCount = $customServices->count();
+        $paymentEnabledCount = $customServices->where('is_payment_enabled', true)->count();
+        $payAtBayCount = $customServices->where('is_payment_enabled', false)->count();
+        $activeCatalogCount = $customServices->where('is_active', true)->count();
+        $activeTab = $request->query('tab', 'bookings');
+
         $statuses = BookingStatus::cases();
         $types = ServiceType::cases();
         $technicians = $showroom->users()->get();
@@ -59,7 +67,13 @@ class ServiceBookingController extends Controller
             'search',
             'date',
             'status',
-            'serviceType'
+            'serviceType',
+            'customServices',
+            'totalServicesCount',
+            'paymentEnabledCount',
+            'payAtBayCount',
+            'activeCatalogCount',
+            'activeTab'
         ));
     }
 

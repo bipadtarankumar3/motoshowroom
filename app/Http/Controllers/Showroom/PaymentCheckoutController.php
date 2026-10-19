@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Showroom;
 
+use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\ServiceBooking;
@@ -119,6 +120,12 @@ class PaymentCheckoutController extends Controller
         if ($payment->payable_type === ServiceBooking::class) {
             /** @var ServiceBooking|null $booking */
             $booking = ServiceBooking::find($payment->payable_id);
+            if ($booking) {
+                $booking->update([
+                    'terms_accepted' => true,
+                    'payment_status' => PaymentStatus::Captured->value,
+                ]);
+            }
 
             return redirect()->route('showrooms.services.track', [
                 'showroom' => $showroom,

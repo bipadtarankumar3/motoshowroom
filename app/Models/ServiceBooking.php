@@ -39,6 +39,7 @@ class ServiceBooking extends Model
         'tenant_id',
         'user_id',
         'bike_id',
+        'showroom_service_id',
         'booking_number',
         'customer_name',
         'customer_email',
@@ -55,6 +56,8 @@ class ServiceBooking extends Model
         'final_cost',
         'payment_status',
         'customer_notes',
+        'terms_accepted',
+        'payment_required',
         'technician_notes',
         'assigned_to_user_id',
         'confirmed_at',
@@ -78,6 +81,8 @@ class ServiceBooking extends Model
             'booking_date' => 'date',
             'estimated_cost' => 'decimal:2',
             'final_cost' => 'decimal:2',
+            'terms_accepted' => 'boolean',
+            'payment_required' => 'boolean',
             'confirmed_at' => 'datetime',
             'checked_in_at' => 'datetime',
             'in_service_at' => 'datetime',
@@ -138,6 +143,26 @@ class ServiceBooking extends Model
     public function scratchCardParticipations(): HasMany
     {
         return $this->hasMany(ScratchCardParticipation::class, 'service_booking_id');
+    }
+
+    /**
+     * Custom showroom workshop service package if assigned.
+     */
+    public function showroomService(): BelongsTo
+    {
+        return $this->belongsTo(ShowroomService::class, 'showroom_service_id')->withTrashed();
+    }
+
+    /**
+     * Human-readable service package title.
+     */
+    public function getServiceName(): string
+    {
+        if ($this->showroomService) {
+            return $this->showroomService->name;
+        }
+
+        return $this->service_type instanceof ServiceType ? $this->service_type->label() : (string) $this->service_type;
     }
 
     /**
