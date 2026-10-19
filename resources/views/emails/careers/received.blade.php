@@ -13,7 +13,7 @@
             </h1>
 
             <p style="font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;">
-                Thank you for applying for the position of <strong style="color: #0f172a;">{{ $jobOpening->title }}</strong> at <strong style="color: #0f172a;">{{ $showroom->name }}</strong>. We have successfully logged your profile and resume in our recruitment system. Our hiring team will review your qualifications and contact you if your experience aligns with our needs.
+                Thank you for applying for <strong style="color: #0f172a;">{{ $jobOpening?->title ?? ($application->desired_role ?: 'General Application') }}</strong> at <strong style="color: #0f172a;">{{ $showroom->name }}</strong>. We have successfully logged your profile and candidate intro in our recruitment system. Our hiring team will review your qualifications and contact you if your experience aligns with our needs.
             </p>
 
             <table class="details-table" role="presentation" cellspacing="0" cellpadding="0">
@@ -23,8 +23,9 @@
                 </tr>
                 <tr>
                     <td class="label">Position</td>
-                    <td class="value">{{ $jobOpening->title }}</td>
+                    <td class="value">{{ $jobOpening?->title ?? ($application->desired_role ?: 'General Application / Talent Pool') }}</td>
                 </tr>
+                @if($jobOpening)
                 <tr>
                     <td class="label">Department</td>
                     <td class="value">{{ $jobOpening->department instanceof \BackedEnum ? $jobOpening->department->label() : ucfirst($jobOpening->department) }}</td>
@@ -33,6 +34,13 @@
                     <td class="label">Employment Type</td>
                     <td class="value">{{ $jobOpening->job_type instanceof \BackedEnum ? $jobOpening->job_type->label() : ucfirst(str_replace('_', ' ', $jobOpening->job_type)) }}</td>
                 </tr>
+                @endif
+                @if($application->video_path)
+                <tr>
+                    <td class="label">Video Introduction</td>
+                    <td class="value" style="color: #059669; font-weight: bold;">1-Minute Video Pitch Attached</td>
+                </tr>
+                @endif
                 <tr>
                     <td class="label">Contact Phone</td>
                     <td class="value mono">{{ $application->applicant_phone }}</td>

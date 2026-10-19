@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class JobApplication extends Model
@@ -29,8 +30,11 @@ class JobApplication extends Model
         'applicant_email',
         'applicant_phone',
         'current_company',
+        'desired_role',
         'experience_years',
         'resume_path',
+        'video_path',
+        'video_duration_seconds',
         'portfolio_url',
         'cover_letter',
         'status',
@@ -49,6 +53,7 @@ class JobApplication extends Model
         return [
             'status' => ApplicationStatus::class,
             'experience_years' => 'decimal:1',
+            'video_duration_seconds' => 'integer',
             'interview_at' => 'datetime',
         ];
     }
@@ -76,7 +81,7 @@ class JobApplication extends Model
     }
 
     /**
-     * The specific job opening applied for.
+     * The specific job opening applied for (or null for general talent pool applications).
      */
     public function jobOpening(): BelongsTo
     {
@@ -92,6 +97,18 @@ class JobApplication extends Model
     }
 
     /**
+     * Get the publicly accessible URL for the candidate's 1-minute video pitch.
+     */
+    public function getDisplayVideoUrlAttribute(): ?string
+    {
+        if (empty($this->video_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->video_path);
+    }
+
+    /**
      * Filter by recruitment pipeline status.
      */
     public function scopeFilterStatus(Builder $query, ?string $status): Builder
@@ -104,7 +121,7 @@ class JobApplication extends Model
     }
 
     /**
-     * Search candidate applications by name, email, phone, applicant number, or current company.
+     * Search candidate applications by name, email, phone, applicant number, current company, or desired role.
      */
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
@@ -117,6 +134,7 @@ class JobApplication extends Model
                 ->orWhere('applicant_email', 'like', "%{$term}%")
                 ->orWhere('applicant_phone', 'like', "%{$term}%")
                 ->orWhere('applicant_number', 'like', "%{$term}%")
+                ->orWhere('desired_role', 'like', "%{$term}%")
                 ->orWhere('current_company', 'like', "%{$term}%");
         });
     }

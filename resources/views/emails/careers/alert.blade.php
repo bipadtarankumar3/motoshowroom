@@ -23,7 +23,13 @@
                 </tr>
                 <tr>
                     <td class="label">Target Role</td>
-                    <td class="value">{{ $jobOpening->title }} ({{ $jobOpening->department instanceof \BackedEnum ? $jobOpening->department->label() : ucfirst($jobOpening->department) }})</td>
+                    <td class="value">
+                        @if($jobOpening)
+                            {{ $jobOpening->title }} ({{ $jobOpening->department instanceof \BackedEnum ? $jobOpening->department->label() : ucfirst($jobOpening->department) }})
+                        @else
+                            {{ $application->desired_role ?: 'General Application / Open Talent Pool' }}
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <td class="label">Candidate Name</td>

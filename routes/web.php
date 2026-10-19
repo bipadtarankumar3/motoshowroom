@@ -178,6 +178,8 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
 
     // Careers & Job Openings (Public Dealership Portal)
     Route::get('/careers', [PublicCareerController::class, 'index'])->name('showrooms.careers.index');
+    Route::get('/careers/apply', [PublicCareerController::class, 'generalApply'])->name('showrooms.careers.general-apply');
+    Route::post('/careers/apply', [PublicCareerController::class, 'storeGeneralApplication'])->name('showrooms.careers.store-general');
     Route::get('/careers/{jobOpening}', [PublicCareerController::class, 'show'])->name('showrooms.careers.show');
     Route::post('/careers/{jobOpening}/apply', [PublicCareerController::class, 'apply'])->name('showrooms.careers.apply');
 

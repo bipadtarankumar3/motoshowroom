@@ -19,13 +19,15 @@ class NewJobApplicationAlertMail extends Mailable implements ShouldQueue
     public function __construct(
         public Showroom $showroom,
         public JobApplication $application,
-        public JobOpening $jobOpening
+        public ?JobOpening $jobOpening = null
     ) {}
 
     public function envelope(): Envelope
     {
+        $roleTitle = $this->jobOpening?->title ?? ($this->application->desired_role ?: 'General Application');
+
         return new Envelope(
-            subject: "[New Candidate Application] {$this->jobOpening->title}: {$this->application->applicant_name} (#{$this->application->applicant_number})",
+            subject: "[New Candidate Application] {$roleTitle}: {$this->application->applicant_name} (#{$this->application->applicant_number})",
         );
     }
 

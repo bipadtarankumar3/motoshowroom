@@ -141,7 +141,7 @@ class ShowroomNotificationService
     {
         $jobOpening = $application->jobOpening;
         $showroom = $application->showroom ?? $jobOpening?->showroom;
-        if (! $showroom || ! $jobOpening) {
+        if (! $showroom) {
             return;
         }
 

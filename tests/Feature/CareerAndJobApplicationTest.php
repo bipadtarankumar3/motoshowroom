@@ -666,4 +666,116 @@ class CareerAndJobApplicationTest extends TestCase
             'deleted_at' => null,
         ]);
     }
+
+    public function test_candidate_can_submit_job_application_with_1_minute_video_pitch(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        $videoFile = UploadedFile::fake()->create('video_pitch.webm', 2048, 'video/webm');
+
+        $response = $this->post(route('showrooms.careers.apply', [
+            'showroom' => $this->showroomA,
+            'jobOpening' => $this->openingA,
+        ]), [
+            'applicant_name' => 'Kavita Rao',
+            'applicant_email' => 'kavita@example.com',
+            'applicant_phone' => '+91 9988776655',
+            'experience_years' => 3.5,
+            'current_company' => 'Royal Enfield',
+            'cover_letter' => 'Here is my 1-minute video pitch explaining my motorcycle racing background.',
+            'video_file' => $videoFile,
+            'video_duration_seconds' => 54,
+        ]);
+
+        $response->assertSessionHas('success');
+        $response->assertRedirect(route('showrooms.careers.show', [$this->showroomA, $this->openingA]));
+
+        $this->assertDatabaseHas('job_applications', [
+            'tenant_id' => $this->showroomA->id,
+            'job_opening_id' => $this->openingA->id,
+            'applicant_name' => 'Kavita Rao',
+            'applicant_email' => 'kavita@example.com',
+            'video_duration_seconds' => 54,
+        ]);
+
+        $applicant = JobApplication::where('applicant_email', 'kavita@example.com')->first();
+        $this->assertNotNull($applicant->video_path);
+        Storage::disk('public')->assertExists($applicant->video_path);
+    }
+
+    public function test_candidate_can_submit_open_application_with_video_pitch(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        // GET open application page
+        $responseGet = $this->get(route('showrooms.careers.general-apply', $this->showroomA));
+        $responseGet->assertStatus(200);
+        $responseGet->assertSeeText('Spontaneous Application & 1-Min Video Pitch');
+
+        $videoFile = UploadedFile::fake()->create('pitch.mp4', 3000, 'video/mp4');
+
+        $responsePost = $this->post(route('showrooms.careers.store-general', $this->showroomA), [
+            'applicant_name' => 'Devendra Patel',
+            'applicant_email' => 'devendra@example.com',
+            'applicant_phone' => '+91 9123456780',
+            'desired_role' => 'Master Motorcycle Technician',
+            'experience_years' => 5,
+            'current_company' => 'Honda Two Wheelers',
+            'cover_letter' => 'Passionate master mechanic looking for high performance superbikes.',
+            'video_file' => $videoFile,
+            'video_duration_seconds' => 58,
+        ]);
+
+        $responsePost->assertSessionHas('success');
+        $responsePost->assertRedirect(route('showrooms.careers.index', $this->showroomA));
+
+        $this->assertDatabaseHas('job_applications', [
+            'tenant_id' => $this->showroomA->id,
+            'job_opening_id' => null,
+            'desired_role' => 'Master Motorcycle Technician',
+            'applicant_name' => 'Devendra Patel',
+            'video_duration_seconds' => 58,
+        ]);
+
+        $applicant = JobApplication::where('applicant_email', 'devendra@example.com')->first();
+        $this->assertNotNull($applicant->video_path);
+        Storage::disk('public')->assertExists($applicant->video_path);
+    }
+
+    public function test_back_office_user_can_view_candidate_video_pitch_and_details(): void
+    {
+        $applicant = JobApplication::create([
+            'tenant_id' => $this->showroomA->id,
+            'showroom_id' => $this->showroomA->id,
+            'job_opening_id' => null,
+            'desired_role' => 'Superbike Sales Consultant',
+            'applicant_name' => 'Siddharth Roy',
+            'applicant_email' => 'siddharth@example.com',
+            'applicant_phone' => '+91 9876000000',
+            'experience_years' => 4,
+            'cover_letter' => 'Check out my video pitch!',
+            'video_path' => 'candidate-videos/'.$this->showroomA->id.'/video_test.webm',
+            'video_duration_seconds' => 47,
+            'status' => ApplicationStatus::New,
+        ]);
+
+        // Access ATS Candidate Detail page as showroom owner
+        $response = $this->actingAs($this->ownerA)->get(route('showrooms.manage.applicants.show', [
+            'showroom' => $this->showroomA,
+            'applicant' => $applicant,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Candidate 1-Minute Video Pitch');
+        $response->assertSee('47s');
+        $response->assertSee('Superbike Sales Consultant (Open Application)');
+
+        // Access ATS Index page
+        $responseIndex = $this->actingAs($this->ownerA)->get(route('showrooms.manage.applicants.index', $this->showroomA));
+        $responseIndex->assertStatus(200);
+        $responseIndex->assertSee('47s Video');
+        $responseIndex->assertSee('Superbike Sales Consultant');
+    }
 }

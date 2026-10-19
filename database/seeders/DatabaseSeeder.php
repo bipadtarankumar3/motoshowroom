@@ -4,9 +4,12 @@ namespace Database\Seeders;
 
 use App\Enums\BikeCategory;
 use App\Enums\BikeStatus;
+use App\Enums\JobDepartment;
+use App\Enums\JobType;
 use App\Models\Banner;
 use App\Models\Bike;
 use App\Models\Category;
+use App\Models\JobOpening;
 use App\Models\Showroom;
 use App\Models\ShowroomMembership;
 use App\Models\SubscriptionPlan;
@@ -471,6 +474,62 @@ class DatabaseSeeder extends Seeder
                 ->first();
             if ($cat) {
                 $bike->update(['category_id' => $cat->id]);
+            }
+        }
+
+        // Seed Active Job Openings for Apex Moto Hub
+        $apexShowroom = Showroom::where('slug', 'apex-moto')->first();
+        if ($apexShowroom) {
+            $openings = [
+                [
+                    'title' => 'Master Superbike Technician & Dyno Diagnostic Lead',
+                    'slug' => 'master-superbike-technician',
+                    'department' => JobDepartment::Workshop,
+                    'job_type' => JobType::FullTime,
+                    'experience_level' => 'Senior (4+ Years)',
+                    'location' => 'Indiranagar Service Center, Bangalore',
+                    'salary_range' => '₹45,000 – ₹70,000 / month',
+                    'description' => "We are looking for a certified Master Motorcycle Technician specialized in high-displacement sportbikes, power cruisers, and electronic fuel injection systems. You will lead ECU diagnostics, valve adjustments, track bike prep, and express 60-minute pit services.\n\nOur service bays are fully air-conditioned and equipped with the latest dyno test beds, laser wheel aligners, and factory OBD diagnostics.",
+                    'requirements' => "• Minimum 4 years professional wrenching experience with multi-cylinder performance motorcycles.\n• Hands-on expertise in desmodromic valves, crossplane crankshafts, and hydraulic clutch servicing.\n• Ability to communicate diagnostics clearly to riders.\n• Valid two-wheeler driving license.",
+                    'benefits' => "• Competitive base salary + quarterly workshop diagnostic performance bonuses.\n• Comprehensive medical insurance covering family.\n• Factory OEM training & track-day certifications.\n• Annual complimentary helmet & riding gear allowance.",
+                    'is_active' => true,
+                    'deadline' => now()->addDays(45),
+                ],
+                [
+                    'title' => 'Senior Motorcycle Sales Consultant & Test Ride Advisor',
+                    'slug' => 'senior-motorcycle-sales-consultant',
+                    'department' => JobDepartment::Sales,
+                    'job_type' => JobType::FullTime,
+                    'experience_level' => 'Mid-Senior (2+ Years)',
+                    'location' => 'Main Flagship Showroom, Bangalore',
+                    'salary_range' => '₹35,000 – ₹55,000 / month + Incentives',
+                    'description' => 'Guide motorcycle enthusiasts, track riders, and long-distance tourers through our premium portfolio. You will conduct interactive 360° studio walkthroughs, accompany qualified buyers on road tests, and structure tailored financing packages.',
+                    'requirements' => "• Genuine passion for two-wheelers and deep knowledge of modern motorcycle tech.\n• 2+ years experience in premium automotive or lifestyle retail sales.\n• Exceptional verbal and interpersonal communication skills.\n• Confident rider with an active motorcycle license.",
+                    'benefits' => "• Uncapped delivery commission on motorcycle sales.\n• Company demo bike privilege for weekend track days and club touring.\n• Health insurance and paid annual leave.\n• Structured fast-track path to Showroom Floor Manager.",
+                    'is_active' => true,
+                    'deadline' => now()->addDays(30),
+                ],
+                [
+                    'title' => 'Customer Experience Specialist & Community Manager',
+                    'slug' => 'customer-experience-specialist',
+                    'department' => JobDepartment::CustomerRelations,
+                    'job_type' => JobType::FullTime,
+                    'experience_level' => 'Entry-Mid (1+ Years)',
+                    'location' => 'Bangalore',
+                    'salary_range' => '₹28,000 – ₹42,000 / month',
+                    'description' => 'Serve as the welcoming face and voice of Apex Moto Hub. You will manage customer test-ride appointments, coordinate post-delivery celebrations, and organize monthly weekend breakfast rides with our community of owners.',
+                    'requirements' => "• Enthusiastic, warm demeanor with strong empathy and active listening.\n• Experience in hospitality, luxury retail, or customer success.\n• Proficient with digital CRM platforms and WhatsApp Business communications.",
+                    'benefits' => "• Supportive, high-energy work culture surrounded by cutting-edge superbikes.\n• Weekend ride event allowances.\n• Generous employee discounts on motorcycle accessories, gear, and service.",
+                    'is_active' => true,
+                    'deadline' => now()->addDays(60),
+                ],
+            ];
+
+            foreach ($openings as $openingData) {
+                JobOpening::updateOrCreate(
+                    ['tenant_id' => $apexShowroom->id, 'slug' => $openingData['slug']],
+                    $openingData
+                );
             }
         }
     }

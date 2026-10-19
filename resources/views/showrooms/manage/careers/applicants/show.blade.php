@@ -46,7 +46,7 @@
                             </span>
                         </div>
                         <p class="text-xs text-slate-500 mt-1">
-                            Applied for <strong class="text-slate-900">{{ $applicant->jobOpening?->title ?? 'General Application' }}</strong>
+                            Applied for <strong class="text-slate-900">{{ $applicant->jobOpening?->title ?? ($applicant->desired_role . ' (Open Application)') }}</strong>
                             &bull; Reference <span class="font-mono text-rose-600 font-bold">#{{ $applicant->applicant_number }}</span>
                         </p>
                     </div>
@@ -117,6 +117,55 @@
                     </div>
                 </div>
 
+                <!-- 1-Minute Video Pitch Card -->
+                <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-xs">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            Candidate 1-Minute Video Pitch
+                        </h3>
+                        @if($applicant->video_path)
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 font-bold text-[11px] border border-rose-200 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                                    <span>{{ $applicant->video_duration_seconds ? $applicant->video_duration_seconds . 's' : 'Recorded' }}</span>
+                                </span>
+                                <a href="{{ $applicant->display_video_url }}"
+                                   download
+                                   class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    <span>Download</span>
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+
+                    @if($applicant->video_path)
+                        <div class="rounded-2xl overflow-hidden bg-black border border-slate-300 shadow-sm relative">
+                            <video controls
+                                   preload="metadata"
+                                   playsinline
+                                   class="w-full aspect-video bg-black rounded-2xl"
+                                   src="{{ $applicant->display_video_url }}">
+                                Your browser does not support HTML5 video tag.
+                            </video>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Recorded by candidate during career application submission.</span>
+                        </p>
+                    @else
+                        <div class="p-5 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </div>
+                            <p class="text-xs text-slate-500 font-medium">No 1-minute video pitch was recorded for this candidate.</p>
+                        </div>
+                    @endif
+                </div>
+
                 <!-- Cover Letter -->
                 <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-xs">
                     <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -141,6 +190,12 @@
                         </div>
                         <p class="text-sm font-bold text-slate-900">{{ $applicant->jobOpening->title }}</p>
                         <p class="text-xs text-slate-500 mt-1">{{ $applicant->jobOpening->department->label() }} &bull; {{ $applicant->jobOpening->job_type->label() }} &bull; {{ $applicant->jobOpening->location }}</p>
+                    </div>
+                @elseif($applicant->desired_role)
+                    <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-xs">
+                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">Desired Role (Open Application)</h4>
+                        <p class="text-sm font-bold text-slate-900">{{ $applicant->desired_role }}</p>
+                        <p class="text-xs text-slate-500 mt-1">Spontaneous talent pool submission without a specific vacancy opening.</p>
                     </div>
                 @endif
 

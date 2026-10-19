@@ -66,7 +66,92 @@ class PublicCareerController extends Controller
     }
 
     /**
-     * Submit a candidate job application with resume file upload.
+     * Display general / spontaneous talent pool application form.
+     */
+    public function generalApply(Showroom $showroom): View
+    {
+        $departments = JobDepartment::cases();
+        $jobTypes = JobType::cases();
+
+        return view('showrooms.careers.general-apply', compact('showroom', 'departments', 'jobTypes'));
+    }
+
+    /**
+     * Store a general / spontaneous candidate job application with optional 1-min video pitch.
+     */
+    public function storeGeneralApplication(
+        Request $request,
+        Showroom $showroom,
+        ShowroomNotificationService $notificationService
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'applicant_name' => ['required', 'string', 'max:150'],
+            'applicant_email' => ['required', 'email', 'max:150'],
+            'applicant_phone' => ['required', 'string', 'max:30'],
+            'desired_role' => ['required', 'string', 'max:150'],
+            'current_company' => ['nullable', 'string', 'max:150'],
+            'experience_years' => ['required', 'numeric', 'min:0', 'max:50'],
+            'resume_file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'], // 5MB max
+            'video_file' => ['nullable', 'file', 'mimetypes:video/webm,video/mp4,video/quicktime,video/ogg,video/x-matroska,application/octet-stream', 'max:51200'], // 50MB max
+            'video_duration_seconds' => ['nullable', 'integer', 'min:1', 'max:300'],
+            'portfolio_url' => ['nullable', 'url', 'max:255'],
+            'cover_letter' => ['nullable', 'string', 'max:3000'],
+        ]);
+
+        $resumePath = null;
+        if ($request->hasFile('resume_file')) {
+            $resumePath = $request->file('resume_file')->store('resumes/'.$showroom->id, 'public');
+        }
+
+        $videoPath = null;
+        if ($request->hasFile('video_file')) {
+            $videoPath = $request->file('video_file')->store('candidate-videos/'.$showroom->id, 'public');
+        }
+
+        /** @var JobApplication $application */
+        $application = $showroom->jobApplications()->create([
+            'job_opening_id' => null,
+            'user_id' => Auth::id(),
+            'applicant_name' => $validated['applicant_name'],
+            'applicant_email' => $validated['applicant_email'],
+            'applicant_phone' => $validated['applicant_phone'],
+            'desired_role' => $validated['desired_role'],
+            'current_company' => $validated['current_company'] ?? null,
+            'experience_years' => $validated['experience_years'],
+            'resume_path' => $resumePath,
+            'video_path' => $videoPath,
+            'video_duration_seconds' => $validated['video_duration_seconds'] ?? null,
+            'portfolio_url' => $validated['portfolio_url'] ?? null,
+            'cover_letter' => $validated['cover_letter'] ?? null,
+            'status' => ApplicationStatus::New->value,
+        ]);
+
+        $application->setRelation('showroom', $showroom);
+
+        $notificationService->notifyJobApplicationSubmitted($application);
+
+        AuditLogger::log(
+            'job_application.general_submitted',
+            $application,
+            null,
+            [
+                'applicant_number' => $application->applicant_number,
+                'desired_role' => $application->desired_role,
+                'applicant_name' => $application->applicant_name,
+                'has_video' => ! empty($videoPath),
+            ],
+            $showroom->id,
+            Auth::user()
+        );
+
+        return redirect()->route('showrooms.careers.index', $showroom)->with(
+            'success',
+            "General Application & Video Pitch successfully received! Your tracking reference is #{$application->applicant_number}."
+        );
+    }
+
+    /**
+     * Submit a candidate job application for a specific vacancy with optional 1-min video pitch.
      */
     public function apply(
         Request $request,
@@ -84,6 +169,8 @@ class PublicCareerController extends Controller
             'current_company' => ['nullable', 'string', 'max:150'],
             'experience_years' => ['required', 'numeric', 'min:0', 'max:50'],
             'resume_file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'], // 5MB max
+            'video_file' => ['nullable', 'file', 'mimetypes:video/webm,video/mp4,video/quicktime,video/ogg,video/x-matroska,application/octet-stream', 'max:51200'], // 50MB max
+            'video_duration_seconds' => ['nullable', 'integer', 'min:1', 'max:300'],
             'portfolio_url' => ['nullable', 'url', 'max:255'],
             'cover_letter' => ['nullable', 'string', 'max:3000'],
         ]);
@@ -93,6 +180,11 @@ class PublicCareerController extends Controller
             $resumePath = $request->file('resume_file')->store('resumes/'.$showroom->id, 'public');
         }
 
+        $videoPath = null;
+        if ($request->hasFile('video_file')) {
+            $videoPath = $request->file('video_file')->store('candidate-videos/'.$showroom->id, 'public');
+        }
+
         /** @var JobApplication $application */
         $application = $jobOpening->applications()->create([
             'tenant_id' => $showroom->id,
@@ -100,9 +192,12 @@ class PublicCareerController extends Controller
             'applicant_name' => $validated['applicant_name'],
             'applicant_email' => $validated['applicant_email'],
             'applicant_phone' => $validated['applicant_phone'],
+            'desired_role' => $jobOpening->title,
             'current_company' => $validated['current_company'] ?? null,
             'experience_years' => $validated['experience_years'],
             'resume_path' => $resumePath,
+            'video_path' => $videoPath,
+            'video_duration_seconds' => $validated['video_duration_seconds'] ?? null,
             'portfolio_url' => $validated['portfolio_url'] ?? null,
             'cover_letter' => $validated['cover_letter'] ?? null,
             'status' => ApplicationStatus::New->value,
@@ -121,6 +216,7 @@ class PublicCareerController extends Controller
                 'applicant_number' => $application->applicant_number,
                 'job_opening' => $jobOpening->title,
                 'applicant_name' => $application->applicant_name,
+                'has_video' => ! empty($videoPath),
             ],
             $showroom->id,
             Auth::user()
