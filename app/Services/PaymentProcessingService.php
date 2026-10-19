@@ -119,7 +119,8 @@ class PaymentProcessingService
             'purpose' => 'vehicle_reservation_advance',
         ];
 
-        $order = $this->razorpay->createOrder($amount, $receipt, $notes);
+        $rzp = $this->razorpay->forShowroom($showroom);
+        $order = $rzp->createOrder($amount, $receipt, $notes);
 
         return Payment::create([
             'tenant_id' => $showroom->id,
@@ -146,10 +147,18 @@ class PaymentProcessingService
         ?string $method = 'upi'
     ): bool {
         // 1. Verify HMAC Signature
+        // For SaaS platform subscriptions, verify against Admin's credentials; for showroom bookings, use showroom credentials
+        if ($payment->payable_type === SubscriptionPlan::class || str_starts_with((string) $payment->purpose, 'subscription')) {
+            $secret = $this->razorpay->getKeySecret();
+        } else {
+            $secret = $payment->showroom?->getRazorpayKeySecret() ?: $this->razorpay->getKeySecret();
+        }
+
         $isValid = $this->razorpay->verifySignature(
             $payment->razorpay_order_id,
             $razorpayPaymentId,
-            $razorpaySignature
+            $razorpaySignature,
+            $secret
         );
 
         if (! $isValid) {

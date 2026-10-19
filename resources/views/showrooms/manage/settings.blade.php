@@ -16,11 +16,35 @@
                 <p class="text-sm text-slate-500 mt-1">Manage physical address, commercial contact channels, and authorized dealership personnel.</p>
             </div>
 
+            @if(session('success'))
+                <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-sm shadow-xs">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        <span class="font-bold">{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm shadow-xs space-y-1">
+                    <div class="font-bold flex items-center gap-2">
+                        <svg class="w-5 h-5 text-rose-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        <span>Please fix the following issues:</span>
+                    </div>
+                    <ul class="list-disc list-inside text-xs pl-6">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <!-- Contact & Address Form -->
             <form method="POST" action="{{ route('showrooms.manage.settings.update', $showroom) }}" class="space-y-8">
                 @csrf
                 @method('PUT')
 
+                {{-- Section 1: Commercial Contact & Physical Address --}}
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6">
                     <h2 class="text-lg font-bold font-display text-slate-900 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-rose-600"></span>
@@ -31,45 +55,187 @@
                         <div>
                             <label for="email" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">Business Email *</label>
                             <input type="email" name="email" id="email" value="{{ old('email', $showroom->email) }}" required
-                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium">
                         </div>
 
                         <div>
                             <label for="phone" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">Main Contact Phone *</label>
                             <input type="text" name="phone" id="phone" value="{{ old('phone', $showroom->phone) }}" required
-                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium">
                         </div>
 
                         <div class="md:col-span-2">
                             <label for="address_line1" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">Street Address</label>
                             <input type="text" name="address_line1" id="address_line1" value="{{ old('address_line1', $showroom->address_line1) }}"
-                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium">
                         </div>
 
                         <div>
                             <label for="city" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">City *</label>
                             <input type="text" name="city" id="city" value="{{ old('city', $showroom->city) }}" required
-                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium">
                         </div>
 
                         <div>
                             <label for="state" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">State / Province</label>
                             <input type="text" name="state" id="state" value="{{ old('state', $showroom->state) }}"
-                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium">
                         </div>
 
                         <div>
                             <label for="postal_code" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">Postal Code</label>
                             <input type="text" name="postal_code" id="postal_code" value="{{ old('postal_code', $showroom->postal_code) }}"
-                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Section 2: Razorpay Payment Gateway & Online Booking Credentials --}}
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6"
+                     x-data="{
+                         showSecret: false,
+                         showWebhook: false,
+                         razorpayEnabled: {{ $showroom->isRazorpayOnlinePaymentEnabled() ? 'true' : 'false' }}
+                     }">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-lg font-bold font-display text-slate-900 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Razorpay Payment Gateway &amp; Online Booking
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">
+                                Connect your dealership's Razorpay Merchant account to receive token booking advances and online payments.
+                            </p>
+                        </div>
+
+                        <div>
+                            @if($showroom->hasCustomRazorpayCredentials())
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>Custom Account Connected</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                    <span>Platform Sandbox Fallback</span>
+                                </span>
+                            @endif
                         </div>
                     </div>
 
-                    <div class="flex justify-end pt-4 border-t border-slate-100">
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition">
-                            Save Contact Details
-                        </button>
+                    {{-- Enable Toggle --}}
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                        <input type="checkbox"
+                               name="razorpay_enabled"
+                               id="razorpay_enabled"
+                               value="1"
+                               x-model="razorpayEnabled"
+                               class="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <div>
+                            <label for="razorpay_enabled" class="text-sm font-bold text-slate-900 cursor-pointer select-none">
+                                Enable Online Razorpay Payments &amp; Token Reservations
+                            </label>
+                            <p class="text-xs text-slate-500 mt-0.5">
+                                When enabled, customers can reserve motorcycles by paying the advance token directly via Razorpay (UPI, Credit/Debit Cards, NetBanking).
+                            </p>
+                        </div>
                     </div>
+
+                    {{-- Gateway Credentials Grid --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5" x-show="razorpayEnabled">
+                        <div>
+                            <label for="razorpay_key_id" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">
+                                Razorpay Key ID
+                            </label>
+                            <input type="text"
+                                   name="razorpay_key_id"
+                                   id="razorpay_key_id"
+                                   value="{{ old('razorpay_key_id', $showroom->getSetting('razorpay_key_id')) }}"
+                                   placeholder="rzp_live_... or rzp_test_..."
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-mono focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                            <p class="text-[11px] text-slate-400 mt-1">Found in your Razorpay Dashboard &rarr; Account &amp; Settings &rarr; API Keys.</p>
+                        </div>
+
+                        <div>
+                            <label for="razorpay_key_secret" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">
+                                Razorpay Key Secret
+                            </label>
+                            <div class="relative">
+                                <input :type="showSecret ? 'text' : 'password'"
+                                       name="razorpay_key_secret"
+                                       id="razorpay_key_secret"
+                                       placeholder="{{ $showroom->getSetting('razorpay_key_secret') ? '•••••••••••••••• (Leave blank to keep current)' : 'Enter Razorpay Key Secret' }}"
+                                       class="w-full px-4 py-2.5 pr-10 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-mono focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                                <button type="button"
+                                        @click="showSecret = !showSecret"
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                    <svg x-show="!showSecret" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    <svg x-show="showSecret" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                                </button>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Generated together with your Key ID. Kept encrypted on server.</p>
+                        </div>
+
+                        <div>
+                            <label for="razorpay_webhook_secret" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">
+                                Webhook Secret <span class="text-slate-400 font-normal lowercase">(optional)</span>
+                            </label>
+                            <div class="relative">
+                                <input :type="showWebhook ? 'text' : 'password'"
+                                       name="razorpay_webhook_secret"
+                                       id="razorpay_webhook_secret"
+                                       placeholder="{{ $showroom->getSetting('razorpay_webhook_secret') ? '•••••••••••••••• (Leave blank to keep current)' : 'Optional webhook signing secret' }}"
+                                       class="w-full px-4 py-2.5 pr-10 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-mono focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                                <button type="button"
+                                        @click="showWebhook = !showWebhook"
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                    <svg x-show="!showWebhook" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    <svg x-show="showWebhook" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                                </button>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Used to verify asynchronous webhook status updates from Razorpay.</p>
+                        </div>
+
+                        <div>
+                            <label for="booking_token_amount" class="block text-xs uppercase font-bold text-slate-700 tracking-wider mb-2">
+                                Default Refundable Booking Token (₹)
+                            </label>
+                            <input type="number"
+                                   name="booking_token_amount"
+                                   id="booking_token_amount"
+                                   min="100"
+                                   step="100"
+                                   value="{{ old('booking_token_amount', $showroom->getBookingTokenAmount()) }}"
+                                   required
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm font-mono focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                            <p class="text-[11px] text-slate-400 mt-1">Amount charged to customers when reserving a vehicle (e.g. ₹10,000).</p>
+                        </div>
+                    </div>
+
+                    {{-- Help & Guidance Note --}}
+                    <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-xs text-emerald-900 flex items-start gap-3">
+                        <svg class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="space-y-1 leading-relaxed">
+                            <p class="font-bold text-emerald-950">How Razorpay Integration Works for {{ $showroom->name }}:</p>
+                            <p>
+                                1. Log in to your <a href="https://dashboard.razorpay.com/" target="_blank" class="font-bold underline text-emerald-800 hover:text-emerald-950">Razorpay Dashboard</a>.
+                            </p>
+                            <p>
+                                2. Navigate to <strong>Account &amp; Settings &rarr; API Keys &rarr; Generate Key</strong>. Copy your <em>Key ID</em> and <em>Key Secret</em>.
+                            </p>
+                            <p>
+                                3. Paste them into the fields above and click Save. All customer booking advances will be credited directly to your bank account!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Unified Save Button --}}
+                <div class="flex items-center justify-between pt-2">
+                    <p class="text-xs text-slate-500">Ensure all details are accurate before saving.</p>
+                    <button type="submit" class="px-8 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider shadow-md transition cursor-pointer">
+                        Save Showroom &amp; Payment Settings
+                    </button>
                 </div>
             </form>
 

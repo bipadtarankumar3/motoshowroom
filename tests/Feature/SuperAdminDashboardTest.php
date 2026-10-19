@@ -7,6 +7,7 @@ use App\Models\Showroom;
 use App\Models\ShowroomMembership;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\RazorpayService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -358,6 +359,10 @@ class SuperAdminDashboardTest extends TestCase
             'allow_360_viewer' => 1,
             'allow_ai_assistant' => 1,
             'allow_registration' => 1,
+            'razorpay_subscriptions_enabled' => 1,
+            'razorpay_key_id' => 'rzp_live_master_admin_987654',
+            'razorpay_key_secret' => 'super_secret_master_admin_token',
+            'razorpay_webhook_secret' => 'whsec_platform_admin_sub',
         ]);
 
         $updateResponse->assertRedirect('/admin/settings');
@@ -367,6 +372,15 @@ class SuperAdminDashboardTest extends TestCase
         $this->assertEquals('billing@motoshowroom.example', PlatformSetting::get('support_email'));
         $this->assertEquals('30', PlatformSetting::get('default_trial_days'));
         $this->assertEquals('1', PlatformSetting::get('allow_360_viewer'));
+        $this->assertEquals('1', PlatformSetting::get('razorpay_subscriptions_enabled'));
+        $this->assertEquals('rzp_live_master_admin_987654', PlatformSetting::get('razorpay_key_id'));
+        $this->assertEquals('super_secret_master_admin_token', PlatformSetting::get('razorpay_key_secret'));
+        $this->assertEquals('whsec_platform_admin_sub', PlatformSetting::get('razorpay_webhook_secret'));
+
+        // Verify that RazorpayService immediately picks up the new Super Admin credentials
+        $razorpayService = app(RazorpayService::class);
+        $this->assertEquals('rzp_live_master_admin_987654', $razorpayService->getKeyId());
+        $this->assertEquals('super_secret_master_admin_token', $razorpayService->getKeySecret());
 
         $this->assertDatabaseHas('audit_logs', [
             'action' => 'platform.settings_updated',

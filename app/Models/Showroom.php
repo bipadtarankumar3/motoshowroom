@@ -325,6 +325,57 @@ class Showroom extends Model
     }
 
     /**
+     * Get the Razorpay Key ID for this showroom, or fall back to system configuration.
+     */
+    public function getRazorpayKeyId(): string
+    {
+        return (string) ($this->getSetting('razorpay_key_id') ?: config('services.razorpay.key_id', 'rzp_test_placeholder'));
+    }
+
+    /**
+     * Get the Razorpay Key Secret for this showroom, or fall back to system configuration.
+     */
+    public function getRazorpayKeySecret(): string
+    {
+        return (string) ($this->getSetting('razorpay_key_secret') ?: config('services.razorpay.key_secret', 'rzp_secret_placeholder'));
+    }
+
+    /**
+     * Get the Razorpay Webhook Secret for this showroom, or fall back to system configuration.
+     */
+    public function getRazorpayWebhookSecret(): string
+    {
+        return (string) ($this->getSetting('razorpay_webhook_secret') ?: config('services.razorpay.webhook_secret', 'rzp_webhook_secret_placeholder'));
+    }
+
+    /**
+     * Check if this showroom has configured its own custom Razorpay API credentials.
+     */
+    public function hasCustomRazorpayCredentials(): bool
+    {
+        $keyId = $this->getSetting('razorpay_key_id');
+        $keySecret = $this->getSetting('razorpay_key_secret');
+
+        return ! empty($keyId) && ! empty($keySecret) && ! str_contains((string) $keyId, 'placeholder');
+    }
+
+    /**
+     * Check if online Razorpay payments are enabled for this showroom.
+     */
+    public function isRazorpayOnlinePaymentEnabled(): bool
+    {
+        return (bool) $this->getSetting('razorpay_enabled', true);
+    }
+
+    /**
+     * Get default refundable booking token amount (₹10,000 default).
+     */
+    public function getBookingTokenAmount(): float
+    {
+        return (float) $this->getSetting('booking_token_amount', 10000.0);
+    }
+
+    /**
      * Get the marketing headline or default to showroom name.
      */
     public function getHeadlineAttribute(): string

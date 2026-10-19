@@ -35,6 +35,12 @@ class PlatformSettingController extends Controller
             // System Security & Maintenance
             'allow_registration' => PlatformSetting::get('allow_registration', '1'),
             'maintenance_mode' => PlatformSetting::get('maintenance_mode', '0'),
+
+            // Razorpay Billing for Platform Subscriptions
+            'razorpay_subscriptions_enabled' => PlatformSetting::get('razorpay_subscriptions_enabled', '1'),
+            'razorpay_key_id' => PlatformSetting::get('razorpay_key_id', config('services.razorpay.key_id', '')),
+            'razorpay_key_secret' => PlatformSetting::get('razorpay_key_secret', config('services.razorpay.key_secret', '')),
+            'razorpay_webhook_secret' => PlatformSetting::get('razorpay_webhook_secret', config('services.razorpay.webhook_secret', '')),
         ];
 
         return view('admin.settings.index', compact('settings'));
@@ -57,6 +63,10 @@ class PlatformSettingController extends Controller
             'allow_ai_assistant' => ['nullable'],
             'allow_registration' => ['nullable'],
             'maintenance_mode' => ['nullable'],
+            'razorpay_subscriptions_enabled' => ['nullable'],
+            'razorpay_key_id' => ['nullable', 'string', 'max:255'],
+            'razorpay_key_secret' => ['nullable', 'string', 'max:255'],
+            'razorpay_webhook_secret' => ['nullable', 'string', 'max:255'],
         ]);
 
         $settingsMap = [
@@ -71,6 +81,10 @@ class PlatformSettingController extends Controller
             'allow_ai_assistant' => ['features', 'Enable virtual showroom assistant (0 or 1)'],
             'allow_registration' => ['system', 'Allow public user self-registration (0 or 1)'],
             'maintenance_mode' => ['system', 'Emergency maintenance mode toggle (0 or 1)'],
+            'razorpay_subscriptions_enabled' => ['billing', 'Enable online Razorpay payments for platform subscription purchases (0 or 1)'],
+            'razorpay_key_id' => ['billing', 'Super Admin Razorpay API Key ID for platform subscriptions'],
+            'razorpay_key_secret' => ['billing', 'Super Admin Razorpay API Key Secret'],
+            'razorpay_webhook_secret' => ['billing', 'Super Admin Razorpay Webhook Secret for subscription recurring charge verification'],
         ];
 
         $oldSettings = [];
@@ -85,9 +99,18 @@ class PlatformSettingController extends Controller
                 'allow_360_viewer',
                 'allow_ai_assistant',
                 'allow_registration',
-                'maintenance_mode' => $request->has($key) ? '1' : '0',
+                'maintenance_mode',
+                'razorpay_subscriptions_enabled' => $request->has($key) ? '1' : '0',
                 default => (string) ($validated[$key] ?? ''),
             };
+
+            // Preserve existing secrets if masked or left blank
+            if ($key === 'razorpay_key_secret' && (empty($val) || str_starts_with($val, '••••'))) {
+                $val = (string) ($oldSettings[$key] ?? '');
+            }
+            if ($key === 'razorpay_webhook_secret' && (empty($val) || str_starts_with($val, '••••'))) {
+                $val = (string) ($oldSettings[$key] ?? '');
+            }
 
             PlatformSetting::set($key, $val, $group, $desc);
             $newSettings[$key] = $val;

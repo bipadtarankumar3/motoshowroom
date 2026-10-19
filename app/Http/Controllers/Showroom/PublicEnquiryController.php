@@ -148,11 +148,11 @@ class PublicEnquiryController extends Controller
         if ($isBookingReservation && $paymentMethod === 'razorpay') {
             $paymentProcessor = app(PaymentProcessingService::class);
             $payment = $paymentProcessor->initiateBookingPayment($showroom, $enquiry, (float) ($bookingAmount ?? 10000.0), Auth::user());
-            $keyId = config('services.razorpay.key_id', 'rzp_test_placeholder');
+            $keyId = $showroom->getRazorpayKeyId();
 
             $razorpay = app(RazorpayService::class);
             $simulatedPaymentId = 'pay_'.substr(md5($payment->razorpay_order_id.'sim'), 0, 14);
-            $simulatedSignature = $razorpay->generateSignature($payment->razorpay_order_id, $simulatedPaymentId);
+            $simulatedSignature = $razorpay->generateSignature($payment->razorpay_order_id, $simulatedPaymentId, $showroom->getRazorpayKeySecret());
 
             if ($request->expectsJson() || $request->ajax() || $request->boolean('ajax')) {
                 return response()->json([

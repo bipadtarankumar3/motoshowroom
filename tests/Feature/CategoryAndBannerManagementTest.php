@@ -304,4 +304,39 @@ class CategoryAndBannerManagementTest extends TestCase
 
         $bannerResponse->assertForbidden();
     }
+
+    public function test_showroom_staff_can_update_razorpay_credentials_in_settings(): void
+    {
+        $response = $this->actingAs($this->owner)
+            ->put(route('showrooms.manage.settings.update', $this->showroom), [
+                'email' => 'apex.updated@example.com',
+                'phone' => '+91 9999988888',
+                'city' => 'Bengaluru',
+                'razorpay_enabled' => '1',
+                'razorpay_key_id' => 'rzp_live_custom12345678',
+                'razorpay_key_secret' => 'super_secret_rzp_key_999',
+                'razorpay_webhook_secret' => 'whsec_custom_123',
+                'booking_token_amount' => 15000,
+            ]);
+
+        $response->assertRedirect(route('showrooms.manage.settings', $this->showroom));
+        $response->assertSessionHas('success');
+
+        $this->showroom->refresh();
+        $this->assertEquals('apex.updated@example.com', $this->showroom->email);
+        $this->assertEquals('rzp_live_custom12345678', $this->showroom->getRazorpayKeyId());
+        $this->assertEquals('super_secret_rzp_key_999', $this->showroom->getRazorpayKeySecret());
+        $this->assertEquals('whsec_custom_123', $this->showroom->getRazorpayWebhookSecret());
+        $this->assertTrue($this->showroom->hasCustomRazorpayCredentials());
+        $this->assertTrue($this->showroom->isRazorpayOnlinePaymentEnabled());
+        $this->assertEquals(15000.0, $this->showroom->getBookingTokenAmount());
+
+        // Check settings page renders these credentials properly
+        $getSettingsResponse = $this->actingAs($this->owner)
+            ->get(route('showrooms.manage.settings', $this->showroom));
+        $getSettingsResponse->assertOk();
+        $getSettingsResponse->assertSee('Razorpay Payment Gateway');
+        $getSettingsResponse->assertSee('Custom Account Connected');
+        $getSettingsResponse->assertSee('rzp_live_custom12345678');
+    }
 }

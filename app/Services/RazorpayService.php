@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\PlatformSetting;
+use App\Models\Showroom;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -19,13 +21,42 @@ class RazorpayService
 
     public function __construct()
     {
-        $this->keyId = config('services.razorpay.key_id', 'rzp_test_placeholder');
-        $this->keySecret = config('services.razorpay.key_secret', 'rzp_secret_placeholder');
-        $this->webhookSecret = config('services.razorpay.webhook_secret', 'rzp_webhook_secret_placeholder');
+        $this->keyId = (string) (PlatformSetting::get('razorpay_key_id') ?: config('services.razorpay.key_id', 'rzp_test_placeholder'));
+        $this->keySecret = (string) (PlatformSetting::get('razorpay_key_secret') ?: config('services.razorpay.key_secret', 'rzp_secret_placeholder'));
+        $this->webhookSecret = (string) (PlatformSetting::get('razorpay_webhook_secret') ?: config('services.razorpay.webhook_secret', 'rzp_webhook_secret_placeholder'));
 
         if ($this->hasLiveCredentials()) {
             $this->api = new Api($this->keyId, $this->keySecret);
         }
+    }
+
+    /**
+     * Create a scoped RazorpayService configured with a specific Showroom's credentials.
+     */
+    public function forShowroom(Showroom $showroom): self
+    {
+        $instance = new self;
+        $instance->keyId = $showroom->getRazorpayKeyId();
+        $instance->keySecret = $showroom->getRazorpayKeySecret();
+        $instance->webhookSecret = $showroom->getRazorpayWebhookSecret();
+
+        if ($instance->hasLiveCredentials()) {
+            $instance->api = new Api($instance->keyId, $instance->keySecret);
+        } else {
+            $instance->api = null;
+        }
+
+        return $instance;
+    }
+
+    public function getKeyId(): string
+    {
+        return $this->keyId;
+    }
+
+    public function getKeySecret(): string
+    {
+        return $this->keySecret;
     }
 
     /**
@@ -86,13 +117,14 @@ class RazorpayService
     /**
      * Verify server-side HMAC-SHA256 signature for client payment response.
      */
-    public function verifySignature(string $orderId, string $paymentId, string $signature): bool
+    public function verifySignature(string $orderId, string $paymentId, string $signature, ?string $secret = null): bool
     {
         if (empty($orderId) || empty($paymentId) || empty($signature)) {
             return false;
         }
 
-        $expectedSignature = hash_hmac('sha256', "{$orderId}|{$paymentId}", $this->keySecret);
+        $signingSecret = $secret ?: $this->keySecret;
+        $expectedSignature = hash_hmac('sha256', "{$orderId}|{$paymentId}", $signingSecret);
 
         return hash_equals($expectedSignature, $signature);
     }
@@ -100,9 +132,11 @@ class RazorpayService
     /**
      * Generate valid signature for an order and payment pair (used in tests and simulation).
      */
-    public function generateSignature(string $orderId, string $paymentId): string
+    public function generateSignature(string $orderId, string $paymentId, ?string $secret = null): string
     {
-        return hash_hmac('sha256', "{$orderId}|{$paymentId}", $this->keySecret);
+        $signingSecret = $secret ?: $this->keySecret;
+
+        return hash_hmac('sha256', "{$orderId}|{$paymentId}", $signingSecret);
     }
 
     /**
@@ -125,13 +159,5 @@ class RazorpayService
     public function generateWebhookSignature(string $rawPayload): string
     {
         return hash_hmac('sha256', $rawPayload, $this->webhookSecret);
-    }
-
-    /**
-     * Get the configured public Razorpay Key ID for frontend checkout.
-     */
-    public function getKeyId(): string
-    {
-        return $this->keyId;
     }
 }
