@@ -39,7 +39,7 @@
     <input type="file"
            id="video_file"
            name="video_file"
-           accept="video/*"
+           accept="video/mp4,video/*,.mp4,.mov,.webm"
            class="sr-only"
            x-ref="fileInput"
            @change="handleManualFile($event)">
@@ -400,13 +400,14 @@ function careerVideoRecorder() {
             this.timeElapsed = 0;
             this.timeRemaining = 60;
 
-            // Pick supported container type, prioritizing WebM for reliable Chromium & Firefox recording
+            // Pick supported container type, prioritizing MP4 whenever supported by the browser
             const mimeCandidates = [
+                'video/mp4;codecs=avc1,mp4a.40.2',
+                'video/mp4;codecs=avc1',
+                'video/mp4',
                 'video/webm;codecs=vp8,opus',
                 'video/webm;codecs=vp9,opus',
-                'video/webm',
-                'video/mp4;codecs=avc1,mp4a.40.2',
-                'video/mp4'
+                'video/webm'
             ];
             let selectedMime = mimeCandidates.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || '';
 
