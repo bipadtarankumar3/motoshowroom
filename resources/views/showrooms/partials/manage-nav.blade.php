@@ -258,25 +258,6 @@
                     </svg>
                     <span class="hidden md:inline-block text-xs font-semibold text-slate-500 group-hover:text-slate-700" x-text="sidebarCollapsed ? 'Show Panel' : 'Hide Panel'"></span>
                 </button>
-
-                <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
-
-                {{-- Showroom Identity Breadcrumb --}}
-                <a href="{{ route('showrooms.manage', $showroom) }}" class="flex items-center gap-2.5 group">
-                    @if($showroom->logo_url)
-                        <img src="{{ $showroom->logo_url }}" alt="{{ $showroom->name }}"
-                             class="w-7 h-7 rounded-lg object-contain bg-white border border-slate-200 shadow-2xs group-hover:scale-105 transition-transform flex-shrink-0 p-0.5">
-                    @else
-                        <span class="w-7 h-7 rounded-lg flex items-center justify-center font-black text-white text-xs flex-shrink-0 shadow-2xs group-hover:scale-105 transition-transform"
-                              style="background-color: {{ $primaryColor }}">
-                            {{ strtoupper(substr($showroom->name, 0, 1)) }}
-                        </span>
-                    @endif
-                    <div class="leading-tight">
-                        <span class="font-display font-black text-sm tracking-tight text-slate-900 block truncate group-hover:text-slate-700 transition">{{ $showroom->name }}</span>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Back-Office</span>
-                    </div>
-                </a>
             </div>
 
             {{-- Right-side Actions & User Dropdown --}}
