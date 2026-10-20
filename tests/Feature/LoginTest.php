@@ -18,7 +18,28 @@ class LoginTest extends TestCase
             ->assertSee('value="1"', false);
     }
 
-    public function test_admin_can_login_with_remember_me_checked(): void
+    public function test_valid_credentials_redirect_to_otp_verification(): void
+    {
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@example.test',
+            'password' => 'Password123!',
+            'role' => 'admin',
+            'status' => 'active',
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => 'admin@example.test',
+            'password' => 'Password123!',
+            'remember' => '1',
+        ]);
+
+        $response->assertRedirect(route('login.otp'));
+        $this->assertGuest();
+        $this->assertTrue(session()->has('auth.otp'));
+    }
+
+    public function test_user_can_complete_login_with_default_otp(): void
     {
         $admin = User::create([
             'name' => 'Admin',
@@ -32,8 +53,40 @@ class LoginTest extends TestCase
             'email' => 'admin@example.test',
             'password' => 'Password123!',
             'remember' => '1',
-        ])->assertRedirect(route('admin.dashboard'));
+        ])->assertRedirect(route('login.otp'));
 
+        $this->get('/login/otp')
+            ->assertOk()
+            ->assertSee('123456');
+
+        $verifyResponse = $this->post('/login/otp', [
+            'otp' => '123456',
+        ]);
+
+        $verifyResponse->assertRedirect(route('admin.dashboard'));
         $this->assertAuthenticatedAs($admin);
+        $this->assertFalse(session()->has('auth.otp'));
+    }
+
+    public function test_invalid_otp_is_rejected(): void
+    {
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@example.test',
+            'password' => 'Password123!',
+            'role' => 'admin',
+            'status' => 'active',
+        ]);
+
+        $this->post('/login', [
+            'email' => 'admin@example.test',
+            'password' => 'Password123!',
+        ]);
+
+        $this->post('/login/otp', [
+            'otp' => '999999',
+        ])->assertSessionHasErrors('otp');
+
+        $this->assertGuest();
     }
 }
