@@ -134,6 +134,14 @@ class PublicAiAssistantController extends Controller
         return response()->json([
             'is_available' => $hasFeature && $setting->is_enabled,
             'bot_name' => $setting->bot_name,
+            'avatar_type' => $setting->avatar_type,
+            'avatar_url' => $setting->avatar_url,
+            'voice_enabled' => (bool) $setting->voice_enabled,
+            'voice_language' => $setting->voice_language,
+            'voice_gender' => $setting->effective_voice_gender,
+            'voice_pitch' => $setting->effective_voice_pitch,
+            'voice_welcome_text' => $setting->voice_welcome_text_or_default,
+            'voice_audio_url' => $setting->voice_audio_url,
             'welcome_message' => $setting->welcome_message_or_default,
             'tone' => $setting->tone,
             'suggested_prompts' => $setting->suggested_prompts ?? [

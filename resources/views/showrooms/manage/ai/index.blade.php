@@ -101,7 +101,7 @@
                         <span>Concierge Settings</span>
                     </h3>
 
-                    <form method="POST" action="{{ route('showrooms.manage.ai.settings', $showroom) }}" class="space-y-4">
+                    <form method="POST" action="{{ route('showrooms.manage.ai.settings', $showroom) }}" enctype="multipart/form-data" class="space-y-5">
                         @csrf
                         @method('PUT')
 
@@ -109,7 +109,7 @@
                         <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                             <div>
                                 <span class="text-xs font-bold text-slate-900 block">Enable Public AI Assistant</span>
-                                <span class="text-[11px] text-slate-500">Display floating widget on showroom website.</span>
+                                <span class="text-[11px] text-slate-500">Display interactive character widget on showroom website.</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" name="is_enabled" value="1" {{ old('is_enabled', $setting->is_enabled) ? 'checked' : '' }}
@@ -118,86 +118,266 @@
                             </label>
                         </div>
 
-                        <!-- Bot Name -->
-                        <div>
-                            <label for="bot_name" class="block text-xs font-bold uppercase text-slate-700 mb-1">Concierge Name</label>
-                            <input type="text" name="bot_name" id="bot_name" value="{{ old('bot_name', $setting->bot_name) }}" required
-                                   @disabled(! $hasFeature)
-                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                        </div>
-
-                        <!-- Tone -->
-                        <div>
-                            <label for="tone" class="block text-xs font-bold uppercase text-slate-700 mb-1">Conversational Tone</label>
-                            <select name="tone" id="tone" @disabled(! $hasFeature)
-                                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                                <option value="friendly" {{ old('tone', $setting->tone) === 'friendly' ? 'selected' : '' }}>Friendly & Welcoming</option>
-                                <option value="professional" {{ old('tone', $setting->tone) === 'professional' ? 'selected' : '' }}>Professional & Direct</option>
-                                <option value="enthusiastic" {{ old('tone', $setting->tone) === 'enthusiastic' ? 'selected' : '' }}>Enthusiastic High-Energy Superbike Specialist</option>
-                            </select>
-                        </div>
-
-                        <!-- Welcome Message -->
-                        <div>
-                            <label for="welcome_message" class="block text-xs font-bold uppercase text-slate-700 mb-1">Welcome Greeting</label>
-                            <textarea name="welcome_message" id="welcome_message" rows="3" @disabled(! $hasFeature)
-                                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 leading-relaxed">{{ old('welcome_message', $setting->welcome_message) }}</textarea>
-                            <span class="text-[10px] text-slate-500 mt-1 block">Leave empty to use automatic showroom greeting.</span>
-                        </div>
-
-                        <!-- Suggested Prompts -->
-                        <div>
-                            <label for="suggested_prompts" class="block text-xs font-bold uppercase text-slate-700 mb-1">Suggested Prompt Chips (One per line)</label>
-                            <textarea name="suggested_prompts" id="suggested_prompts" rows="4" @disabled(! $hasFeature)
-                                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 font-mono">{{ old('suggested_prompts', is_array($setting->suggested_prompts) ? implode("\n", $setting->suggested_prompts) : '') }}</textarea>
-                        </div>
-
-                        <!-- Custom FAQs Builder -->
-                        <div class="pt-4 border-t border-slate-200">
-                            <div class="flex items-center justify-between mb-3">
+                        <!-- Character Avatar Selection -->
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                            <div class="flex items-center justify-between">
                                 <div>
-                                    <span class="text-xs font-bold uppercase text-slate-900 block">Custom FAQs Knowledge</span>
-                                    <span class="text-[10px] text-slate-500">Add shop-specific answers (financing, trade-in, insurance).</span>
+                                    <span class="text-xs font-bold uppercase text-slate-900 block">AI Character Avatar</span>
+                                    <span class="text-[11px] text-slate-500">Select the welcome advisor character with Namaste gesture.</span>
                                 </div>
-                                <button type="button" id="btn-add-faq" @disabled(! $hasFeature)
-                                        class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs text-slate-700 font-semibold transition">
-                                    + Add FAQ
-                                </button>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Namaste 3D / 2D</span>
                             </div>
 
-                            <div id="faqs-list-container" class="space-y-3">
-                                @forelse($setting->faqs_list as $fIndex => $faq)
-                                    <div class="faq-row p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <input type="text" name="faqs[{{ $fIndex }}][question]" value="{{ $faq['question'] ?? '' }}" placeholder="Customer question (e.g. Do you accept trade-ins?)"
-                                                   @disabled(! $hasFeature)
-                                                   class="flex-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                                            <button type="button" onclick="this.closest('.faq-row').remove()" class="text-rose-600 hover:text-rose-800 p-1">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                            </button>
-                                        </div>
-                                        <textarea name="faqs[{{ $fIndex }}][answer]" rows="2" placeholder="Showroom answer provided by AI"
-                                                  @disabled(! $hasFeature)
-                                                  class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 leading-snug">{{ $faq['answer'] ?? '' }}</textarea>
+                            <div class="grid grid-cols-2 gap-3">
+                                <!-- TVS Male Advisor -->
+                                <label id="card-avatar-male" onclick="selectAvatar('male_tvs')"
+                                       class="avatar-card relative flex flex-col items-center p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 text-center bg-white {{ old('avatar_type', $setting->avatar_type) === 'male_tvs' ? 'border-rose-600 ring-2 ring-rose-500/20 shadow-xs' : 'border-slate-200 hover:border-slate-300' }}">
+                                    <span id="badge-male" class="{{ old('avatar_type', $setting->avatar_type) === 'male_tvs' ? '' : 'hidden' }} absolute top-2 right-2 px-1.5 py-0.5 rounded bg-rose-600 text-[9px] font-black text-white shadow-xs">✓ Active</span>
+                                    <input type="radio" name="avatar_type" id="radio-avatar-male" value="male_tvs" {{ old('avatar_type', $setting->avatar_type) === 'male_tvs' ? 'checked' : '' }} class="sr-only">
+                                    <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-200 mb-2 shadow-xs">
+                                        <img src="{{ asset('images/ai-avatars/avatar-male-tvs.jpg') }}" alt="TVS Male Advisor" class="w-full h-full object-cover">
                                     </div>
-                                @empty
-                                    <p id="no-faqs-text" class="text-xs text-slate-500 py-2 text-center">No custom FAQs defined yet.</p>
-                                @endforelse
+                                    <span class="text-xs font-bold text-slate-900 leading-tight">TVS Male Advisor</span>
+                                    <span class="text-[10px] text-slate-500 mt-0.5">Sawaranti TVS Uniform</span>
+                                </label>
+
+                                <!-- Female Advisor -->
+                                <label id="card-avatar-female" onclick="selectAvatar('female_saree')"
+                                       class="avatar-card relative flex flex-col items-center p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 text-center bg-white {{ old('avatar_type', $setting->avatar_type) === 'female_saree' ? 'border-rose-600 ring-2 ring-rose-500/20 shadow-xs' : 'border-slate-200 hover:border-slate-300' }}">
+                                    <span id="badge-female" class="{{ old('avatar_type', $setting->avatar_type) === 'female_saree' ? '' : 'hidden' }} absolute top-2 right-2 px-1.5 py-0.5 rounded bg-rose-600 text-[9px] font-black text-white shadow-xs">✓ Active</span>
+                                    <input type="radio" name="avatar_type" id="radio-avatar-female" value="female_saree" {{ old('avatar_type', $setting->avatar_type) === 'female_saree' ? 'checked' : '' }} class="sr-only">
+                                    <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-200 mb-2 shadow-xs">
+                                        <img src="{{ asset('images/ai-avatars/avatar-female-saree.jpg') }}" alt="Female Advisor" class="w-full h-full object-cover">
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-900 leading-tight">Female Advisor</span>
+                                    <span class="text-[10px] text-slate-500 mt-0.5">Traditional Saree Namaste</span>
+                                </label>
+                            </div>
+
+                            <!-- Custom Upload Option -->
+                            <div class="pt-2 border-t border-slate-200">
+                                <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
+                                    <input type="radio" name="avatar_type" id="radio-avatar-custom" value="custom" {{ old('avatar_type', $setting->avatar_type) === 'custom' ? 'checked' : '' }} class="text-rose-600 focus:ring-rose-500" onclick="selectAvatar('custom')">
+                                    <span>Or upload custom showroom character</span>
+                                </label>
+
+                                <div id="custom-avatar-upload-box" class="mt-2 {{ old('avatar_type', $setting->avatar_type) === 'custom' ? '' : 'hidden' }} space-y-2">
+                                    @if($setting->avatar_type === 'custom' && $setting->avatar_custom_url)
+                                        <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
+                                            <img src="{{ $setting->avatar_url }}" alt="Current Custom Avatar" class="w-10 h-10 rounded-full object-cover border border-slate-200">
+                                            <div class="flex-1 min-w-0">
+                                                <span class="text-xs font-bold text-slate-800 block truncate">Current Custom Avatar</span>
+                                                <label class="text-[11px] text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer">
+                                                    <input type="checkbox" name="remove_custom_avatar" value="1" class="rounded text-rose-600">
+                                                    <span>Remove and reset</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <input type="file" name="avatar_custom" accept="image/png,image/jpeg,image/webp"
+                                           class="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spoken Voice & Namaste Greeting Experience (Recommendation #1) -->
+                        <div class="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-3.5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-bold uppercase text-slate-900 block flex items-center gap-1.5">
+                                        <span>Interactive Voice & Lip-Sync</span>
+                                        <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200">1-Tap</span>
+                                    </span>
+                                    <span class="text-[11px] text-slate-600">Audio welcome with Namaste animation and voice synthesis.</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="voice_enabled" value="1" {{ old('voice_enabled', $setting->voice_enabled) ? 'checked' : '' }}
+                                           @disabled(! $hasFeature) class="sr-only peer">
+                                    <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                                </label>
+                            </div>
+
+                            <!-- Voice Persona & Gender Selector -->
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Spoken Voice Persona & Gender</label>
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <!-- Female Voice Option -->
+                                    <label id="card-voice-female" onclick="selectVoiceGender('female')"
+                                           class="voice-card flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition bg-white {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? 'border-amber-500 ring-2 ring-amber-400/20 bg-amber-50/40' : 'border-slate-200 hover:border-slate-300' }}">
+                                        <input type="radio" name="voice_gender" id="radio-voice-female" value="female" {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? 'checked' : '' }} class="sr-only">
+                                        <span class="text-xl">👩</span>
+                                        <div class="text-left flex-1 min-w-0">
+                                            <span class="text-xs font-bold text-slate-900 block leading-tight">Female Voice</span>
+                                            <span class="text-[10px] text-slate-500 block">Sweet & Welcoming (महिला)</span>
+                                        </div>
+                                        <span id="check-voice-female" class="text-amber-600 text-xs font-black {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? '' : 'hidden' }}">✓</span>
+                                    </label>
+
+                                    <!-- Male Voice Option -->
+                                    <label id="card-voice-male" onclick="selectVoiceGender('male')"
+                                           class="voice-card flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition bg-white {{ old('voice_gender', $setting->effective_voice_gender) === 'male' ? 'border-amber-500 ring-2 ring-amber-400/20 bg-amber-50/40' : 'border-slate-200 hover:border-slate-300' }}">
+                                        <input type="radio" name="voice_gender" id="radio-voice-male" value="male" {{ old('voice_gender', $setting->effective_voice_gender) === 'male' ? 'checked' : '' }} class="sr-only">
+                                        <span class="text-xl">👨</span>
+                                        <div class="text-left flex-1 min-w-0">
+                                            <span class="text-xs font-bold text-slate-900 block leading-tight">Male Voice</span>
+                                            <span class="text-[10px] text-slate-500 block">TVS Advisor (पुरुष)</span>
+                                        </div>
+                                        <span id="check-voice-male" class="text-amber-600 text-xs font-black {{ old('voice_gender', $setting->effective_voice_gender) === 'male' ? '' : 'hidden' }}">✓</span>
+                                    </label>
+                                </div>
+                                <input type="hidden" name="voice_pitch" id="input_voice_pitch" value="{{ old('voice_pitch', $setting->effective_voice_pitch) }}">
+                            </div>
+
+                            <!-- Voice Language & Specific Voice Dropdown -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="voice_language" class="block text-xs font-bold uppercase text-slate-700 mb-1">Voice Language</label>
+                                    <select name="voice_language" id="voice_language" onchange="updateAvailableVoices()" @disabled(! $hasFeature)
+                                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                        <option value="hi-IN" {{ old('voice_language', $setting->voice_language) === 'hi-IN' ? 'selected' : '' }}>Hindi (हिंदी - Namaste)</option>
+                                        <option value="en-IN" {{ old('voice_language', $setting->voice_language) === 'en-IN' ? 'selected' : '' }}>Indian English (English - India)</option>
+                                        <option value="en-US" {{ old('voice_language', $setting->voice_language) === 'en-US' ? 'selected' : '' }}>English (US)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="voice_name" class="block text-xs font-bold uppercase text-slate-700 mb-1">Browser Voice Model</label>
+                                    <select name="voice_name" id="voice_name" @disabled(! $hasFeature)
+                                            class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                        <option value="">Auto-matched to Gender</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Spoken Welcome Text -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label for="voice_welcome_text" class="block text-xs font-bold uppercase text-slate-700">Spoken Voice Greeting</label>
+                                    <button type="button" id="btn-test-voice" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shadow-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                                        <span>▶️ Test Selected Voice</span>
+                                    </button>
+                                </div>
+                                <textarea name="voice_welcome_text" id="voice_welcome_text" rows="2" @disabled(! $hasFeature)
+                                          placeholder="e.g. नमस्ते! सवरंती टीवीएस में आपका स्वागत है। बताइए आज मैं आपकी क्या सहायता कर सकता हूँ?"
+                                          class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 leading-relaxed">{{ old('voice_welcome_text', $setting->voice_welcome_text) }}</textarea>
+                                <span class="text-[10px] text-slate-500 mt-0.5 block">Leave blank to use the smart default greeting for this showroom.</span>
+                            </div>
+
+                            <!-- Optional Custom Audio Recording -->
+                            <div class="pt-2 border-t border-amber-200/60">
+                                <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Optional Studio Voiceover File (.mp3, .wav)</label>
+                                @if($setting->voice_audio_path)
+                                    <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200 mb-2">
+                                        <audio controls class="h-8 flex-1">
+                                            <source src="{{ $setting->voice_audio_url }}">
+                                        </audio>
+                                        <label class="text-[11px] text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer shrink-0">
+                                            <input type="checkbox" name="remove_custom_audio" value="1" class="rounded text-rose-600">
+                                            <span>Delete audio</span>
+                                        </label>
+                                    </div>
+                                @endif
+                                <input type="file" name="voice_audio" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4"
+                                       class="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200">
                             </div>
                         </div>
 
                         <button type="submit" @disabled(! $hasFeature)
-                                class="w-full py-2.5 rounded-xl btn-brand-primary font-bold text-xs transition shadow-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                class="w-full py-3 rounded-xl btn-brand-primary font-bold text-xs transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                 style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
-                            Save Assistant Configuration
+                            Save AI Welcome Speech Settings
                         </button>
                     </form>
                 </div>
 
             </div>
 
-            <!-- Right Column: Customer Conversations & Leads Ledger (7 cols) -->
+            <!-- Right Column: Avatar Preview, QR Code & Conversations Ledger (7 cols) -->
             <div class="lg:col-span-7 space-y-6">
+
+                <!-- Interactive Character Live Preview & QR Scan Card -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Live Character Preview -->
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <div>
+                                <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider block">Live Character Preview</span>
+                                <h4 class="text-sm font-bold text-slate-900 mt-0.5">{{ $setting->bot_name }}</h4>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Namaste Active</span>
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-4 py-2">
+                            <div class="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-100 border-2 border-rose-500/30 shadow-md shrink-0">
+                                <img id="preview-avatar-img" src="{{ $setting->avatar_url }}" alt="Character Preview" class="w-full h-full object-cover">
+                                <div id="preview-speaking-indicator" class="hidden absolute bottom-1 right-1 px-1 py-0.5 rounded bg-emerald-500 text-[8px] font-black text-white">
+                                    LIVE
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs text-slate-600 italic line-clamp-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                    "{{ $setting->voice_welcome_text_or_default }}"
+                                </p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <button type="button" id="btn-preview-listen" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] transition shadow-xs flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                                        <span>Listen Spoken Greeting</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                            <span>Voice: <strong id="preview-voice-gender-label" class="text-slate-800">{{ $setting->effective_voice_gender === 'female' ? 'Female (Sweet)' : 'Male (TVS Advisor)' }}</strong> (<span id="preview-voice-lang-label">{{ $setting->voice_language === 'hi-IN' ? 'Hindi' : 'Indian English' }}</span>)</span>
+                            <span>Mode: <strong class="text-emerald-700">1-Tap Experience</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- In-Showroom QR Welcome Standee Card -->
+                    <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <div>
+                                <span class="text-[10px] font-bold text-cyan-700 uppercase tracking-wider block">QR Scan Welcome</span>
+                                <h4 class="text-sm font-bold text-slate-900 mt-0.5">Customer QR Standee</h4>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-50 text-cyan-800 border border-cyan-200">
+                                Auto-Greet
+                            </span>
+                        </div>
+
+                        @php
+                            $welcomeUrl = route('showrooms.show', ['showroom' => $showroom, 'welcome' => 1]);
+                            $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($welcomeUrl);
+                        @endphp
+
+                        <div class="flex items-center gap-3 py-1">
+                            <div class="p-2 rounded-2xl bg-white border border-slate-200 shadow-xs shrink-0">
+                                <img src="{{ $qrImageUrl }}" alt="Showroom AI Concierge QR Code" class="w-16 h-16 object-contain">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[11px] text-slate-600 leading-snug">
+                                    Customers scanning this in the showroom land straight on the 1-Tap Namaste AI welcome experience.
+                                </p>
+                                <div class="mt-2 flex items-center gap-1.5 flex-wrap">
+                                    <a href="{{ $welcomeUrl }}" target="_blank" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-[10px] transition">
+                                        Test Link &rarr;
+                                    </a>
+                                    <button type="button" onclick="navigator.clipboard.writeText('{{ $welcomeUrl }}'); alert('Direct QR link copied!');" class="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-[10px] transition">
+                                        Copy Link
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500 truncate font-mono">
+                            {{ $welcomeUrl }}
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Conversations Ledger Card -->
                 <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
@@ -325,32 +505,252 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const btnAddFaq = document.getElementById('btn-add-faq');
-    const faqsContainer = document.getElementById('faqs-list-container');
-    const noFaqsText = document.getElementById('no-faqs-text');
+let currentVoiceGender = "{{ old('voice_gender', $setting->effective_voice_gender) }}";
+let savedVoiceName = "{{ old('voice_name', $setting->voice_name ?? '') }}";
 
-    if (btnAddFaq && faqsContainer) {
-        btnAddFaq.addEventListener('click', function () {
-            if (noFaqsText) noFaqsText.style.display = 'none';
-            const index = faqsContainer.querySelectorAll('.faq-row').length;
+function selectAvatar(choice) {
+    const cardMale = document.getElementById('card-avatar-male');
+    const cardFemale = document.getElementById('card-avatar-female');
+    const badgeMale = document.getElementById('badge-male');
+    const badgeFemale = document.getElementById('badge-female');
+    const radioMale = document.getElementById('radio-avatar-male');
+    const radioFemale = document.getElementById('radio-avatar-female');
+    const radioCustom = document.getElementById('radio-avatar-custom');
+    const uploadBox = document.getElementById('custom-avatar-upload-box');
+    const previewImg = document.getElementById('preview-avatar-img');
 
-            const row = document.createElement('div');
-            row.className = 'faq-row p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2';
-            row.innerHTML = `
-                <div class="flex items-center justify-between gap-2">
-                    <input type="text" name="faqs[${index}][question]" placeholder="Customer question (e.g. Do you accept trade-ins?)"
-                           class="flex-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                    <button type="button" onclick="this.closest('.faq-row').remove()" class="text-rose-600 hover:text-rose-800 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <textarea name="faqs[${index}][answer]" rows="2" placeholder="Showroom answer provided by AI"
-                          class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 leading-snug"></textarea>
-            `;
-            faqsContainer.appendChild(row);
-        });
+    const activeClasses = ['border-rose-600', 'ring-2', 'ring-rose-500/20', 'shadow-xs'];
+    const inactiveClasses = ['border-slate-200', 'hover:border-slate-300'];
+
+    if (choice === 'male_tvs') {
+        if (radioMale) radioMale.checked = true;
+        if (cardMale) {
+            cardMale.classList.add(...activeClasses);
+            cardMale.classList.remove(...inactiveClasses);
+        }
+        if (cardFemale) {
+            cardFemale.classList.remove(...activeClasses);
+            cardFemale.classList.add(...inactiveClasses);
+        }
+        if (badgeMale) badgeMale.classList.remove('hidden');
+        if (badgeFemale) badgeFemale.classList.add('hidden');
+        if (uploadBox) uploadBox.classList.add('hidden');
+        if (previewImg) previewImg.src = "{{ asset('images/ai-avatars/avatar-male-tvs-cutout.png') }}";
+
+        // Auto-switch voice persona to male TVS advisor
+        selectVoiceGender('male');
+    } else if (choice === 'female_saree') {
+        if (radioFemale) radioFemale.checked = true;
+        if (cardFemale) {
+            cardFemale.classList.add(...activeClasses);
+            cardFemale.classList.remove(...inactiveClasses);
+        }
+        if (cardMale) {
+            cardMale.classList.remove(...activeClasses);
+            cardMale.classList.add(...inactiveClasses);
+        }
+        if (badgeFemale) badgeFemale.classList.remove('hidden');
+        if (badgeMale) badgeMale.classList.add('hidden');
+        if (uploadBox) uploadBox.classList.add('hidden');
+        if (previewImg) previewImg.src = "{{ asset('images/ai-avatars/avatar-female-saree-cutout.png') }}";
+
+        // Auto-switch voice persona to female advisor
+        selectVoiceGender('female');
+    } else if (choice === 'custom') {
+        if (radioCustom) radioCustom.checked = true;
+        if (cardMale) {
+            cardMale.classList.remove(...activeClasses);
+            cardMale.classList.add(...inactiveClasses);
+        }
+        if (cardFemale) {
+            cardFemale.classList.remove(...activeClasses);
+            cardFemale.classList.add(...inactiveClasses);
+        }
+        if (badgeMale) badgeMale.classList.add('hidden');
+        if (badgeFemale) badgeFemale.classList.add('hidden');
+        if (uploadBox) uploadBox.classList.remove('hidden');
     }
+}
+
+function selectVoiceGender(gender) {
+    currentVoiceGender = gender;
+    const cardFemale = document.getElementById('card-voice-female');
+    const cardMale = document.getElementById('card-voice-male');
+    const radioFemale = document.getElementById('radio-voice-female');
+    const radioMale = document.getElementById('radio-voice-male');
+    const checkFemale = document.getElementById('check-voice-female');
+    const checkMale = document.getElementById('check-voice-male');
+    const pitchInput = document.getElementById('input_voice_pitch');
+    const genderLabel = document.getElementById('preview-voice-gender-label');
+
+    const activeClasses = ['border-amber-500', 'ring-2', 'ring-amber-400/20', 'bg-amber-50/40'];
+    const inactiveClasses = ['border-slate-200', 'hover:border-slate-300'];
+
+    if (gender === 'female') {
+        if (radioFemale) radioFemale.checked = true;
+        if (cardFemale) {
+            cardFemale.classList.add(...activeClasses);
+            cardFemale.classList.remove(...inactiveClasses);
+        }
+        if (cardMale) {
+            cardMale.classList.remove(...activeClasses);
+            cardMale.classList.add(...inactiveClasses);
+        }
+        if (checkFemale) checkFemale.classList.remove('hidden');
+        if (checkMale) checkMale.classList.add('hidden');
+        if (pitchInput) pitchInput.value = '1.22';
+        if (genderLabel) genderLabel.textContent = 'Female (Sweet)';
+    } else {
+        if (radioMale) radioMale.checked = true;
+        if (cardMale) {
+            cardMale.classList.add(...activeClasses);
+            cardMale.classList.remove(...inactiveClasses);
+        }
+        if (cardFemale) {
+            cardFemale.classList.remove(...activeClasses);
+            cardFemale.classList.add(...inactiveClasses);
+        }
+        if (checkMale) checkMale.classList.remove('hidden');
+        if (checkFemale) checkFemale.classList.add('hidden');
+        if (pitchInput) pitchInput.value = '0.88';
+        if (genderLabel) genderLabel.textContent = 'Male (TVS Advisor)';
+    }
+
+    updateAvailableVoices();
+}
+
+function isFemaleVoiceName(name) {
+    const n = name.toLowerCase();
+    return n.includes('female') || n.includes('woman') || n.includes('girl') ||
+           n.includes('lekha') || n.includes('swara') || n.includes('veena') ||
+           n.includes('samantha') || n.includes('zira') || n.includes('kavya') ||
+           n.includes('priya') || n.includes('aditi') || n.includes('heera') ||
+           n.includes('kalpana') || n.includes('geeta') || n.includes('victoria') ||
+           n.includes('karen') || n.includes('susan');
+}
+
+function isMaleVoiceName(name) {
+    const n = name.toLowerCase();
+    return n.includes('male') || n.includes('man') || n.includes('boy') ||
+           n.includes('rishi') || n.includes('daniel') || n.includes('george') ||
+           n.includes('madhav') || n.includes('hemant') || n.includes('david') ||
+           n.includes('ravi') || n.includes('alex') || n.includes('fred');
+}
+
+function updateAvailableVoices() {
+    if (!('speechSynthesis' in window)) return;
+
+    const langSelect = document.getElementById('voice_language');
+    const voiceSelect = document.getElementById('voice_name');
+    const langLabel = document.getElementById('preview-voice-lang-label');
+    if (!voiceSelect) return;
+
+    const targetLang = langSelect ? langSelect.value : 'hi-IN';
+    if (langLabel) {
+        langLabel.textContent = targetLang === 'hi-IN' ? 'Hindi' : (targetLang === 'en-IN' ? 'Indian English' : 'English');
+    }
+
+    const voices = window.speechSynthesis.getVoices();
+    const langPrefix = targetLang.substring(0, 2);
+
+    const relevantVoices = voices.filter(v => v.lang === targetLang || v.lang.replace('_', '-').startsWith(langPrefix));
+    const previousSelection = voiceSelect.value || savedVoiceName;
+    voiceSelect.innerHTML = '';
+
+    const autoOpt = document.createElement('option');
+    autoOpt.value = '';
+    autoOpt.textContent = `Auto-matched (${currentVoiceGender === 'female' ? 'Female Sweet Pitch 1.22' : 'Male Advisor Pitch 0.88'})`;
+    voiceSelect.appendChild(autoOpt);
+
+    relevantVoices.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        const isF = isFemaleVoiceName(v.name);
+        const isM = isMaleVoiceName(v.name);
+        const genderTag = isF ? ' (Female)' : (isM ? ' (Male)' : '');
+        opt.textContent = `${v.name}${genderTag} [${v.lang}]`;
+        if (v.name === previousSelection) {
+            opt.selected = true;
+        }
+        voiceSelect.appendChild(opt);
+    });
+}
+
+function findBestVoice(lang, gender, preferredName) {
+    if (!('speechSynthesis' in window)) return null;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) return null;
+
+    if (preferredName) {
+        const named = voices.find(v => v.name === preferredName);
+        if (named) return named;
+    }
+
+    const langPrefix = lang.substring(0, 2);
+    const matchingLangVoices = voices.filter(v => v.lang === lang || v.lang.replace('_', '-').startsWith(langPrefix));
+
+    if (gender === 'female') {
+        const femaleVoice = matchingLangVoices.find(v => isFemaleVoiceName(v.name));
+        if (femaleVoice) return femaleVoice;
+    } else {
+        const maleVoice = matchingLangVoices.find(v => isMaleVoiceName(v.name));
+        if (maleVoice) return maleVoice;
+    }
+
+    return matchingLangVoices[0] || voices[0];
+}
+
+function playVoiceTest() {
+    const textInput = document.getElementById('voice_welcome_text');
+    const langSelect = document.getElementById('voice_language');
+    const voiceSelect = document.getElementById('voice_name');
+    const audioUrl = "{{ $setting->voice_audio_url }}";
+
+    if (audioUrl) {
+        const audio = new Audio(audioUrl);
+        audio.play().catch(e => console.log('Audio playback error', e));
+        return;
+    }
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const text = (textInput && textInput.value.trim()) ? textInput.value.trim() : "{{ addslashes($setting->voice_welcome_text_or_default) }}";
+        const lang = langSelect ? langSelect.value : 'hi-IN';
+        const chosenVoiceName = voiceSelect ? voiceSelect.value : '';
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+
+        const isFemale = currentVoiceGender === 'female';
+        utterance.pitch = isFemale ? 1.22 : 0.88;
+        utterance.rate = isFemale ? 0.98 : 0.94;
+
+        const bestVoice = findBestVoice(lang, currentVoiceGender, chosenVoiceName);
+        if (bestVoice) {
+            utterance.voice = bestVoice;
+        }
+
+        const indicator = document.getElementById('preview-speaking-indicator');
+        utterance.onstart = () => { if (indicator) indicator.classList.remove('hidden'); };
+        utterance.onend = () => { if (indicator) indicator.classList.add('hidden'); };
+        utterance.onerror = () => { if (indicator) indicator.classList.add('hidden'); };
+
+        window.speechSynthesis.speak(utterance);
+    } else {
+        alert('Speech synthesis is not supported on this browser.');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = updateAvailableVoices;
+        updateAvailableVoices();
+    }
+
+    const btnTestVoice = document.getElementById('btn-test-voice');
+    const btnPreviewListen = document.getElementById('btn-preview-listen');
+    if (btnTestVoice) btnTestVoice.addEventListener('click', playVoiceTest);
+    if (btnPreviewListen) btnPreviewListen.addEventListener('click', playVoiceTest);
 });
 </script>
 @endpush

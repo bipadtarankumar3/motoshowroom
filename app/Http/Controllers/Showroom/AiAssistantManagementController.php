@@ -8,6 +8,7 @@ use App\Models\Showroom;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AiAssistantManagementController extends Controller
 {
@@ -74,9 +75,20 @@ class AiAssistantManagementController extends Controller
         }
 
         $validated = $request->validate([
-            'bot_name' => ['required', 'string', 'max:100'],
+            'bot_name' => ['nullable', 'string', 'max:100'],
             'welcome_message' => ['nullable', 'string', 'max:1000'],
-            'tone' => ['required', 'string', 'in:friendly,professional,enthusiastic'],
+            'tone' => ['nullable', 'string', 'in:friendly,professional,enthusiastic'],
+            'avatar_type' => ['nullable', 'string', 'in:male_tvs,female_saree,custom'],
+            'avatar_custom' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'voice_enabled' => ['nullable', 'boolean'],
+            'voice_language' => ['nullable', 'string', 'in:hi-IN,en-IN,en-US'],
+            'voice_gender' => ['nullable', 'string', 'in:male,female'],
+            'voice_pitch' => ['nullable', 'numeric', 'min:0.5', 'max:2.0'],
+            'voice_name' => ['nullable', 'string', 'max:100'],
+            'voice_welcome_text' => ['nullable', 'string', 'max:1000'],
+            'voice_audio' => ['nullable', 'file', 'mimes:mp3,wav,ogg,m4a', 'max:10240'],
+            'remove_custom_avatar' => ['nullable', 'boolean'],
+            'remove_custom_audio' => ['nullable', 'boolean'],
             'is_enabled' => ['nullable', 'boolean'],
             'suggested_prompts' => ['nullable', 'string'],
             'faqs' => ['nullable', 'array'],
@@ -105,13 +117,57 @@ class AiAssistantManagementController extends Controller
         }
 
         $setting = $showroom->getOrCreateAiSetting();
+
+        $customAvatarUrl = $setting->avatar_custom_url;
+        if ($request->boolean('remove_custom_avatar')) {
+            if ($customAvatarUrl && ! str_starts_with($customAvatarUrl, 'http')) {
+                Storage::disk('public')->delete($customAvatarUrl);
+            }
+            $customAvatarUrl = null;
+        } elseif ($request->hasFile('avatar_custom')) {
+            if ($customAvatarUrl && ! str_starts_with($customAvatarUrl, 'http')) {
+                Storage::disk('public')->delete($customAvatarUrl);
+            }
+            $customAvatarUrl = $request->file('avatar_custom')->store("ai-avatars/{$showroom->id}", 'public');
+        }
+
+        $voiceAudioPath = $setting->voice_audio_path;
+        if ($request->boolean('remove_custom_audio')) {
+            if ($voiceAudioPath && ! str_starts_with($voiceAudioPath, 'http')) {
+                Storage::disk('public')->delete($voiceAudioPath);
+            }
+            $voiceAudioPath = null;
+        } elseif ($request->hasFile('voice_audio')) {
+            if ($voiceAudioPath && ! str_starts_with($voiceAudioPath, 'http')) {
+                Storage::disk('public')->delete($voiceAudioPath);
+            }
+            $voiceAudioPath = $request->file('voice_audio')->store("ai-audio/{$showroom->id}", 'public');
+        }
+
+        $chosenAvatarType = $validated['avatar_type'] ?? $setting->avatar_type ?? 'male_tvs';
+        $defaultGender = $chosenAvatarType === 'female_saree' ? 'female' : 'male';
+        $chosenGender = $validated['voice_gender'] ?? $defaultGender;
+        $defaultPitch = $chosenGender === 'female' ? 1.22 : 0.88;
+        $chosenPitch = isset($validated['voice_pitch']) && $validated['voice_pitch'] !== null && $validated['voice_pitch'] !== ''
+            ? (float) $validated['voice_pitch']
+            : ($setting->voice_pitch ?: $defaultPitch);
+
         $setting->update([
-            'bot_name' => $validated['bot_name'],
-            'welcome_message' => $validated['welcome_message'] ?? null,
-            'tone' => $validated['tone'],
+            'bot_name' => $validated['bot_name'] ?? $setting->bot_name ?? 'Showroom AI Advisor',
+            'welcome_message' => $validated['welcome_message'] ?? $setting->welcome_message,
+            'tone' => $validated['tone'] ?? $setting->tone ?? 'friendly',
+            'avatar_type' => $chosenAvatarType,
+            'avatar_custom_url' => $customAvatarUrl,
+            'voice_enabled' => $request->has('voice_enabled') ? $request->boolean('voice_enabled') : (bool) ($setting->voice_enabled ?? true),
+            'voice_language' => $validated['voice_language'] ?? $setting->voice_language ?? 'hi-IN',
+            'voice_gender' => $chosenGender,
+            'voice_pitch' => $chosenPitch,
+            'voice_name' => $validated['voice_name'] ?? $setting->voice_name,
+            'voice_welcome_text' => $validated['voice_welcome_text'] ?? null,
+            'voice_audio_path' => $voiceAudioPath,
             'is_enabled' => $request->boolean('is_enabled'),
-            'suggested_prompts' => ! empty($promptsArray) ? $promptsArray : null,
-            'custom_faqs' => $faqsArray,
+            'suggested_prompts' => ! empty($promptsArray) ? $promptsArray : $setting->suggested_prompts,
+            'custom_faqs' => ! empty($faqsArray) ? $faqsArray : $setting->custom_faqs,
         ]);
 
         return redirect()

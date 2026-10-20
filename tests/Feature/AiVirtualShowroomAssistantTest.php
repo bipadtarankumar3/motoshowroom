@@ -483,4 +483,89 @@ class AiVirtualShowroomAssistantTest extends TestCase
         $response->assertRedirect(route('showrooms.manage.ai.index', $this->showroomA));
         $this->assertSoftDeleted('ai_conversations', ['id' => $conversation->id]);
     }
+
+    public function test_staff_can_configure_avatar_and_voice_settings(): void
+    {
+        $response = $this->actingAs($this->ownerA)
+            ->put(route('showrooms.manage.ai.settings', $this->showroomA), [
+                'bot_name' => 'Sawaranti TVS Advisor',
+                'tone' => 'friendly',
+                'is_enabled' => '1',
+                'avatar_type' => 'female_saree',
+                'voice_enabled' => '1',
+                'voice_language' => 'hi-IN',
+                'voice_welcome_text' => 'नमस्ते! सवरंती टीवीएस में आपका स्वागत है।',
+            ]);
+
+        $response->assertRedirect(route('showrooms.manage.ai.index', $this->showroomA));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('ai_assistant_settings', [
+            'tenant_id' => $this->showroomA->id,
+            'avatar_type' => 'female_saree',
+            'voice_enabled' => true,
+            'voice_language' => 'hi-IN',
+            'voice_welcome_text' => 'नमस्ते! सवरंती टीवीएस में आपका स्वागत है।',
+        ]);
+    }
+
+    public function test_public_ai_settings_endpoint_exposes_avatar_and_voice_data(): void
+    {
+        $setting = $this->showroomA->getOrCreateAiSetting();
+        $setting->update([
+            'avatar_type' => 'male_tvs',
+            'voice_enabled' => true,
+            'voice_language' => 'hi-IN',
+            'voice_welcome_text' => 'नमस्ते! सवरंती टीवीएस में आपका स्वागत है।',
+        ]);
+
+        $response = $this->getJson(route('showrooms.ai.settings', $this->showroomA));
+
+        $response->assertOk()
+            ->assertJson([
+                'is_available' => true,
+                'avatar_type' => 'male_tvs',
+                'voice_enabled' => true,
+                'voice_language' => 'hi-IN',
+                'voice_welcome_text' => 'नमस्ते! सवरंती टीवीएस में आपका स्वागत है।',
+            ]);
+
+        $this->assertStringContainsString('avatar-male-tvs-cutout.png', $response->json('avatar_url'));
+    }
+
+    public function test_ai_assistant_setting_avatar_url_and_voice_accessors(): void
+    {
+        $setting = $this->showroomA->getOrCreateAiSetting();
+
+        $setting->update(['avatar_type' => 'male_tvs']);
+        $this->assertStringContainsString('avatar-male-tvs-cutout.png', $setting->avatar_url);
+
+        $setting->update(['avatar_type' => 'female_saree']);
+        $this->assertStringContainsString('avatar-female-saree-cutout.png', $setting->avatar_url);
+
+        $setting->update([
+            'avatar_type' => 'custom',
+            'avatar_custom_url' => 'https://example.com/custom-avatar.png',
+        ]);
+        $this->assertSame('https://example.com/custom-avatar.png', $setting->avatar_url);
+
+        $setting->update([
+            'voice_language' => 'hi-IN',
+            'voice_welcome_text' => null,
+            'avatar_type' => 'female_saree',
+            'voice_gender' => 'female',
+            'voice_pitch' => null,
+        ]);
+        $this->assertStringContainsString('नमस्ते', $setting->voice_welcome_text_or_default);
+        $this->assertSame('female', $setting->effective_voice_gender);
+        $this->assertEquals(1.22, $setting->effective_voice_pitch);
+
+        $setting->update([
+            'avatar_type' => 'male_tvs',
+            'voice_gender' => 'male',
+            'voice_pitch' => null,
+        ]);
+        $this->assertSame('male', $setting->effective_voice_gender);
+        $this->assertEquals(0.88, $setting->effective_voice_pitch);
+    }
 }

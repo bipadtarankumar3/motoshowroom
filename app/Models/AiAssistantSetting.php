@@ -21,6 +21,15 @@ class AiAssistantSetting extends Model
         'bot_name',
         'welcome_message',
         'tone',
+        'avatar_type',
+        'avatar_custom_url',
+        'voice_enabled',
+        'voice_language',
+        'voice_gender',
+        'voice_pitch',
+        'voice_name',
+        'voice_welcome_text',
+        'voice_audio_path',
         'is_enabled',
         'suggested_prompts',
         'custom_faqs',
@@ -35,9 +44,89 @@ class AiAssistantSetting extends Model
     {
         return [
             'is_enabled' => 'boolean',
+            'voice_enabled' => 'boolean',
+            'voice_pitch' => 'float',
             'suggested_prompts' => 'array',
             'custom_faqs' => 'array',
         ];
+    }
+
+    /**
+     * Get effective voice gender based on avatar or explicit choice.
+     */
+    public function getEffectiveVoiceGenderAttribute(): string
+    {
+        if (! empty($this->voice_gender)) {
+            return $this->voice_gender;
+        }
+
+        return $this->avatar_type === 'female_saree' ? 'female' : 'male';
+    }
+
+    /**
+     * Get effective speech pitch.
+     */
+    public function getEffectiveVoicePitchAttribute(): float
+    {
+        if (! empty($this->voice_pitch) && $this->voice_pitch > 0) {
+            return (float) $this->voice_pitch;
+        }
+
+        return $this->effective_voice_gender === 'female' ? 1.22 : 0.88;
+    }
+
+    /**
+     * Get the avatar image URL.
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar_type === 'female_saree') {
+            return asset('images/ai-avatars/avatar-female-saree-cutout.png');
+        }
+
+        if ($this->avatar_type === 'custom' && ! empty($this->avatar_custom_url)) {
+            if (str_starts_with($this->avatar_custom_url, 'http://') || str_starts_with($this->avatar_custom_url, 'https://')) {
+                return $this->avatar_custom_url;
+            }
+
+            return asset('storage/'.$this->avatar_custom_url);
+        }
+
+        return asset('images/ai-avatars/avatar-male-tvs-cutout.png');
+    }
+
+    /**
+     * Get the default voice greeting text.
+     */
+    public function getVoiceWelcomeTextOrDefaultAttribute(): string
+    {
+        if (! empty($this->voice_welcome_text)) {
+            return $this->voice_welcome_text;
+        }
+
+        $showroomName = $this->showroom?->name ?? 'Sawaranti TVS';
+
+        if ($this->voice_language === 'hi-IN') {
+            return "नमस्ते! {$showroomName} में आपका स्वागत है। मैं आपका AI सलाहकार हूँ। बताइए आज मैं आपकी क्या सहायता कर सकता हूँ?";
+        }
+
+        return "Namaste! Welcome to {$showroomName}. I am your AI assistant. How may I help you today?";
+    }
+
+    /**
+     * Get pre-recorded voice audio URL if uploaded.
+     */
+    public function getVoiceAudioUrlAttribute(): ?string
+    {
+        if (empty($this->voice_audio_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->voice_audio_path, 'http://') || str_starts_with($this->voice_audio_path, 'https://')) {
+            return $this->voice_audio_path;
+        }
+
+        return asset('storage/'.$this->voice_audio_path);
     }
 
     /**
