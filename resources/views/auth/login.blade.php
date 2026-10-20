@@ -306,8 +306,8 @@
 
             <div class="w-full max-w-[420px] mx-auto my-auto space-y-3.5 py-4">
 
-                <!-- TOP FLOATING PILL TABS (AskReview Style) -->
-                <div class="flex items-center justify-center gap-2.5" role="tablist">
+                <!-- TOP FLOATING PILL TABS (AskReview Style - Mobile Only) -->
+                <div class="flex lg:hidden items-center justify-center gap-2.5" role="tablist">
                     <!-- Tab: Sign In -->
                     <button type="button"
                             role="tab"
