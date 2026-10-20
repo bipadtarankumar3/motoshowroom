@@ -437,7 +437,7 @@
                             </div>
                             <div>
                                 <h3 class="text-xs sm:text-sm font-bold text-slate-900">Interactive 360° & 3D Media Suite</h3>
-                                <p class="text-[11px] text-slate-500">Choose between sequential turntable frames, 3D WebGL CAD models, external embeds, or turntable videos.</p>
+                                <p class="text-[11px] text-slate-500">Choose between sequential turntable frames, 3D WebGL CAD models, or turntable videos.</p>
                             </div>
                         </div>
 
@@ -448,7 +448,7 @@
                     </div>
 
                     <!-- Type Selector Segmented Control -->
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-1.5 mb-4 p-1.5 bg-slate-200/60 rounded-2xl border border-slate-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 mb-4 p-1.5 bg-slate-200/60 rounded-2xl border border-slate-200">
                         <!-- Option 1: Turntable Frames -->
                         <button type="button" @click="viewerType = 'image_sequence'"
                                 :class="viewerType === 'image_sequence' ? 'bg-white text-slate-900 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'"
@@ -477,21 +477,7 @@
                             </div>
                         </button>
 
-                        <!-- Option 3: External Embed -->
-                        <button type="button" @click="viewerType = 'external_embed'"
-                                :class="viewerType === 'external_embed' ? 'bg-white text-slate-900 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'"
-                                class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition cursor-pointer">
-                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition"
-                                 :class="viewerType === 'external_embed' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            </div>
-                            <div class="min-w-0">
-                                <div class="text-xs leading-tight truncate">Virtual Tour Embed</div>
-                                <div class="text-[10px] text-slate-500 truncate">SpinCar / Sirv</div>
-                            </div>
-                        </button>
-
-                        <!-- Option 4: Turntable Video -->
+                        <!-- Option 3: Turntable Video -->
                         <button type="button" @click="viewerType = 'video_loop'"
                                 :class="viewerType === 'video_loop' ? 'bg-white text-slate-900 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'"
                                 class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition cursor-pointer">
@@ -576,26 +562,7 @@
                         </div>
                     </div>
 
-                    <!-- TYPE 3 VIEW: External Virtual Tour / Embed -->
-                    <div x-show="viewerType === 'external_embed'" class="space-y-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 mb-1.5">External 360° Virtual Tour or Viewer URL</label>
-                            <input type="text" name="model_3d_path" value="{{ old('model_3d_path') }}"
-                                   :disabled="viewerType !== 'external_embed'"
-                                   placeholder="https://spincar.com/view/... or https://sirv.com/... or https://my.matterport.com/show/?m=..."
-                                   class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500">
-                            <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
-                                <span class="text-[10px] text-slate-400 font-medium mr-1">Supported platforms:</span>
-                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">SpinCar</span>
-                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">Sirv 360</span>
-                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">Matterport</span>
-                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">Sketchfab</span>
-                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">Kuula</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TYPE 4 VIEW: Turntable Video Loop -->
+                    <!-- TYPE 3 VIEW: Turntable Video Loop -->
                     <div x-show="viewerType === 'video_loop'" class="space-y-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
                         <div class="p-5 rounded-xl border-2 border-dashed border-slate-300 hover:border-slate-400 transition text-center cursor-pointer bg-slate-50/50 group">
                             <label for="video_360_file" class="cursor-pointer block">
