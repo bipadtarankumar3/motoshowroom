@@ -71,13 +71,49 @@
          }"
          x-init="setInterval(() => { if (! paused) { next(); } }, 5500)">
 
+        <!-- MOBILE TOP STICKY PILL TABS -->
+        <div class="lg:hidden sticky top-0 z-40 w-full py-3 bg-slate-50/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-center shadow-xs">
+            <div class="flex items-center justify-center gap-2.5" role="tablist">
+                <!-- Tab: Sign In -->
+                <button type="button"
+                        role="tab"
+                        id="tab-login"
+                        @click="tab = 'login'"
+                        :class="tab === 'login'
+                            ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20 border-slate-900 font-bold'
+                            : 'bg-white/90 hover:bg-white text-slate-700 border-slate-200 font-semibold shadow-2xs hover:border-slate-300'"
+                        class="px-5 sm:px-6 py-2 rounded-full text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 border">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>Sign In</span>
+                </button>
+
+                <!-- Tab: Review Tour & Demo -->
+                <button type="button"
+                        role="tab"
+                        id="tab-demo"
+                        @click="tab = 'demo'"
+                        :class="tab === 'demo'
+                            ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20 border-slate-900 font-bold'
+                            : 'bg-white/90 hover:bg-white text-slate-700 border-slate-200 font-semibold shadow-2xs hover:border-slate-300'"
+                        class="px-5 sm:px-6 py-2 rounded-full text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 border">
+                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span>Review Tour & Demo</span>
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                </button>
+            </div>
+        </div>
+
         <!-- ======================================================== -->
         <!-- LEFT SECTION (70% on desktop): Showroom Carousel & Story -->
         <!-- Shown on desktop; on mobile shown when tab is 'demo'     -->
         <!-- ======================================================== -->
         <section id="showroom-section"
-                 class="w-full lg:w-[68%] xl:w-[70%] h-full flex flex-col justify-between p-6 sm:p-8 xl:p-10 2xl:p-12 bg-slate-50/70 border-r border-slate-200/80 relative overflow-hidden"
-                 :class="tab === 'demo' ? 'flex order-2 lg:order-1' : 'hidden lg:flex lg:order-1'">
+                 class="w-full lg:w-[68%] xl:w-[70%] min-h-screen lg:h-full flex flex-col justify-between p-5 sm:p-8 xl:p-10 2xl:p-12 bg-slate-50/70 border-r border-slate-200/80 relative overflow-y-auto"
+                 :class="tab === 'demo' ? 'flex' : 'hidden lg:flex'">
 
             <!-- Ambient Glow Accents -->
             <div class="pointer-events-none absolute -top-28 -left-28 w-96 h-96 rounded-full bg-red-400/10 blur-3xl"></div>
@@ -299,46 +335,14 @@
 
         <!-- ======================================================== -->
         <!-- RIGHT SECTION (STRICTLY 30%): Modern Login & Demo Panel  -->
+        <!-- Shown on desktop; on mobile shown when tab is 'login'    -->
         <!-- ======================================================== -->
-        <section class="w-full lg:w-[32%] xl:w-[30%] min-w-[360px] h-full flex flex-col justify-center items-center p-4 sm:p-6 xl:p-8 bg-slate-50/70 border-l border-slate-200/90 relative z-20 overflow-y-auto order-1 lg:order-2 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:18px_18px]">
+        <section class="w-full lg:w-[32%] xl:w-[30%] min-w-[340px] min-h-screen lg:h-full flex flex-col justify-center items-center p-4 sm:p-6 xl:p-8 bg-slate-50/70 border-l border-slate-200/90 relative z-20 overflow-y-auto bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:18px_18px]"
+                 :class="tab === 'login' ? 'flex' : 'hidden lg:flex'">
             <!-- Top Accent Gradient Line -->
             <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-600 via-rose-500 to-amber-500"></div>
 
             <div class="w-full max-w-[420px] mx-auto my-auto space-y-3.5 py-4">
-
-                <!-- TOP FLOATING PILL TABS (AskReview Style - Mobile Only) -->
-                <div class="flex lg:hidden items-center justify-center gap-2.5" role="tablist">
-                    <!-- Tab: Sign In -->
-                    <button type="button"
-                            role="tab"
-                            id="tab-login"
-                            @click="tab = 'login'"
-                            :class="tab === 'login'
-                                ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20 border-slate-900 font-bold'
-                                : 'bg-white/90 hover:bg-white text-slate-700 border-slate-200 font-semibold shadow-2xs hover:border-slate-300'"
-                            class="px-5 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 border">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span>Sign In</span>
-                    </button>
-
-                    <!-- Tab: Review Tour & Demo -->
-                    <button type="button"
-                            role="tab"
-                            id="tab-demo"
-                            @click="tab = 'demo'; $nextTick(() => { document.getElementById('showroom-section')?.scrollIntoView({ behavior: 'smooth' }); })"
-                            :class="tab === 'demo'
-                                ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20 border-slate-900 font-bold'
-                                : 'bg-white/90 hover:bg-white text-slate-700 border-slate-200 font-semibold shadow-2xs hover:border-slate-300'"
-                            class="px-5 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm transition-all duration-200 flex items-center gap-2 border">
-                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span>Review Tour & Demo</span>
-                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                    </button>
-                </div>
 
                 <!-- MAIN ELEVATED WHITE CARD -->
                 <div class="bg-white rounded-3xl border border-slate-200/90 shadow-2xl shadow-slate-200/60 p-6 sm:p-7 space-y-4 relative">
@@ -379,13 +383,9 @@
                     </div>
 
                     <!-- ============================= -->
-                    <!-- TAB 1: LOGIN FORM VIEW        -->
+                    <!-- LOGIN FORM VIEW               -->
                     <!-- ============================= -->
-                    <div x-show="tab === 'login'"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         class="space-y-4">
+                    <div class="space-y-4">
 
                         <!-- Google Sign-In Button (Directly below subtitle, matching AskReview) -->
                         <div>
@@ -496,96 +496,29 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
                             </button>
+
+                            <!-- Quick 1-Click Demo Logins -->
+                            <div class="pt-2 text-center border-t border-slate-100">
+                                <div class="text-[11px] text-slate-400 font-semibold mb-1.5">1-Click Demo Login:</div>
+                                <div class="grid grid-cols-3 gap-1.5">
+                                    <button type="button"
+                                            @click="signInAs('admin', 'admin@motoshowroom.example', 'Password123!')"
+                                            class="py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-red-50 hover:text-red-600 text-slate-700 text-xs font-bold border border-slate-200 transition">
+                                        👑 Admin
+                                    </button>
+                                    <button type="button"
+                                            @click="signInAs('dealer', 'rajesh@apex.example', 'Password123!')"
+                                            class="py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-amber-50 hover:text-amber-700 text-slate-700 text-xs font-bold border border-slate-200 transition">
+                                        🏍️ Dealer
+                                    </button>
+                                    <button type="button"
+                                            @click="signInAs('customer', 'user@motoshowroom.example', 'Password123!')"
+                                            class="py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-xs font-bold border border-slate-200 transition">
+                                        👤 Buyer
+                                    </button>
+                                </div>
+                            </div>
                         </form>
-                    </div>
-
-                    <!-- ============================= -->
-                    <!-- TAB 2: DEMO ROLES & UI VIEW   -->
-                    <!-- ============================= -->
-                    <div x-show="tab === 'demo'"
-                         x-cloak
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         class="space-y-3">
-
-                        <div class="rounded-xl bg-amber-50/90 border border-amber-200/90 p-3 flex items-start gap-2.5">
-                            <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                            </svg>
-                            <p class="text-xs text-amber-900 leading-snug text-left">
-                                Click any role to <strong>instantly sign in</strong> and explore the live multi-tenant motorcycle showroom environment.
-                            </p>
-                        </div>
-
-                        <!-- Demo Role 1: Super Admin -->
-                        <button type="button"
-                                @click="signInAs('admin', 'admin@motoshowroom.example', 'Password123!')"
-                                class="w-full text-left p-3.5 rounded-xl bg-white hover:bg-red-50/60 border border-slate-200 hover:border-red-300 shadow-2xs transition group flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-lg group-hover:scale-105 transition shrink-0 border border-red-100">
-                                    👑
-                                </div>
-                                <div>
-                                    <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-red-600 transition">Super Administrator</div>
-                                    <div class="text-[11px] text-slate-400 font-mono">admin@motoshowroom.example</div>
-                                    <div class="text-[10px] text-slate-500">Platform billing & showroom tenants</div>
-                                </div>
-                            </div>
-                            <span class="text-xs font-bold text-red-600 opacity-0 group-hover:opacity-100 transition whitespace-nowrap pl-2">
-                                Launch →
-                            </span>
-                        </button>
-
-                        <!-- Demo Role 2: Showroom Dealer Owner -->
-                        <button type="button"
-                                @click="signInAs('dealer', 'rajesh@apex.example', 'Password123!')"
-                                class="w-full text-left p-3.5 rounded-xl bg-white hover:bg-amber-50/60 border border-slate-200 hover:border-amber-300 shadow-2xs transition group flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg group-hover:scale-105 transition shrink-0 border border-amber-100">
-                                    🏍️
-                                </div>
-                                <div>
-                                    <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-amber-700 transition">Showroom Owner (Apex Moto)</div>
-                                    <div class="text-[11px] text-slate-400 font-mono">rajesh@apex.example</div>
-                                    <div class="text-[10px] text-slate-500">360° bikes, service bays & tokens</div>
-                                </div>
-                            </div>
-                            <span class="text-xs font-bold text-amber-600 opacity-0 group-hover:opacity-100 transition whitespace-nowrap pl-2">
-                                Launch →
-                            </span>
-                        </button>
-
-                        <!-- Demo Role 3: Customer / Rider -->
-                        <button type="button"
-                                @click="signInAs('customer', 'user@motoshowroom.example', 'Password123!')"
-                                class="w-full text-left p-3.5 rounded-xl bg-white hover:bg-blue-50/60 border border-slate-200 hover:border-blue-300 shadow-2xs transition group flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg group-hover:scale-105 transition shrink-0 border border-sky-100">
-                                    👤
-                                </div>
-                                <div>
-                                    <div class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-700 transition">Customer / Buyer</div>
-                                    <div class="text-[11px] text-slate-400 font-mono">user@motoshowroom.example</div>
-                                    <div class="text-[10px] text-slate-500">Test rides, bookings & scratch cards</div>
-                                </div>
-                            </div>
-                            <span class="text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition whitespace-nowrap pl-2">
-                                Launch →
-                            </span>
-                        </button>
-
-                        <!-- Mobile callout to view left side UI -->
-                        <div class="lg:hidden pt-2">
-                            <button type="button"
-                                    @click="document.getElementById('showroom-section')?.scrollIntoView({ behavior: 'smooth' })"
-                                    class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                                <span>👀 View Showroom 360° Carousel Below</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                                </svg>
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Footer: Don't have an account? Create Account -->
