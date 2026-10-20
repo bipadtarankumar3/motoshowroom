@@ -3,6 +3,32 @@
 @section('title', 'AI Virtual Concierge - ' . $showroom->name)
 
 @section('content')
+<style>
+    @keyframes avatarLifeBreathe {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-3px) scale(1.012); }
+    }
+    @keyframes naturalEyelidBlink {
+        0%, 94%, 100% { opacity: 0; }
+        96%, 98% { opacity: 0.95; }
+    }
+    @keyframes mouthPhonemeSync {
+        0% { transform: translate(-50%, -50%) scaleY(0.15) scaleX(0.85); }
+        25% { transform: translate(-50%, -50%) scaleY(0.85) scaleX(1.1); }
+        50% { transform: translate(-50%, -50%) scaleY(0.35) scaleX(0.95); }
+        75% { transform: translate(-50%, -50%) scaleY(0.95) scaleX(1.15); }
+        100% { transform: translate(-50%, -50%) scaleY(0.2) scaleX(0.9); }
+    }
+    .animate-avatar-life {
+        animation: avatarLifeBreathe 4s ease-in-out infinite;
+    }
+    .animate-avatar-blink {
+        animation: naturalEyelidBlink 4.8s infinite;
+    }
+    .animate-avatar-speaking {
+        animation: mouthPhonemeSync 0.24s ease-in-out infinite alternate;
+    }
+</style>
 <div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
     @include('showrooms.partials.manage-nav')
 
@@ -123,9 +149,9 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <span class="text-xs font-bold uppercase text-slate-900 block">AI Character Avatar</span>
-                                    <span class="text-[11px] text-slate-500">Select the welcome advisor character with Namaste gesture.</span>
+                                    <span class="text-[11px] text-slate-500">Select authentic human showroom advisor persona.</span>
                                 </div>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Namaste 3D / 2D</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Real Human Avatars</span>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
@@ -134,11 +160,11 @@
                                        class="avatar-card relative flex flex-col items-center p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 text-center bg-white {{ old('avatar_type', $setting->avatar_type) === 'male_tvs' ? 'border-rose-600 ring-2 ring-rose-500/20 shadow-xs' : 'border-slate-200 hover:border-slate-300' }}">
                                     <span id="badge-male" class="{{ old('avatar_type', $setting->avatar_type) === 'male_tvs' ? '' : 'hidden' }} absolute top-2 right-2 px-1.5 py-0.5 rounded bg-rose-600 text-[9px] font-black text-white shadow-xs">✓ Active</span>
                                     <input type="radio" name="avatar_type" id="radio-avatar-male" value="male_tvs" {{ old('avatar_type', $setting->avatar_type) === 'male_tvs' ? 'checked' : '' }} class="sr-only">
-                                    <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-200 mb-2 shadow-xs">
-                                        <img src="{{ asset('images/ai-avatars/avatar-male-tvs.jpg') }}" alt="TVS Male Advisor" class="w-full h-full object-cover">
+                                    <div class="rounded-full overflow-hidden bg-slate-100 border border-slate-200 mb-2 shadow-xs shrink-0" style="width: 64px; height: 64px; min-width: 64px; min-height: 64px;">
+                                        <img src="{{ asset('images/ai-avatars/avatar-male-tvs.jpg') }}" alt="Rohit - Real Human TVS Advisor" class="w-full h-full object-cover object-top" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                                     </div>
-                                    <span class="text-xs font-bold text-slate-900 leading-tight">TVS Male Advisor</span>
-                                    <span class="text-[10px] text-slate-500 mt-0.5">Sawaranti TVS Uniform</span>
+                                    <span class="text-xs font-bold text-slate-900 leading-tight">Rohit (TVS Advisor)</span>
+                                    <span class="text-[10px] text-slate-500 mt-0.5">Real Human Male</span>
                                 </label>
 
                                 <!-- Female Advisor -->
@@ -146,11 +172,11 @@
                                        class="avatar-card relative flex flex-col items-center p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 text-center bg-white {{ old('avatar_type', $setting->avatar_type) === 'female_saree' ? 'border-rose-600 ring-2 ring-rose-500/20 shadow-xs' : 'border-slate-200 hover:border-slate-300' }}">
                                     <span id="badge-female" class="{{ old('avatar_type', $setting->avatar_type) === 'female_saree' ? '' : 'hidden' }} absolute top-2 right-2 px-1.5 py-0.5 rounded bg-rose-600 text-[9px] font-black text-white shadow-xs">✓ Active</span>
                                     <input type="radio" name="avatar_type" id="radio-avatar-female" value="female_saree" {{ old('avatar_type', $setting->avatar_type) === 'female_saree' ? 'checked' : '' }} class="sr-only">
-                                    <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-200 mb-2 shadow-xs">
-                                        <img src="{{ asset('images/ai-avatars/avatar-female-saree.jpg') }}" alt="Female Advisor" class="w-full h-full object-cover">
+                                    <div class="rounded-full overflow-hidden bg-slate-100 border border-slate-200 mb-2 shadow-xs shrink-0" style="width: 64px; height: 64px; min-width: 64px; min-height: 64px;">
+                                        <img src="{{ asset('images/ai-avatars/avatar-female-saree.jpg') }}" alt="Priya - Real Human Female Advisor" class="w-full h-full object-cover object-top" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                                     </div>
-                                    <span class="text-xs font-bold text-slate-900 leading-tight">Female Advisor</span>
-                                    <span class="text-[10px] text-slate-500 mt-0.5">Traditional Saree Namaste</span>
+                                    <span class="text-xs font-bold text-slate-900 leading-tight">Priya (Female Advisor)</span>
+                                    <span class="text-[10px] text-slate-500 mt-0.5">Real Human Namaste</span>
                                 </label>
                             </div>
 
@@ -296,85 +322,155 @@
             <!-- Right Column: Avatar Preview, QR Code & Conversations Ledger (7 cols) -->
             <div class="lg:col-span-7 space-y-6">
 
-                <!-- Interactive Character Live Preview & QR Scan Card -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Live Character Preview -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
-                        <div class="flex items-start justify-between gap-3 mb-3">
-                            <div>
-                                <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider block">Live Character Preview</span>
-                                <h4 class="text-sm font-bold text-slate-900 mt-0.5">{{ $setting->bot_name }}</h4>
+                <!-- Live Human Concierge Recitation Stage (Strictly Dimensioned, Real Human Presenter) -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-xs overflow-hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                                    Real Human AI Presenter
+                                </span>
+                                <span id="preview-live-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span id="preview-status-text">Ready to Speak</span>
+                                </span>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span>Namaste Active</span>
-                            </span>
+                            <h3 class="text-base sm:text-lg font-black text-slate-900 mt-1 flex items-center gap-2">
+                                <span>{{ $setting->bot_name }}</span>
+                                <span class="text-xs font-normal text-slate-500">• 1-Tap Voice Greeting</span>
+                            </h3>
                         </div>
 
-                        <div class="flex items-center gap-4 py-2">
-                            <div class="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-100 border-2 border-rose-500/30 shadow-md shrink-0">
-                                <img id="preview-avatar-img" src="{{ $setting->avatar_url }}" alt="Character Preview" class="w-full h-full object-cover">
-                                <div id="preview-speaking-indicator" class="hidden absolute bottom-1 right-1 px-1 py-0.5 rounded bg-emerald-500 text-[8px] font-black text-white">
-                                    LIVE
-                                </div>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs text-slate-600 italic line-clamp-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                                    "{{ $setting->voice_welcome_text_or_default }}"
-                                </p>
-                                <div class="mt-2 flex items-center gap-2">
-                                    <button type="button" id="btn-preview-listen" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] transition shadow-xs flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-                                        <span>Listen Spoken Greeting</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                            <span>Voice: <strong id="preview-voice-gender-label" class="text-slate-800">{{ $setting->effective_voice_gender === 'female' ? 'Female (Sweet)' : 'Male (TVS Advisor)' }}</strong> (<span id="preview-voice-lang-label">{{ $setting->voice_language === 'hi-IN' ? 'Hindi' : 'Indian English' }}</span>)</span>
-                            <span>Mode: <strong class="text-emerald-700">1-Tap Experience</strong></span>
+                        <div class="flex items-center gap-2 text-xs text-slate-500">
+                            <span>Voice: <strong id="preview-voice-gender-label" class="text-slate-800">{{ $setting->effective_voice_gender === 'female' ? 'Female (Sweet)' : 'Male (TVS Advisor)' }}</strong></span>
+                            <span>•</span>
+                            <span id="preview-voice-lang-label" class="text-slate-700 font-semibold">{{ $setting->voice_language === 'hi-IN' ? 'Hindi (Namaste)' : ($setting->voice_language === 'en-IN' ? 'Indian English' : 'English (US)') }}</span>
                         </div>
                     </div>
 
-                    <!-- In-Showroom QR Welcome Standee Card -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
-                        <div class="flex items-start justify-between gap-3 mb-2">
-                            <div>
-                                <span class="text-[10px] font-bold text-cyan-700 uppercase tracking-wider block">QR Scan Welcome</span>
-                                <h4 class="text-sm font-bold text-slate-900 mt-0.5">Customer QR Standee</h4>
+                    <!-- Human Presenter Stage + Spoken Speech Display -->
+                    <div class="mt-6 flex flex-col md:flex-row items-center md:items-stretch gap-6">
+
+                        <!-- Human Presenter Stage (Strict fixed width/height container) -->
+                        <div class="shrink-0 flex flex-col items-center" style="width: 200px; min-width: 200px; max-width: 200px;">
+                            <div id="preview-avatar-stage"
+                                 class="relative rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-md select-none"
+                                 style="width: 200px; height: 250px; min-width: 200px; max-width: 200px; min-height: 250px; max-height: 250px;">
+
+                                <!-- Living Breathing Real Human Container -->
+                                <div id="preview-character-container" class="relative w-full h-full overflow-hidden flex items-end justify-center animate-avatar-life">
+                                    <!-- Real Human Photo -->
+                                    <img id="preview-avatar-img"
+                                         src="{{ $setting->avatar_type === 'female_saree' ? asset('images/ai-avatars/avatar-female-saree.jpg') : asset('images/ai-avatars/avatar-male-tvs.jpg') }}"
+                                         alt="Real Human Advisor"
+                                         class="w-full h-full object-cover object-top transition-transform duration-300"
+                                         style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
+
+                                    <!-- Subtle Natural Eyelid Blink Overlay -->
+                                    <div id="preview-blink-overlay"
+                                         class="absolute pointer-events-none opacity-0 animate-avatar-blink"
+                                         style="left: 50%; top: 24.5%; width: 44px; height: 12px; transform: translate(-50%, -50%);">
+                                        <div class="w-full h-[2px] bg-slate-900/40 rounded-full mx-auto"></div>
+                                    </div>
+
+                                    <!-- Organic Talking Mouth Overlay (Articulates during speech) -->
+                                    <div id="preview-mouth-overlay"
+                                         class="absolute pointer-events-none transition-opacity duration-150 opacity-0"
+                                         style="left: 50%; top: 33.5%; width: 32px; height: 16px; transform: translate(-50%, -50%);">
+                                        <svg viewBox="0 0 50 30" class="w-full h-full overflow-visible" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M 4 12 Q 25 7 46 12" stroke="#a34e44" stroke-width="2.5" stroke-linecap="round"/>
+                                            <path d="M 5 12 Q 25 30 45 12 Z" fill="#3b0f11"/>
+                                            <path d="M 9 12 Q 25 18 41 12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+                                            <ellipse cx="25" cy="18" rx="9" ry="4" fill="#cf4e58"/>
+                                            <path d="M 6 13 Q 25 29 44 13" stroke="#b85b52" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Presenter HUD Badge Top-Left -->
+                                    <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-900/70 backdrop-blur-xs text-[9px] font-bold text-white shadow-xs">
+                                        <span id="preview-hud-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                        <span id="preview-hud-status">AI PRESENTER</span>
+                                    </div>
+
+                                    <!-- Bottom Gradient Overlay with Persona Name -->
+                                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-2.5 pt-6 text-left">
+                                        <span id="preview-character-persona-title" class="text-xs font-bold text-white block truncate leading-tight">
+                                            {{ $setting->avatar_type === 'female_saree' ? 'Priya (Female Advisor)' : 'Rohit (TVS Advisor)' }}
+                                        </span>
+                                        <span class="text-[10px] text-slate-300 block leading-none mt-0.5">Real Human Showroom Host</span>
+                                    </div>
+                                </div>
+
+                                <!-- Speaking Pulse Ring Halo -->
+                                <div id="preview-speaking-halo" class="absolute inset-0 ring-4 ring-amber-400/60 rounded-2xl opacity-0 transition-opacity duration-300 pointer-events-none"></div>
                             </div>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-50 text-cyan-800 border border-cyan-200">
-                                Auto-Greet
-                            </span>
+
+                            <!-- Badges below avatar -->
+                            <div class="mt-2 text-center">
+                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600">
+                                    <span>✨ Photorealistic</span>
+                                    <span>•</span>
+                                    <span>HD 4K</span>
+                                </span>
+                            </div>
                         </div>
 
-                        @php
-                            $welcomeUrl = route('showrooms.show', ['showroom' => $showroom, 'welcome' => 1]);
-                            $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($welcomeUrl);
-                        @endphp
+                        <!-- Speech Balloon & Interactive Controls -->
+                        <div class="flex-1 min-w-0 w-full flex flex-col justify-between">
+                            <!-- Speech Bubble pointing to the human avatar -->
+                            <div class="relative bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-xs flex-1 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-200/60">
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+                                            <span>Spoken Showroom Welcome Dialogue</span>
+                                        </span>
+                                        <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                            Recited to Visitors
+                                        </span>
+                                    </div>
 
-                        <div class="flex items-center gap-3 py-1">
-                            <div class="p-2 rounded-2xl bg-white border border-slate-200 shadow-xs shrink-0">
-                                <img src="{{ $qrImageUrl }}" alt="Showroom AI Concierge QR Code" class="w-16 h-16 object-contain">
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-[11px] text-slate-600 leading-snug">
-                                    Customers scanning this in the showroom land straight on the 1-Tap Namaste AI welcome experience.
-                                </p>
-                                <div class="mt-2 flex items-center gap-1.5 flex-wrap">
-                                    <a href="{{ $welcomeUrl }}" target="_blank" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-[10px] transition">
-                                        Test Link &rarr;
-                                    </a>
-                                    <button type="button" onclick="navigator.clipboard.writeText('{{ $welcomeUrl }}'); alert('Direct QR link copied!');" class="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-[10px] transition">
-                                        Copy Link
-                                    </button>
+                                    <p id="preview-welcome-bubble-text" class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed italic select-all py-1">
+                                        "{{ $setting->voice_welcome_text_or_default }}"
+                                    </p>
+                                </div>
+
+                                <!-- Equalizer Sound Wave (active when speaking) -->
+                                <div id="preview-equalizer-row" class="hidden mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between">
+                                    <div class="flex items-center gap-1.5 h-5">
+                                        <span class="w-1 bg-amber-500 rounded-full animate-pulse h-2"></span>
+                                        <span class="w-1 bg-amber-500 rounded-full animate-pulse h-5" style="animation-delay: 150ms;"></span>
+                                        <span class="w-1 bg-amber-500 rounded-full animate-pulse h-3" style="animation-delay: 300ms;"></span>
+                                        <span class="w-1 bg-amber-500 rounded-full animate-pulse h-5" style="animation-delay: 450ms;"></span>
+                                        <span class="w-1 bg-amber-500 rounded-full animate-pulse h-2" style="animation-delay: 200ms;"></span>
+                                        <span class="w-1 bg-amber-500 rounded-full animate-pulse h-4" style="animation-delay: 350ms;"></span>
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-700 animate-pulse flex items-center gap-1">
+                                        <span>🎙️ Human Voice Synthesis Playing...</span>
+                                    </span>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500 truncate font-mono">
-                            {{ $welcomeUrl }}
+                            <!-- Speech Action Controls -->
+                            <div class="mt-4 flex flex-wrap items-center gap-3">
+                                <button type="button" id="btn-preview-listen"
+                                        class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-98 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                                    <span id="btn-preview-listen-text">Listen Spoken Greeting</span>
+                                </button>
+
+                                <button type="button" id="btn-preview-stop" class="hidden px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+                                    ⏹ Stop
+                                </button>
+
+                                @if($showroom->isWebsiteAccessible())
+                                    <a href="{{ route('showrooms.show', ['showroom' => $showroom, 'welcome' => 1]) }}" target="_blank"
+                                       class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs shadow-xs transition flex items-center gap-1.5 sm:ml-auto">
+                                        <span>Test on Website</span>
+                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -507,6 +603,7 @@
 <script>
 let currentVoiceGender = "{{ old('voice_gender', $setting->effective_voice_gender) }}";
 let savedVoiceName = "{{ old('voice_name', $setting->voice_name ?? '') }}";
+let activeAudio = null;
 
 function selectAvatar(choice) {
     const cardMale = document.getElementById('card-avatar-male');
@@ -518,6 +615,7 @@ function selectAvatar(choice) {
     const radioCustom = document.getElementById('radio-avatar-custom');
     const uploadBox = document.getElementById('custom-avatar-upload-box');
     const previewImg = document.getElementById('preview-avatar-img');
+    const personaTitle = document.getElementById('preview-character-persona-title');
 
     const activeClasses = ['border-rose-600', 'ring-2', 'ring-rose-500/20', 'shadow-xs'];
     const inactiveClasses = ['border-slate-200', 'hover:border-slate-300'];
@@ -535,7 +633,18 @@ function selectAvatar(choice) {
         if (badgeMale) badgeMale.classList.remove('hidden');
         if (badgeFemale) badgeFemale.classList.add('hidden');
         if (uploadBox) uploadBox.classList.add('hidden');
-        if (previewImg) previewImg.src = "{{ asset('images/ai-avatars/avatar-male-tvs-cutout.png') }}";
+        if (previewImg) previewImg.src = "{{ asset('images/ai-avatars/avatar-male-tvs.jpg') }}";
+        if (personaTitle) personaTitle.textContent = "Rohit (TVS Advisor)";
+        const mouthOverlay = document.getElementById('preview-mouth-overlay');
+        const blinkOverlay = document.getElementById('preview-blink-overlay');
+        if (mouthOverlay) {
+            mouthOverlay.style.top = '29.5%';
+            mouthOverlay.style.left = '49.5%';
+        }
+        if (blinkOverlay) {
+            blinkOverlay.style.top = '21.5%';
+            blinkOverlay.style.left = '49.5%';
+        }
 
         // Auto-switch voice persona to male TVS advisor
         selectVoiceGender('male');
@@ -552,7 +661,18 @@ function selectAvatar(choice) {
         if (badgeFemale) badgeFemale.classList.remove('hidden');
         if (badgeMale) badgeMale.classList.add('hidden');
         if (uploadBox) uploadBox.classList.add('hidden');
-        if (previewImg) previewImg.src = "{{ asset('images/ai-avatars/avatar-female-saree-cutout.png') }}";
+        if (previewImg) previewImg.src = "{{ asset('images/ai-avatars/avatar-female-saree.jpg') }}";
+        if (personaTitle) personaTitle.textContent = "Priya (Female Advisor)";
+        const mouthOverlay = document.getElementById('preview-mouth-overlay');
+        const blinkOverlay = document.getElementById('preview-blink-overlay');
+        if (mouthOverlay) {
+            mouthOverlay.style.top = '33.5%';
+            mouthOverlay.style.left = '50%';
+        }
+        if (blinkOverlay) {
+            blinkOverlay.style.top = '24.5%';
+            blinkOverlay.style.left = '50%';
+        }
 
         // Auto-switch voice persona to female advisor
         selectVoiceGender('female');
@@ -647,7 +767,7 @@ function updateAvailableVoices() {
 
     const targetLang = langSelect ? langSelect.value : 'hi-IN';
     if (langLabel) {
-        langLabel.textContent = targetLang === 'hi-IN' ? 'Hindi' : (targetLang === 'en-IN' ? 'Indian English' : 'English');
+        langLabel.textContent = targetLang === 'hi-IN' ? 'Hindi (Namaste)' : (targetLang === 'en-IN' ? 'Indian English' : 'English (US)');
     }
 
     const voices = window.speechSynthesis.getVoices();
@@ -700,20 +820,89 @@ function findBestVoice(lang, gender, preferredName) {
     return matchingLangVoices[0] || voices[0];
 }
 
+function setSpeakingUIState(isSpeaking) {
+    const halo = document.getElementById('preview-speaking-halo');
+    const equalizer = document.getElementById('preview-equalizer-row');
+    const statusText = document.getElementById('preview-status-text');
+    const liveBadge = document.getElementById('preview-live-badge');
+    const btnText = document.getElementById('btn-preview-listen-text');
+    const stopBtn = document.getElementById('btn-preview-stop');
+    const mouthOverlay = document.getElementById('preview-mouth-overlay');
+    const hudDot = document.getElementById('preview-hud-dot');
+    const hudStatus = document.getElementById('preview-hud-status');
+
+    if (isSpeaking) {
+        if (halo) {
+            halo.classList.remove('opacity-0');
+            halo.classList.add('opacity-100');
+        }
+        if (mouthOverlay) {
+            mouthOverlay.classList.remove('opacity-0');
+            mouthOverlay.classList.add('opacity-100', 'animate-avatar-speaking');
+        }
+        if (hudDot) hudDot.className = "w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping";
+        if (hudStatus) hudStatus.textContent = "SPEAKING LIVE";
+        if (equalizer) equalizer.classList.remove('hidden');
+        if (statusText) statusText.textContent = "Speaking Greeting...";
+        if (liveBadge) {
+            liveBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5";
+        }
+        if (btnText) btnText.textContent = "Speaking Greeting...";
+        if (stopBtn) stopBtn.classList.remove('hidden');
+    } else {
+        if (halo) {
+            halo.classList.add('opacity-0');
+            halo.classList.remove('opacity-100');
+        }
+        if (mouthOverlay) {
+            mouthOverlay.classList.add('opacity-0');
+            mouthOverlay.classList.remove('opacity-100', 'animate-avatar-speaking');
+        }
+        if (hudDot) hudDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400";
+        if (hudStatus) hudStatus.textContent = "AI PRESENTER";
+        if (equalizer) equalizer.classList.add('hidden');
+        if (statusText) statusText.textContent = "Ready to Speak";
+        if (liveBadge) {
+            liveBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5";
+        }
+        if (btnText) btnText.textContent = "Listen Spoken Greeting";
+        if (stopBtn) stopBtn.classList.add('hidden');
+    }
+}
+
+function stopVoicePlayback() {
+    if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+        activeAudio = null;
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    setSpeakingUIState(false);
+}
+
 function playVoiceTest() {
+    stopVoicePlayback();
+
     const textInput = document.getElementById('voice_welcome_text');
     const langSelect = document.getElementById('voice_language');
     const voiceSelect = document.getElementById('voice_name');
     const audioUrl = "{{ $setting->voice_audio_url }}";
 
     if (audioUrl) {
-        const audio = new Audio(audioUrl);
-        audio.play().catch(e => console.log('Audio playback error', e));
+        setSpeakingUIState(true);
+        activeAudio = new Audio(audioUrl);
+        activeAudio.onended = () => setSpeakingUIState(false);
+        activeAudio.onerror = () => setSpeakingUIState(false);
+        activeAudio.play().catch(e => {
+            console.log('Audio playback error', e);
+            setSpeakingUIState(false);
+        });
         return;
     }
 
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
         const text = (textInput && textInput.value.trim()) ? textInput.value.trim() : "{{ addslashes($setting->voice_welcome_text_or_default) }}";
         const lang = langSelect ? langSelect.value : 'hi-IN';
         const chosenVoiceName = voiceSelect ? voiceSelect.value : '';
@@ -730,10 +919,9 @@ function playVoiceTest() {
             utterance.voice = bestVoice;
         }
 
-        const indicator = document.getElementById('preview-speaking-indicator');
-        utterance.onstart = () => { if (indicator) indicator.classList.remove('hidden'); };
-        utterance.onend = () => { if (indicator) indicator.classList.add('hidden'); };
-        utterance.onerror = () => { if (indicator) indicator.classList.add('hidden'); };
+        utterance.onstart = () => setSpeakingUIState(true);
+        utterance.onend = () => setSpeakingUIState(false);
+        utterance.onerror = () => setSpeakingUIState(false);
 
         window.speechSynthesis.speak(utterance);
     } else {
@@ -749,8 +937,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const btnTestVoice = document.getElementById('btn-test-voice');
     const btnPreviewListen = document.getElementById('btn-preview-listen');
+    const btnPreviewStop = document.getElementById('btn-preview-stop');
+    const voiceWelcomeInput = document.getElementById('voice_welcome_text');
+    const previewBubbleText = document.getElementById('preview-welcome-bubble-text');
+
     if (btnTestVoice) btnTestVoice.addEventListener('click', playVoiceTest);
     if (btnPreviewListen) btnPreviewListen.addEventListener('click', playVoiceTest);
+    if (btnPreviewStop) btnPreviewStop.addEventListener('click', stopVoicePlayback);
+
+    if (voiceWelcomeInput && previewBubbleText) {
+        voiceWelcomeInput.addEventListener('input', function () {
+            const val = this.value.trim();
+            if (val.length > 0) {
+                previewBubbleText.textContent = `"${val}"`;
+            } else {
+                previewBubbleText.textContent = `"{{ addslashes($setting->voice_welcome_text_or_default) }}"`;
+            }
+        });
+    }
 });
 </script>
 @endpush

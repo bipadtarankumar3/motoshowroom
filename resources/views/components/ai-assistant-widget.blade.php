@@ -14,10 +14,10 @@
     $voiceName = $aiSetting->voice_name;
 
     // Exact mouth anchor coordinates for cutouts
-    $mouthLeft = $avatarType === 'female_saree' ? '49.0%' : '50.6%';
-    $mouthTop = $avatarType === 'female_saree' ? '31.3%' : '24.0%';
-    $mouthWidth = $avatarType === 'female_saree' ? '42px' : '46px';
-    $mouthHeight = $avatarType === 'female_saree' ? '24px' : '26px';
+    $mouthLeft = $avatarType === 'female_saree' ? '50.0%' : '49.5%';
+    $mouthTop = $avatarType === 'female_saree' ? '33.8%' : '30.0%';
+    $mouthWidth = $avatarType === 'female_saree' ? '38px' : '40px';
+    $mouthHeight = $avatarType === 'female_saree' ? '20px' : '22px';
 @endphp
 
 @if($aiAvailable && $aiSetting->is_enabled)
