@@ -281,21 +281,15 @@
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Service Package</label>
                             <select name="service_type" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                                <option value="">All Packages</option>
-                                @if(isset($customServices) && $customServices->isNotEmpty())
-                                    <optgroup label="Showroom Packages">
-                                        @foreach ($customServices as $cs)
-                                            <option value="{{ $cs->id }}" {{ (string)$serviceType === (string)$cs->id || $serviceType === $cs->slug ? 'selected' : '' }}>{{ $cs->name }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endif
-                                <optgroup label="Standard Categories">
-                                    @foreach ($types as $tp)
-                                        <option value="{{ $tp->value }}" {{ $serviceType === $tp->value ? 'selected' : '' }}>{{ $tp->label() }}</option>
-                                    @endforeach
-                                </optgroup>
+                                <option value="">All Services</option>
+                                @foreach ($customServices as $cs)
+                                    <option value="{{ $cs->id }}" {{ (string)$serviceType === (string)$cs->id || $serviceType === $cs->slug ? 'selected' : '' }}>
+                                        {{ $cs->name }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
+
 
 
                         <!-- Assigned Technician -->
