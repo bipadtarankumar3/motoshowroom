@@ -172,22 +172,24 @@
                         'show_hero' => true,
                         'show_categories' => true,
                         'show_featured_bikes' => true,
-                        'show_services' => true,
-                        'show_promo_banner' => true,
+                        'show_services' => false,
+                        'show_promo_banner' => false,
                         'show_trust_pillars' => true,
-                        'show_testimonials' => true,
+                        'show_testimonials' => false,
                         'show_about' => true,
-                        'show_stats' => true,
+                        'show_stats' => false,
                         'show_news' => true,
                         'categories_title' => 'Browse By Category',
                         'featured_bikes_title' => 'Premier Showcase',
                         'featured_bikes_count' => 6,
-                        'promo_title' => 'Book a Test Ride Today',
-                        'promo_subtitle' => 'Feel the surge of genuine racing power. Experience your dream motorcycle on an open track or street loop.',
-                        'promo_cta_text' => 'Reserve Test Ride',
-                        'promo_cta_url' => route('showrooms.enquiries.create', $showroom),
                     ];
-                    $sectionsData = array_merge($defaultSections, is_array($homepageSections ?? null) ? $homepageSections : []);
+                    $savedSections = is_array($homepageSections ?? null) ? $homepageSections : [];
+                    $sectionsData = array_merge($defaultSections, $savedSections);
+                    // Explicitly disable the 4 removed sections
+                    $sectionsData['show_services'] = false;
+                    $sectionsData['show_promo_banner'] = false;
+                    $sectionsData['show_stats'] = false;
+                    $sectionsData['show_testimonials'] = false;
                 @endphp
 
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-6" id="homepage-sections-management"
@@ -249,36 +251,9 @@
                             </div>
                         </div>
 
-                        <!-- 4. Certified Workshop & Services -->
-                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
-                            <div>
-                                <span class="font-bold text-xs text-slate-900 block">Certified Workshop & Service</span>
-                                <span class="text-[11px] text-slate-500">Showcases maintenance services, booking CTAs, and certified technicians.</span>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" x-model="sections.show_services" class="sr-only peer">
-                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-                            </label>
-                        </div>
 
-                        <!-- 5. Promotional Offer Banner -->
-                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2 md:col-span-2">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-xs text-slate-900">Special Promo / Test Ride Banner</span>
-                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                    <input type="checkbox" x-model="sections.show_promo_banner" class="sr-only peer">
-                                    <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-                                </label>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <input type="text" x-model="sections.promo_title" placeholder="Promo Title"
-                                       class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs">
-                                <input type="text" x-model="sections.promo_subtitle" placeholder="Promo Description"
-                                       class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs sm:col-span-2">
-                            </div>
-                        </div>
 
-                        <!-- 6. Trust Pillars ("Why Us") -->
+                        <!-- 4. Trust Pillars ("Why Us") -->
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
                             <div>
                                 <span class="font-bold text-xs text-slate-900 block">Dealership Trust Pillars</span>
@@ -290,19 +265,7 @@
                             </label>
                         </div>
 
-                        <!-- 7. Rider Reviews / Testimonials -->
-                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
-                            <div>
-                                <span class="font-bold text-xs text-slate-900 block">Customer Rider Stories</span>
-                                <span class="text-[11px] text-slate-500">Verified buyer reviews, ratings, and testimonials.</span>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" x-model="sections.show_testimonials" class="sr-only peer">
-                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-                            </label>
-                        </div>
-
-                        <!-- 8. About & Showroom Hours -->
+                        <!-- 5. About & Showroom Hours -->
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
                             <div>
                                 <span class="font-bold text-xs text-slate-900 block">About Dealership Story & Hours Matrix</span>
@@ -314,19 +277,7 @@
                             </label>
                         </div>
 
-                        <!-- 9. Dealership Achievements / Stats Strip -->
-                        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
-                            <div>
-                                <span class="font-bold text-xs text-slate-900 block">Dealership Stats & Milestones</span>
-                                <span class="text-[11px] text-slate-500">Highlights happy customers, bike models, experience, and awards.</span>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" x-model="sections.show_stats" class="sr-only peer">
-                                <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
-                            </label>
-                        </div>
-
-                        <!-- 10. Moto Journalism & Latest News -->
+                        <!-- 6. Moto Journalism & Latest News -->
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between md:col-span-2">
                             <div>
                                 <span class="font-bold text-xs text-slate-900 block">Moto Journalism & Latest News</span>
