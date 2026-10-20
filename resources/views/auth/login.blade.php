@@ -496,28 +496,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
                             </button>
-
-                            <!-- Quick 1-Click Demo Logins -->
-                            <div class="pt-2 text-center border-t border-slate-100">
-                                <div class="text-[11px] text-slate-400 font-semibold mb-1.5">1-Click Demo Login:</div>
-                                <div class="grid grid-cols-3 gap-1.5">
-                                    <button type="button"
-                                            @click="signInAs('admin', 'admin@motoshowroom.example', 'Password123!')"
-                                            class="py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-red-50 hover:text-red-600 text-slate-700 text-xs font-bold border border-slate-200 transition">
-                                        👑 Admin
-                                    </button>
-                                    <button type="button"
-                                            @click="signInAs('dealer', 'rajesh@apex.example', 'Password123!')"
-                                            class="py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-amber-50 hover:text-amber-700 text-slate-700 text-xs font-bold border border-slate-200 transition">
-                                        🏍️ Dealer
-                                    </button>
-                                    <button type="button"
-                                            @click="signInAs('customer', 'user@motoshowroom.example', 'Password123!')"
-                                            class="py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-xs font-bold border border-slate-200 transition">
-                                        👤 Buyer
-                                    </button>
-                                </div>
-                            </div>
                         </form>
                     </div>
 
