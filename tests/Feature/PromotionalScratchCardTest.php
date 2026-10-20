@@ -386,6 +386,17 @@ class PromotionalScratchCardTest extends TestCase
         $this->assertDatabaseMissing('promotional_campaigns', ['name' => 'Blocked Campaign']);
     }
 
+    public function test_back_office_campaign_create_page_renders_dynamic_prize_tier_controls(): void
+    {
+        $response = $this->actingAs($this->ownerA)->get(route('showrooms.manage.campaigns.create', $this->showroomA));
+
+        $response->assertOk();
+        $response->assertSee('2. Prize Tiers & Probabilities', false);
+        $response->assertSee('Add Prize Tier');
+        $response->assertSee('+ Add More Prize Tier');
+        $response->assertSee('id="prize-row-template"', false);
+    }
+
     public function test_back_office_owner_can_create_campaign_with_multiple_prize_tiers(): void
     {
         $payload = [

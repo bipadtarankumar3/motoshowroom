@@ -119,100 +119,112 @@
 
                 <!-- Prize Pool Configuration -->
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-                            2. Prize Tiers & Probabilities
-                        </h3>
-                        <span class="text-xs text-slate-500">Total available quantity is enforced server-side with zero overselling.</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-3 gap-2">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                                2. Prize Tiers & Probabilities
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Total available quantity is enforced server-side with zero overselling.</p>
+                        </div>
+                        <button type="button"
+                                id="btn-add-prize"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-xs transition self-start sm:self-auto cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>Add Prize Tier</span>
+                        </button>
                     </div>
 
                     @error('prizes')
                         <p class="text-[11px] text-rose-600">{{ $message }}</p>
                     @enderror
 
+                    @php
+                        $initialPrizes = old('prizes', [
+                            [
+                                'title' => 'Free Premium Riding Gloves',
+                                'prize_type' => 'free_accessory',
+                                'total_quantity' => 10,
+                                'probability_weight' => 15,
+                            ],
+                            [
+                                'title' => 'Flat ₹500 Off Workshop General Service',
+                                'prize_type' => 'service_discount',
+                                'total_quantity' => 50,
+                                'probability_weight' => 35,
+                            ],
+                            [
+                                'title' => 'Better Luck Next Time',
+                                'prize_type' => 'better_luck',
+                                'total_quantity' => 999,
+                                'probability_weight' => 50,
+                            ],
+                        ]);
+                    @endphp
+
                     <div id="prize-rows-container" class="space-y-3">
-                        <!-- Prize Tier 1: Free Accessory -->
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                            <div class="sm:col-span-4">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Prize Title</label>
-                                <input type="text" name="prizes[0][title]" value="Free Premium Riding Gloves" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+                        @foreach($initialPrizes as $index => $prize)
+                            <div class="prize-row p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center transition hover:border-slate-300">
+                                <div class="sm:col-span-4">
+                                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Prize Title <span class="text-rose-500">*</span></label>
+                                    <input type="text"
+                                           name="prizes[{{ $index }}][title]"
+                                           value="{{ $prize['title'] ?? '' }}"
+                                           required
+                                           placeholder="e.g. Free Riding Helmet"
+                                           class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+                                </div>
+                                <div class="sm:col-span-3">
+                                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Type <span class="text-rose-500">*</span></label>
+                                    <select name="prizes[{{ $index }}][prize_type]" class="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+                                        @foreach($prizeTypes as $pt)
+                                            <option value="{{ $pt->value }}" @selected(($prize['prize_type'] ?? '') === $pt->value)>{{ $pt->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Quantity <span class="text-rose-500">*</span></label>
+                                    <input type="number"
+                                           name="prizes[{{ $index }}][total_quantity]"
+                                           value="{{ $prize['total_quantity'] ?? 10 }}"
+                                           min="0"
+                                           required
+                                           class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Weight <span class="text-rose-500">*</span></label>
+                                    <input type="number"
+                                           name="prizes[{{ $index }}][probability_weight]"
+                                           value="{{ $prize['probability_weight'] ?? 10 }}"
+                                           min="1"
+                                           max="100"
+                                           required
+                                           class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+                                </div>
+                                <div class="sm:col-span-1 text-center pt-2 sm:pt-4">
+                                    <button type="button"
+                                            class="btn-remove-prize inline-flex items-center justify-center w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
+                                            title="Remove this prize tier">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="sm:col-span-3">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Type</label>
-                                <select name="prizes[0][prize_type]" class="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                                    @foreach($prizeTypes as $pt)
-                                        <option value="{{ $pt->value }}" @selected($pt->value === 'free_accessory')>{{ $pt->label() }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Quantity</label>
-                                <input type="number" name="prizes[0][total_quantity]" value="10" min="0" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Weight</label>
-                                <input type="number" name="prizes[0][probability_weight]" value="15" min="1" max="100" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                            </div>
-                            <div class="sm:col-span-1 text-center pt-4">
-                                <span class="text-xs text-slate-400 font-bold">&bull;</span>
-                            </div>
-                        </div>
-
-                        <!-- Prize Tier 2: Service Discount -->
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                            <div class="sm:col-span-4">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Prize Title</label>
-                                <input type="text" name="prizes[1][title]" value="Flat ₹500 Off Workshop General Service" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                            </div>
-                            <div class="sm:col-span-3">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Type</label>
-                                <select name="prizes[1][prize_type]" class="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                                    @foreach($prizeTypes as $pt)
-                                        <option value="{{ $pt->value }}" @selected($pt->value === 'service_discount')>{{ $pt->label() }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Quantity</label>
-                                <input type="number" name="prizes[1][total_quantity]" value="50" min="0" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Weight</label>
-                                <input type="number" name="prizes[1][probability_weight]" value="35" min="1" max="100" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                            </div>
-                            <div class="sm:col-span-1 text-center pt-4">
-                                <span class="text-xs text-slate-400 font-bold">&bull;</span>
-                            </div>
-                        </div>
-
-                        <!-- Prize Tier 3: Better Luck Next Time -->
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                            <div class="sm:col-span-4">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Prize Title</label>
-                                <input type="text" name="prizes[2][title]" value="Better Luck Next Time" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                            </div>
-                            <div class="sm:col-span-3">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Type</label>
-                                <select name="prizes[2][prize_type]" class="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                                    @foreach($prizeTypes as $pt)
-                                        <option value="{{ $pt->value }}" @selected($pt->value === 'better_luck')>{{ $pt->label() }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Quantity</label>
-                                <input type="number" name="prizes[2][total_quantity]" value="999" min="0" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Weight</label>
-                                <input type="number" name="prizes[2][probability_weight]" value="50" min="1" max="100" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                            </div>
-                            <div class="sm:col-span-1 text-center pt-4">
-                                <span class="text-xs text-slate-400 font-bold">&bull;</span>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
+
+                    <!-- Add More Button at Bottom -->
+                    <button type="button"
+                            id="btn-add-prize-bottom"
+                            class="w-full py-3 border-2 border-dashed border-slate-300 hover:border-purple-500 rounded-2xl text-slate-600 hover:text-purple-700 bg-white hover:bg-purple-50/50 flex items-center justify-center gap-2 text-xs font-bold transition cursor-pointer shadow-2xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span>+ Add More Prize Tier</span>
+                    </button>
                 </div>
 
                 <!-- Terms and Conditions -->
@@ -248,5 +260,115 @@
         </div>
 
     </main>
+
+    <!-- Hidden Row Template for Dynamic Addition -->
+    <template id="prize-row-template">
+        <div class="prize-row p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center transition hover:border-slate-300">
+            <div class="sm:col-span-4">
+                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Prize Title <span class="text-rose-500">*</span></label>
+                <input type="text"
+                       name="prizes[__INDEX__][title]"
+                       value=""
+                       required
+                       placeholder="e.g. Free Riding Helmet"
+                       class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+            </div>
+            <div class="sm:col-span-3">
+                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Type <span class="text-rose-500">*</span></label>
+                <select name="prizes[__INDEX__][prize_type]" class="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+                    @foreach($prizeTypes as $pt)
+                        <option value="{{ $pt->value }}">{{ $pt->label() }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="sm:col-span-2">
+                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Quantity <span class="text-rose-500">*</span></label>
+                <input type="number"
+                       name="prizes[__INDEX__][total_quantity]"
+                       value="10"
+                       min="0"
+                       required
+                       class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+            </div>
+            <div class="sm:col-span-2">
+                <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Weight <span class="text-rose-500">*</span></label>
+                <input type="number"
+                       name="prizes[__INDEX__][probability_weight]"
+                       value="10"
+                       min="1"
+                       max="100"
+                       required
+                       class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+            </div>
+            <div class="sm:col-span-1 text-center pt-2 sm:pt-4">
+                <button type="button"
+                        class="btn-remove-prize inline-flex items-center justify-center w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
+                        title="Remove this prize tier">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </template>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('prize-rows-container');
+    const template = document.getElementById('prize-row-template');
+    let nextIndex = {{ count($initialPrizes) }};
+
+    function addPrizeRow() {
+        if (!template || !container) return;
+
+        const html = template.innerHTML.replace(/__INDEX__/g, nextIndex++);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html.trim();
+        const newRow = tempDiv.firstElementChild;
+
+        newRow.style.opacity = '0';
+        newRow.style.transform = 'translateY(-4px)';
+        container.appendChild(newRow);
+
+        requestAnimationFrame(() => {
+            newRow.style.transition = 'all 0.2s ease-out';
+            newRow.style.opacity = '1';
+            newRow.style.transform = 'translateY(0)';
+        });
+
+        // Auto focus new prize title input
+        const titleInput = newRow.querySelector('input[name*="[title]"]');
+        if (titleInput) {
+            titleInput.focus();
+        }
+    }
+
+    document.getElementById('btn-add-prize')?.addEventListener('click', addPrizeRow);
+    document.getElementById('btn-add-prize-bottom')?.addEventListener('click', addPrizeRow);
+
+    container?.addEventListener('click', function (e) {
+        const removeBtn = e.target.closest('.btn-remove-prize');
+        if (!removeBtn) return;
+
+        const rows = container.querySelectorAll('.prize-row');
+        if (rows.length <= 1) {
+            alert('A campaign must have at least one prize tier.');
+            return;
+        }
+
+        const row = removeBtn.closest('.prize-row');
+        if (row) {
+            row.style.transition = 'all 0.15s ease-in';
+            row.style.opacity = '0';
+            row.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                row.remove();
+            }, 150);
+        }
+    });
+});
+</script>
+@endpush
