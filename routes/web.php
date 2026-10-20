@@ -140,6 +140,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/showrooms/{showroom}', [ShowroomController::class, 'update'])->name('showrooms.update');
         Route::delete('/showrooms/{showroom}', [ShowroomController::class, 'destroy'])->name('showrooms.destroy');
         Route::post('/showrooms/{showroom}/status', [ShowroomController::class, 'toggleStatus'])->name('showrooms.status');
+        Route::post('/showrooms/{showroom}/feature-overrides', [ShowroomController::class, 'updateFeatureOverrides'])->name('showrooms.feature-overrides');
         Route::post('/showrooms/{showroom}/members', [ShowroomController::class, 'addMember'])->name('showrooms.members.store');
         Route::delete('/showrooms/{showroom}/members/{membership}', [ShowroomController::class, 'removeMember'])->name('showrooms.members.destroy');
 
@@ -156,6 +157,7 @@ Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'], '/subscriptions/export', [SubscriptionController::class, 'export'])->name('subscriptions.export');
         Route::post('/subscriptions/{subscription}/extend', [SubscriptionController::class, 'extend'])->name('subscriptions.extend');
         Route::post('/subscriptions/{subscription}/change-plan', [SubscriptionController::class, 'changePlan'])->name('subscriptions.change-plan');
+        Route::post('/subscriptions/{subscription}/feature-overrides', [SubscriptionController::class, 'updateFeatureOverrides'])->name('subscriptions.feature-overrides');
         Route::post('/subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
 
         // Audit Trail Logs

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
+use App\Services\AuditLogger;
 use App\Services\SubscriptionService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -187,6 +188,87 @@ class SubscriptionController extends Controller
 
         return redirect()->back()
             ->with('success', "Subscription for '{$subscription->showroom->name}' has been cancelled.");
+    }
+
+    /**
+     * Administratively override and grant/revoke specific feature access and custom quotas.
+     */
+    public function updateFeatureOverrides(Request $request, Subscription $subscription): RedirectResponse
+    {
+        $request->validate([
+            'has_careers_module' => ['nullable', 'string', 'in:inherit,grant,deny'],
+            'has_scratch_cards' => ['nullable', 'string', 'in:inherit,grant,deny'],
+            'has_360_viewer' => ['nullable', 'string', 'in:inherit,grant,deny'],
+            'has_ai_assistant' => ['nullable', 'string', 'in:inherit,grant,deny'],
+            'has_custom_domain' => ['nullable', 'string', 'in:inherit,grant,deny'],
+            'has_advanced_analytics' => ['nullable', 'string', 'in:inherit,grant,deny'],
+            'max_staff_accounts' => ['nullable', 'integer', 'min:1'],
+            'max_bike_listings' => ['nullable', 'integer', 'min:1'],
+            'max_monthly_bookings' => ['nullable', 'integer', 'min:1'],
+            'media_storage_mb' => ['nullable', 'integer', 'min:100'],
+            'grant_notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $featureKeys = [
+            'has_careers_module',
+            'has_scratch_cards',
+            'has_360_viewer',
+            'has_ai_assistant',
+            'has_custom_domain',
+            'has_advanced_analytics',
+        ];
+
+        $overrides = [];
+
+        foreach ($featureKeys as $key) {
+            $val = $request->input($key, 'inherit');
+            if ($val === 'grant') {
+                $overrides[$key] = true;
+            } elseif ($val === 'deny') {
+                $overrides[$key] = false;
+            }
+        }
+
+        $quotaKeys = [
+            'max_staff_accounts',
+            'max_bike_listings',
+            'max_monthly_bookings',
+            'media_storage_mb',
+        ];
+
+        foreach ($quotaKeys as $quota) {
+            if ($request->filled($quota)) {
+                $overrides[$quota] = (int) $request->input($quota);
+            }
+        }
+
+        $oldOverrides = $subscription->feature_overrides ?? [];
+        $subscription->update([
+            'feature_overrides' => ! empty($overrides) ? $overrides : null,
+        ]);
+
+        // Also sync to showroom settings for consistency
+        $showroom = $subscription->showroom;
+        if ($showroom) {
+            $settings = $showroom->settings ?? [];
+            if (! empty($overrides)) {
+                $settings['feature_overrides'] = $overrides;
+            } else {
+                unset($settings['feature_overrides']);
+            }
+            $showroom->update(['settings' => $settings]);
+        }
+
+        AuditLogger::log(
+            action: 'subscription.feature_overrides_updated',
+            auditable: $subscription,
+            oldValues: ['feature_overrides' => $oldOverrides],
+            newValues: ['feature_overrides' => $overrides, 'notes' => $request->input('grant_notes')],
+            tenantId: $showroom?->id
+        );
+
+        return redirect()->back()
+            ->with('success', "Special feature access permissions updated for '{$showroom?->name}'.");
     }
 
     /**

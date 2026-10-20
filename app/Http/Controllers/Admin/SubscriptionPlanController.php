@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Showroom;
 use App\Models\SubscriptionPlan;
 use App\Services\AuditLogger;
 use Illuminate\Contracts\View\View;
@@ -13,7 +14,7 @@ use Illuminate\Support\Str;
 class SubscriptionPlanController extends Controller
 {
     /**
-     * Display a listing of all subscription tiers.
+     * Display a listing of all subscription tiers and showroom overrides.
      */
     public function index(): View
     {
@@ -22,7 +23,11 @@ class SubscriptionPlanController extends Controller
             ->orderBy('monthly_price')
             ->get();
 
-        return view('admin.plans.index', compact('plans'));
+        $showrooms = Showroom::with(['subscription.plan', 'ownerMembership.user'])
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.plans.index', compact('plans', 'showrooms'));
     }
 
     /**

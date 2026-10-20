@@ -102,6 +102,96 @@
                         </form>
                     </div>
 
+                    <!-- Special Feature Grants & Plan Entitlements Widget -->
+                    @php
+                        $activeSub = $showroom->subscription;
+                        $activePlan = $activeSub?->plan;
+                        $showroomOverrides = $activeSub?->feature_overrides ?? $showroom->settings['feature_overrides'] ?? [];
+                    @endphp
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <h2 class="text-base font-bold font-display text-slate-900 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                Special Feature Grants & VIP Access
+                            </h2>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                Overrides
+                            </span>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+                            <div>
+                                <span class="text-slate-500 block text-[10px] uppercase font-bold">Subscribed Plan</span>
+                                <span class="font-bold text-slate-900 text-sm">{{ $activePlan?->name ?? 'No Plan Assigned' }}</span>
+                            </div>
+                            <a href="{{ route('admin.subscriptions.index', ['search' => $showroom->name]) }}" class="text-xs font-bold text-rose-600 hover:text-rose-700">
+                                Subscriptions →
+                            </a>
+                        </div>
+
+                        <form method="POST" action="{{ route('admin.showrooms.feature-overrides', $showroom) }}" class="space-y-4">
+                            @csrf
+
+                            <div class="space-y-2 text-xs">
+                                @php
+                                    $featureList = [
+                                        'has_ai_assistant' => ['AI Assistant', '🤖', (bool) ($activePlan?->has_ai_assistant ?? false)],
+                                        'has_360_viewer' => ['360° Viewer', '🔄', (bool) ($activePlan?->has_360_viewer ?? false)],
+                                        'has_custom_domain' => ['Custom Domain', '🌐', (bool) ($activePlan?->has_custom_domain ?? false)],
+                                        'has_scratch_cards' => ['Scratch Cards', '🎁', (bool) ($activePlan?->has_scratch_cards ?? false)],
+                                        'has_careers_module' => ['Careers Portal', '💼', (bool) ($activePlan?->has_careers_module ?? false)],
+                                        'has_advanced_analytics' => ['Advanced Analytics', '📊', (bool) ($activePlan?->has_advanced_analytics ?? false)],
+                                    ];
+                                @endphp
+
+                                @foreach($featureList as $key => [$label, $icon, $inPlan])
+                                    @php
+                                        $currentVal = isset($showroomOverrides[$key])
+                                            ? ($showroomOverrides[$key] ? 'grant' : 'deny')
+                                            : 'inherit';
+                                    @endphp
+                                    <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex items-center justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                                                <span>{{ $icon }}</span> {{ $label }}
+                                            </div>
+                                            <div class="text-[10px] {{ $inPlan ? 'text-emerald-700' : 'text-slate-400' }}">
+                                                {{ $inPlan ? 'Plan: Included' : 'Plan: Not in plan' }}
+                                            </div>
+                                        </div>
+
+                                        <select name="{{ $key }}" class="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-rose-500">
+                                            <option value="inherit" {{ $currentVal === 'inherit' ? 'selected' : '' }}>Follow Plan</option>
+                                            <option value="grant" {{ $currentVal === 'grant' ? 'selected' : '' }}>⭐ Grant Access</option>
+                                            <option value="deny" {{ $currentVal === 'deny' ? 'selected' : '' }}>🚫 Disable</option>
+                                        </select>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Custom Max Bike Listings Limit -->
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                                <span class="font-bold text-slate-800 block text-[11px] uppercase tracking-wider">Custom Limits (Optional)</span>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Active Bikes</label>
+                                        <input type="number" name="max_bike_listings" value="{{ $showroomOverrides['max_bike_listings'] ?? '' }}" min="1" placeholder="Plan: {{ $activePlan?->max_bike_listings ?? 25 }}"
+                                               class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:ring-1 focus:ring-rose-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Staff Accounts</label>
+                                        <input type="number" name="max_staff_accounts" value="{{ $showroomOverrides['max_staff_accounts'] ?? '' }}" min="1" placeholder="Plan: {{ $activePlan?->max_staff_accounts ?? 5 }}"
+                                               class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:ring-1 focus:ring-rose-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer" id="btn-save-showroom-feature-overrides">
+                                <span>Save Special Feature Access</span>
+                            </button>
+                        </form>
+                    </div>
+
                     <!-- Contact & Identity Details -->
                     <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
                         <h2 class="text-base font-bold font-display text-slate-900 flex items-center gap-2">

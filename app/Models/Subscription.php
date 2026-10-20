@@ -30,6 +30,7 @@ class Subscription extends Model
         'suspension_reason',
         'auto_renew',
         'last_payment_reference',
+        'feature_overrides',
     ];
 
     /**
@@ -46,6 +47,7 @@ class Subscription extends Model
             'trial_ends_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'auto_renew' => 'boolean',
+            'feature_overrides' => 'array',
         ];
     }
 
@@ -115,11 +117,41 @@ class Subscription extends Model
     }
 
     /**
-     * Evaluate if a specific feature flag is granted under this active subscription.
+     * Determine if an administrative override explicitly enables or disables this feature.
+     * Returns true (forced grant), false (forced deny), or null (defer to plan).
+     */
+    public function getFeatureOverride(string $featureKey): ?bool
+    {
+        if (empty($this->feature_overrides) || ! is_array($this->feature_overrides) || ! array_key_exists($featureKey, $this->feature_overrides)) {
+            return null;
+        }
+
+        $val = $this->feature_overrides[$featureKey];
+
+        if ($val === true || $val === 1 || $val === '1') {
+            return true;
+        }
+
+        if ($val === false || $val === 0 || $val === '0') {
+            return false;
+        }
+
+        return null;
+    }
+
+    /**
+     * Evaluate if a specific feature flag is granted under this subscription.
+     * Administrative VIP overrides take precedence over plan tier limits.
      * During the trial period, full VIP platform capabilities are unlocked.
      */
     public function canAccessFeature(string $featureKey): bool
     {
+        // 1. Super Admin VIP Feature Override
+        $override = $this->getFeatureOverride($featureKey);
+        if ($override !== null) {
+            return $override;
+        }
+
         if (! $this->isActive()) {
             return false;
         }
@@ -134,10 +166,18 @@ class Subscription extends Model
 
     /**
      * Evaluate if a quantitative limit has been reached or exceeded.
+     * Administrative custom limit overrides take precedence.
      * During trial, generous testing headroom is provided.
      */
     public function hasReachedLimit(string $limitKey, int $currentCount): bool
     {
+        // Check if an administrative override exists for this quota limit
+        if (! empty($this->feature_overrides) && is_array($this->feature_overrides) && isset($this->feature_overrides[$limitKey]) && is_numeric($this->feature_overrides[$limitKey])) {
+            $customLimit = (int) $this->feature_overrides[$limitKey];
+
+            return $currentCount >= $customLimit;
+        }
+
         if (! $this->isActive()) {
             return true;
         }

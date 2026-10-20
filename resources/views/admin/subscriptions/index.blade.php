@@ -673,6 +673,82 @@
                                                 </div>
                                             </details>
 
+                                            <!-- Special Feature Access & Overrides Dropdown -->
+                                            @php
+                                                $subOverrides = $subscription->feature_overrides ?? $showroom?->settings['feature_overrides'] ?? [];
+                                            @endphp
+                                            <details class="relative">
+                                                <summary class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold cursor-pointer list-none flex items-center gap-1 shadow-2xs"
+                                                         title="Grant Extra Feature Access">
+                                                    <span>⭐ Extra Access</span>
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                                </summary>
+                                                <div class="absolute right-0 mt-2 w-84 p-5 rounded-2xl bg-white border border-slate-200 shadow-2xl z-30 text-left space-y-4">
+                                                    <div class="border-b border-slate-100 pb-3">
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
+                                                                VIP Feature Grants
+                                                            </span>
+                                                            <span class="text-[11px] font-bold text-slate-800">{{ $plan?->name }}</span>
+                                                        </div>
+                                                        <h4 class="text-sm font-black text-slate-900 mt-1">{{ $showroom->name }}</h4>
+                                                        <p class="text-[11px] text-slate-500">Grant features to this user even if not in their plan.</p>
+                                                    </div>
+
+                                                    <form method="POST" action="{{ route('admin.subscriptions.feature-overrides', $subscription) }}" class="space-y-3 text-xs">
+                                                        @csrf
+
+                                                        <!-- Features Stack -->
+                                                        <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                                                            @php
+                                                                $featureList = [
+                                                                    'has_ai_assistant' => ['AI Assistant', '🤖', (bool) ($plan?->has_ai_assistant ?? false)],
+                                                                    'has_360_viewer' => ['360° Viewer', '🔄', (bool) ($plan?->has_360_viewer ?? false)],
+                                                                    'has_custom_domain' => ['Custom Domain', '🌐', (bool) ($plan?->has_custom_domain ?? false)],
+                                                                    'has_scratch_cards' => ['Scratch Cards', '🎁', (bool) ($plan?->has_scratch_cards ?? false)],
+                                                                    'has_careers_module' => ['Careers Portal', '💼', (bool) ($plan?->has_careers_module ?? false)],
+                                                                    'has_advanced_analytics' => ['Advanced Analytics', '📊', (bool) ($plan?->has_advanced_analytics ?? false)],
+                                                                ];
+                                                            @endphp
+
+                                                            @foreach($featureList as $key => [$label, $icon, $inPlan])
+                                                                @php
+                                                                    $currentVal = isset($subOverrides[$key])
+                                                                        ? ($subOverrides[$key] ? 'grant' : 'deny')
+                                                                        : 'inherit';
+                                                                @endphp
+                                                                <div class="p-2 rounded-xl border border-slate-200 bg-slate-50/60 flex items-center justify-between gap-2">
+                                                                    <div class="min-w-0">
+                                                                        <div class="font-bold text-slate-900 text-[11px] truncate flex items-center gap-1">
+                                                                            <span>{{ $icon }}</span> {{ $label }}
+                                                                        </div>
+                                                                        <div class="text-[10px] {{ $inPlan ? 'text-emerald-700' : 'text-slate-400' }}">
+                                                                            {{ $inPlan ? 'Plan: Included' : 'Plan: Not in plan' }}
+                                                                        </div>
+                                                                    </div>
+                                                                    <select name="{{ $key }}" class="px-2 py-1 rounded-lg bg-white border border-slate-300 text-[11px] font-semibold text-slate-800 focus:ring-1 focus:ring-rose-500">
+                                                                        <option value="inherit" {{ $currentVal === 'inherit' ? 'selected' : '' }}>Follow Plan</option>
+                                                                        <option value="grant" {{ $currentVal === 'grant' ? 'selected' : '' }}>⭐ Grant Access</option>
+                                                                        <option value="deny" {{ $currentVal === 'deny' ? 'selected' : '' }}>🚫 Disable</option>
+                                                                    </select>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+
+                                                        <!-- Custom Max Bike Listings -->
+                                                        <div class="pt-2 border-t border-slate-100">
+                                                            <label class="block text-[10px] uppercase font-bold text-slate-600 mb-1">Custom Max Active Bikes (Optional)</label>
+                                                            <input type="number" name="max_bike_listings" value="{{ $subOverrides['max_bike_listings'] ?? '' }}" min="1" placeholder="Plan: {{ $plan?->max_bike_listings ?? 25 }}"
+                                                                   class="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs focus:ring-1 focus:ring-rose-500">
+                                                        </div>
+
+                                                        <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition cursor-pointer">
+                                                            Save Special Feature Grants
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </details>
+
                                             <!-- Showroom Manage Link -->
                                             <a href="{{ route('admin.showrooms.show', $showroom) }}"
                                                class="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition shadow-2xs"

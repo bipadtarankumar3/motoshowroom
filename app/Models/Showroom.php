@@ -298,9 +298,21 @@ class Showroom extends Model
 
     /**
      * Determine if showroom has access to a specific plan feature flag.
+     * Evaluates showroom settings overrides, then active subscription entitlements and VIP overrides.
      */
     public function canAccessFeature(string $featureKey): bool
     {
+        $showroomOverrides = $this->getSetting('feature_overrides', []);
+        if (is_array($showroomOverrides) && array_key_exists($featureKey, $showroomOverrides)) {
+            $val = $showroomOverrides[$featureKey];
+            if ($val === true || $val === 1 || $val === '1') {
+                return true;
+            }
+            if ($val === false || $val === 0 || $val === '0') {
+                return false;
+            }
+        }
+
         return $this->subscription?->canAccessFeature($featureKey) ?? false;
     }
 
@@ -309,6 +321,11 @@ class Showroom extends Model
      */
     public function hasReachedLimit(string $limitKey, int $currentCount): bool
     {
+        $showroomOverrides = $this->getSetting('feature_overrides', []);
+        if (is_array($showroomOverrides) && isset($showroomOverrides[$limitKey]) && is_numeric($showroomOverrides[$limitKey])) {
+            return $currentCount >= (int) $showroomOverrides[$limitKey];
+        }
+
         if (! $this->subscription) {
             return true;
         }
