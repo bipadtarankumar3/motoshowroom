@@ -173,7 +173,10 @@ class Enquiry extends Model
                 ->orWhere('customer_email', 'like', "%{$term}%")
                 ->orWhere('customer_phone', 'like', "%{$term}%")
                 ->orWhere('enquiry_number', 'like', "%{$term}%")
-                ->orWhere('customer_notes', 'like', "%{$term}%");
+                ->orWhere('customer_notes', 'like', "%{$term}%")
+                ->orWhereHas('bike', function (Builder $b) use ($term): void {
+                    $b->where('model_name', 'like', "%{$term}%");
+                });
         });
     }
 

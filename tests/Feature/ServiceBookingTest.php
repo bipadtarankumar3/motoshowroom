@@ -696,4 +696,50 @@ class ServiceBookingTest extends TestCase
         $response->assertSee('Service Bookings');
         $this->assertEquals(2, $response->viewData('metrics')['today_services']);
     }
+
+    public function test_showroom_staff_can_filter_service_bookings_by_today_and_tomorrow_timeframe(): void
+    {
+        $todayBooking = ServiceBooking::factory()->create([
+            'tenant_id' => $this->showroomA->id,
+            'booking_date' => today(),
+            'customer_name' => 'Kunal Today Customer',
+            'status' => BookingStatus::Confirmed->value,
+        ]);
+
+        $tomorrowBooking = ServiceBooking::factory()->create([
+            'tenant_id' => $this->showroomA->id,
+            'booking_date' => today()->addDay(),
+            'customer_name' => 'Aarav Tomorrow Customer',
+            'status' => BookingStatus::Pending->value,
+        ]);
+
+        $futureBooking = ServiceBooking::factory()->create([
+            'tenant_id' => $this->showroomA->id,
+            'booking_date' => today()->addDays(5),
+            'customer_name' => 'Rohan Future Customer',
+            'status' => BookingStatus::Confirmed->value,
+        ]);
+
+        $this->actingAs($this->ownerA);
+
+        // Filter by today
+        $responseToday = $this->get(route('showrooms.manage.services.index', [
+            'showroom' => $this->showroomA,
+            'timeframe' => 'today',
+        ]));
+        $responseToday->assertStatus(200);
+        $responseToday->assertSee('Kunal Today Customer');
+        $responseToday->assertDontSee('Aarav Tomorrow Customer');
+        $responseToday->assertDontSee('Rohan Future Customer');
+
+        // Filter by tomorrow
+        $responseTomorrow = $this->get(route('showrooms.manage.services.index', [
+            'showroom' => $this->showroomA,
+            'timeframe' => 'tomorrow',
+        ]));
+        $responseTomorrow->assertStatus(200);
+        $responseTomorrow->assertSee('Aarav Tomorrow Customer');
+        $responseTomorrow->assertDontSee('Kunal Today Customer');
+        $responseTomorrow->assertDontSee('Rohan Future Customer');
+    }
 }

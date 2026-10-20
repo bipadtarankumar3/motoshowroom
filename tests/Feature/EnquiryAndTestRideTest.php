@@ -745,4 +745,41 @@ class EnquiryAndTestRideTest extends TestCase
         $this->assertEquals('offline', $enquiry->payment_method);
         $this->assertEquals('unpaid', $enquiry->payment_status);
     }
+
+    public function test_showroom_staff_can_filter_bike_bookings_by_today_and_tomorrow_timeframe(): void
+    {
+        $todayEnquiry = Enquiry::factory()->create([
+            'tenant_id' => $this->showroomA->id,
+            'customer_name' => 'Rider Today Booking',
+            'preferred_date' => today()->toDateString(),
+            'status' => EnquiryStatus::New->value,
+        ]);
+
+        $tomorrowEnquiry = Enquiry::factory()->create([
+            'tenant_id' => $this->showroomA->id,
+            'customer_name' => 'Rider Tomorrow Booking',
+            'preferred_date' => today()->addDay()->toDateString(),
+            'status' => EnquiryStatus::New->value,
+        ]);
+
+        $this->actingAs($this->ownerA);
+
+        // Filter Today
+        $responseToday = $this->get(route('showrooms.manage.enquiries.index', [
+            'showroom' => $this->showroomA,
+            'timeframe' => 'today',
+        ]));
+        $responseToday->assertOk();
+        $responseToday->assertSee('Rider Today Booking');
+        $responseToday->assertDontSee('Rider Tomorrow Booking');
+
+        // Filter Tomorrow
+        $responseTomorrow = $this->get(route('showrooms.manage.enquiries.index', [
+            'showroom' => $this->showroomA,
+            'timeframe' => 'tomorrow',
+        ]));
+        $responseTomorrow->assertOk();
+        $responseTomorrow->assertSee('Rider Tomorrow Booking');
+        $responseTomorrow->assertDontSee('Rider Today Booking');
+    }
 }

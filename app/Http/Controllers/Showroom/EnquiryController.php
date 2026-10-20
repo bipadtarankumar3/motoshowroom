@@ -23,17 +23,54 @@ class EnquiryController extends Controller
         $search = $request->query('search');
         $type = $request->query('type');
         $status = $request->query('status');
+        $timeframe = $request->query('timeframe');
+        $date = $request->query('date');
+        $assignedTo = $request->query('assigned_to');
 
         $query = $showroom->enquiries()
             ->with(['bike', 'assignedStaff'])
             ->search($search)
             ->filterType($type)
             ->filterStatus($status)
+            ->when(! empty($assignedTo) && $assignedTo !== 'all', fn ($q) => $q->where('assigned_to_user_id', $assignedTo))
+            ->when(! empty($date), fn ($q) => $q->whereDate('preferred_date', $date))
+            ->when(! empty($timeframe) && $timeframe !== 'all', function ($q) use ($timeframe) {
+                match ($timeframe) {
+                    'today' => $q->where(function ($sub) {
+                        $sub->whereDate('preferred_date', today())
+                            ->orWhere(function ($sub2) {
+                                $sub2->whereNull('preferred_date')->whereDate('created_at', today());
+                            });
+                    }),
+                    'tomorrow' => $q->whereDate('preferred_date', today()->addDay()),
+                    'this_week' => $q->where(function ($sub) {
+                        $sub->whereBetween('preferred_date', [today()->startOfWeek(), today()->endOfWeek()])
+                            ->orWhereBetween('created_at', [today()->startOfWeek(), today()->endOfWeek()]);
+                    }),
+                    'upcoming' => $q->whereDate('preferred_date', '>=', today()),
+                    'past' => $q->whereDate('preferred_date', '<', today()),
+                    'new' => $q->where('status', EnquiryStatus::New->value),
+                    'scheduled' => $q->where('status', EnquiryStatus::TestRideScheduled->value),
+                    'booked' => $q->whereIn('status', [EnquiryStatus::Booked->value, EnquiryStatus::Completed->value]),
+                    default => null,
+                };
+            })
             ->latest();
 
         $enquiries = $query->paginate(15)->withQueryString();
 
         $totalCount = $showroom->enquiries()->count();
+        $todayCount = $showroom->enquiries()->where(function ($sub) {
+            $sub->whereDate('preferred_date', today())
+                ->orWhere(function ($sub2) {
+                    $sub2->whereNull('preferred_date')->whereDate('created_at', today());
+                });
+        })->count();
+        $tomorrowCount = $showroom->enquiries()->whereDate('preferred_date', today()->addDay())->count();
+        $thisWeekCount = $showroom->enquiries()->where(function ($sub) {
+            $sub->whereBetween('preferred_date', [today()->startOfWeek(), today()->endOfWeek()])
+                ->orWhereBetween('created_at', [today()->startOfWeek(), today()->endOfWeek()]);
+        })->count();
         $newCount = $showroom->enquiries()->where('status', EnquiryStatus::New->value)->count();
         $scheduledCount = $showroom->enquiries()->where('status', EnquiryStatus::TestRideScheduled->value)->count();
         $completedCount = $showroom->enquiries()->whereIn('status', [
@@ -43,19 +80,27 @@ class EnquiryController extends Controller
 
         $types = EnquiryType::cases();
         $statuses = EnquiryStatus::cases();
+        $staffMembers = $showroom->users()->get();
 
         return view('showrooms.manage.enquiries.index', compact(
             'showroom',
             'enquiries',
             'totalCount',
+            'todayCount',
+            'tomorrowCount',
+            'thisWeekCount',
             'newCount',
             'scheduledCount',
             'completedCount',
             'types',
             'statuses',
+            'staffMembers',
             'search',
             'type',
-            'status'
+            'status',
+            'timeframe',
+            'date',
+            'assignedTo'
         ));
     }
 

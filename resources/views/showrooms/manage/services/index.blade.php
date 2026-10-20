@@ -138,84 +138,200 @@
         <!-- TAB 1: APPOINTMENTS & BAY SCHEDULE         -->
         <!-- ========================================== -->
         <div x-show="tab === 'bookings'" class="space-y-6">
-            <!-- Metric KPI Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Today's Appointments</span>
-                    <p class="text-2xl font-black font-display text-slate-900 mt-1">{{ $todayTotal }}</p>
-                    <span class="text-[10px] text-slate-500">Scheduled for today</span>
-                </div>
+            <!-- Quick Timeframe & Status Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings']) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap {{ empty($timeframe) && empty($status) && empty($date) ? 'bg-slate-900 text-white shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200' }}">
+                    <span>All Appointments</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px] {{ empty($timeframe) && empty($status) && empty($date) ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700' }}">{{ $bookings->total() }}</span>
+                </a>
 
-                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
-                    <span class="text-[10px] uppercase font-bold text-amber-600 tracking-wider">In Service Bays</span>
-                    <p class="text-2xl font-black font-display text-amber-600 mt-1">{{ $inServiceCount }}</p>
-                    <span class="text-[10px] text-slate-500">Actively on the lift</span>
-                </div>
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'today']) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap {{ $timeframe === 'today' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200' }}">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Today's Service</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px] {{ $timeframe === 'today' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800' }}">{{ $todayTotal }}</span>
+                </a>
 
-                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
-                    <span class="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Ready for Collection</span>
-                    <p class="text-2xl font-black font-display text-emerald-600 mt-1">{{ $readyCount }}</p>
-                    <span class="text-[10px] text-slate-500">Service completed</span>
-                </div>
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'tomorrow']) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap {{ $timeframe === 'tomorrow' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white hover:bg-amber-50 text-amber-800 border border-amber-200' }}">
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span>Tomorrow's Service</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px] {{ $timeframe === 'tomorrow' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800' }}">{{ $tomorrowTotal }}</span>
+                </a>
 
-                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
-                    <span class="text-[10px] uppercase font-bold text-sky-600 tracking-wider">Pending Confirmation</span>
-                    <p class="text-2xl font-black font-display text-sky-600 mt-1">{{ $pendingCount }}</p>
-                    <span class="text-[10px] text-slate-500">Awaiting bay approval</span>
-                </div>
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'this_week']) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap {{ $timeframe === 'this_week' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white hover:bg-indigo-50 text-indigo-800 border border-indigo-200' }}">
+                    <span>This Week</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px] {{ $timeframe === 'this_week' ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-800' }}">{{ $thisWeekTotal }}</span>
+                </a>
+
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'in_service']) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap {{ $timeframe === 'in_service' || $status === 'in_service' ? 'bg-amber-500 text-white shadow-xs' : 'bg-white hover:bg-amber-50 text-amber-800 border border-amber-200' }}">
+                    <span>In Service Bays</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px] {{ $timeframe === 'in_service' || $status === 'in_service' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800' }}">{{ $inServiceCount }}</span>
+                </a>
+
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'ready']) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap {{ $timeframe === 'ready' || $status === 'ready_for_collection' ? 'bg-emerald-700 text-white shadow-xs' : 'bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-300' }}">
+                    <span>Ready for Collection</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px] {{ $timeframe === 'ready' || $status === 'ready_for_collection' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-900' }}">{{ $readyCount }}</span>
+                </a>
+
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'pending']) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap {{ $timeframe === 'pending' || $status === 'pending' ? 'bg-sky-600 text-white shadow-xs' : 'bg-white hover:bg-sky-50 text-sky-800 border border-sky-200' }}">
+                    <span>Pending Confirmation</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px] {{ $timeframe === 'pending' || $status === 'pending' ? 'bg-white/20 text-white' : 'bg-sky-100 text-sky-800' }}">{{ $pendingCount }}</span>
+                </a>
+            </div>
+
+            <!-- Metric KPI Cards (6 Cards) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'today']) }}"
+                   class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-emerald-400 hover:shadow-sm transition block group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">Today's Appointments</span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    </div>
+                    <p class="text-2xl font-black font-display text-emerald-700 mt-1.5 group-hover:scale-105 transition-transform">{{ $todayTotal }}</p>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">Scheduled for today</span>
+                </a>
+
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'tomorrow']) }}"
+                   class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-amber-400 hover:shadow-sm transition block group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] uppercase font-bold text-amber-700 tracking-wider">Tomorrow's Service</span>
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    </div>
+                    <p class="text-2xl font-black font-display text-amber-700 mt-1.5 group-hover:scale-105 transition-transform">{{ $tomorrowTotal }}</p>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">Scheduled tomorrow</span>
+                </a>
+
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'in_service']) }}"
+                   class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-amber-400 hover:shadow-sm transition block group">
+                    <span class="text-[10px] uppercase font-bold text-amber-600 tracking-wider block">In Service Bays</span>
+                    <p class="text-2xl font-black font-display text-amber-600 mt-1.5 group-hover:scale-105 transition-transform">{{ $inServiceCount }}</p>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">Actively on the lift</span>
+                </a>
+
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'ready']) }}"
+                   class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-emerald-400 hover:shadow-sm transition block group">
+                    <span class="text-[10px] uppercase font-bold text-emerald-600 tracking-wider block">Ready for Collection</span>
+                    <p class="text-2xl font-black font-display text-emerald-600 mt-1.5 group-hover:scale-105 transition-transform">{{ $readyCount }}</p>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">Service completed</span>
+                </a>
+
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'timeframe' => 'pending']) }}"
+                   class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-sky-400 hover:shadow-sm transition block group">
+                    <span class="text-[10px] uppercase font-bold text-sky-600 tracking-wider block">Pending Confirmation</span>
+                    <p class="text-2xl font-black font-display text-sky-600 mt-1.5 group-hover:scale-105 transition-transform">{{ $pendingCount }}</p>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">Awaiting bay approval</span>
+                </a>
+
+                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings', 'status' => 'completed']) }}"
+                   class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-slate-400 hover:shadow-sm transition block group">
+                    <span class="text-[10px] uppercase font-bold text-slate-700 tracking-wider block">Completed Work</span>
+                    <p class="text-2xl font-black font-display text-slate-900 mt-1.5 group-hover:scale-105 transition-transform">{{ $completedCount }}</p>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">Finished work orders</span>
+                </a>
             </div>
 
             <!-- Filters & Search Toolbar -->
             <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
-                <form method="GET" action="{{ route('showrooms.manage.services.index', $showroom) }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <form method="GET" action="{{ route('showrooms.manage.services.index', $showroom) }}" class="space-y-3">
                     <input type="hidden" name="tab" value="bookings">
 
-                    <!-- Search -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Search Appointments</label>
-                        <input type="text" name="search" value="{{ $search }}"
-                               placeholder="Reg #, Customer, Ref #..."
-                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                        <!-- Search -->
+                        <div class="lg:col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Search Appointments</label>
+                            <input type="text" name="search" value="{{ $search }}"
+                                   placeholder="Reg #, Customer, Bike, Ref #..."
+                                   class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                        </div>
+
+                        <!-- Timeframe Filter -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Timeframe</label>
+                            <select name="timeframe" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                <option value="">All Timeframes</option>
+                                <option value="today" {{ $timeframe === 'today' ? 'selected' : '' }}>Today's Service</option>
+                                <option value="tomorrow" {{ $timeframe === 'tomorrow' ? 'selected' : '' }}>Tomorrow's Service</option>
+                                <option value="this_week" {{ $timeframe === 'this_week' ? 'selected' : '' }}>This Week</option>
+                                <option value="upcoming" {{ $timeframe === 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+                                <option value="past" {{ $timeframe === 'past' ? 'selected' : '' }}>Past / Overdue</option>
+                                <option value="in_service" {{ $timeframe === 'in_service' ? 'selected' : '' }}>In Service Bays</option>
+                                <option value="ready" {{ $timeframe === 'ready' ? 'selected' : '' }}>Ready for Collection</option>
+                                <option value="pending" {{ $timeframe === 'pending' ? 'selected' : '' }}>Pending Confirmation</option>
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Lifecycle Status</label>
+                            <select name="status" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                <option value="all">All Statuses</option>
+                                @foreach ($statuses as $st)
+                                    <option value="{{ $st->value }}" {{ $status === $st->value ? 'selected' : '' }}>{{ $st->label() }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Package Type -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Service Package</label>
+                            <select name="service_type" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                <option value="all">All Packages</option>
+                                @foreach ($types as $tp)
+                                    <option value="{{ $tp->value }}" {{ $serviceType === $tp->value ? 'selected' : '' }}>{{ $tp->label() }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Assigned Technician -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Technician / Mechanic</label>
+                            <select name="assigned_to" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                <option value="">All Technicians</option>
+                                @foreach ($technicians as $tech)
+                                    <option value="{{ $tech->id }}" {{ $assignedTo == $tech->id ? 'selected' : '' }}>{{ $tech->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
-                    <!-- Date -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Appointment Date</label>
-                        <input type="date" name="date" value="{{ $date }}"
-                               class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <!-- Specific Date -->
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-semibold text-slate-600">Specific Date:</label>
+                                <input type="date" name="date" value="{{ $date }}"
+                                       class="px-2.5 py-1.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                            </div>
 
-                    <!-- Status -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Lifecycle Status</label>
-                        <select name="status" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                            <option value="all">All Statuses</option>
-                            @foreach ($statuses as $st)
-                                <option value="{{ $st->value }}" {{ $status === $st->value ? 'selected' : '' }}>{{ $st->label() }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                            <!-- Payment Status Filter -->
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-semibold text-slate-600">Payment:</label>
+                                <select name="payment_status" class="px-2.5 py-1.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                    <option value="">All Payments</option>
+                                    <option value="captured" {{ $paymentStatus === 'captured' ? 'selected' : '' }}>Paid / Advance Captured</option>
+                                    <option value="pending" {{ $paymentStatus === 'pending' ? 'selected' : '' }}>Pay at Bay / Pending</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <!-- Package Type -->
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Service Package</label>
-                        <select name="service_type" class="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                            <option value="all">All Packages</option>
-                            @foreach ($types as $tp)
-                                <option value="{{ $tp->value }}" {{ $serviceType === $tp->value ? 'selected' : '' }}>{{ $tp->label() }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex items-end gap-2">
-                        <button type="submit" class="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition shadow-xs">
-                            Filter
-                        </button>
-                        <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings']) }}"
-                           class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-semibold transition" title="Clear Filters">
-                            Clear
-                        </a>
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2">
+                            <button type="submit" class="py-2 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition shadow-xs cursor-pointer">
+                                Apply Filters
+                            </button>
+                            @if($search || $date || $status || $serviceType || $timeframe || $assignedTo || $paymentStatus)
+                                <a href="{{ route('showrooms.manage.services.index', [$showroom, 'tab' => 'bookings']) }}"
+                                   class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-semibold transition" title="Clear Filters">
+                                    Clear
+                                </a>
+                            @endif
+                        </div>
                     </div>
                 </form>
             </div>
@@ -246,6 +362,11 @@
                             <tbody class="divide-y divide-slate-100">
                                 @foreach ($bookings as $bk)
                                     @php
+                                        $isToday = $bk->booking_date->toDateString() === today()->toDateString();
+                                        $isTomorrow = $bk->booking_date->toDateString() === today()->addDay()->toDateString();
+                                        $isPast = $bk->booking_date->toDateString() < today()->toDateString();
+                                        $cleanPhone = preg_replace('/[^0-9]/', '', $bk->customer_phone);
+
                                         $bkJson = [
                                             'id' => $bk->id,
                                             'booking_number' => $bk->booking_number,
@@ -265,7 +386,7 @@
                                             'notes' => $bk->customer_notes ?? 'No notes provided.',
                                         ];
                                     @endphp
-                                    <tr class="hover:bg-slate-50/80 transition group">
+                                    <tr class="hover:bg-slate-50/80 transition group {{ $isToday ? 'bg-emerald-50/20' : '' }}">
                                         <td class="py-3.5 px-4 text-center">
                                             <input type="checkbox" :value="{{ $bk->id }}" x-model="selectedIds"
                                                    class="w-4 h-4 text-rose-600 border-slate-300 rounded focus:ring-rose-500">
@@ -280,7 +401,14 @@
                                         </td>
                                         <td class="py-3.5 px-4">
                                             <div class="font-bold text-slate-900">{{ $bk->customer_name }}</div>
-                                            <div class="text-[11px] text-slate-500 font-mono">{{ $bk->customer_phone }}</div>
+                                            <div class="text-[11px] text-slate-500 font-mono flex items-center gap-1.5 mt-0.5">
+                                                <a href="tel:{{ $bk->customer_phone }}" class="hover:text-slate-900 transition">{{ $bk->customer_phone }}</a>
+                                                @if($cleanPhone)
+                                                    <a href="https://wa.me/{{ $cleanPhone }}" target="_blank" class="text-emerald-600 hover:text-emerald-700 font-bold" title="Open WhatsApp chat">
+                                                        💬 WA
+                                                    </a>
+                                                @endif
+                                            </div>
                                         </td>
                                         <td class="py-3.5 px-4">
                                             <div class="font-bold text-slate-900">{{ $bk->bike_make_model }}</div>
@@ -292,20 +420,45 @@
                                             <div class="font-semibold text-slate-800">{{ $bk->getServiceName() }}</div>
                                             <div class="text-[11px] font-mono font-bold text-emerald-700">
                                                 ₹{{ number_format($bk->final_cost ?? $bk->estimated_cost) }}
-                                                @if($bk->payment_required)
-                                                    <span class="text-[9px] text-emerald-600 font-sans font-normal">(Advance Paid)</span>
+                                                @if($bk->payment_required || $bk->payment_status === \App\Enums\PaymentStatus::Captured)
+                                                    <span class="text-[9px] text-emerald-600 font-sans font-normal">(Paid)</span>
+                                                @else
+                                                    <span class="text-[9px] text-amber-600 font-sans font-normal">(Pay at Bay)</span>
                                                 @endif
                                             </div>
                                         </td>
                                         <td class="py-3.5 px-4">
-                                            <div class="font-bold text-slate-900">{{ $bk->booking_date->format('M d, Y') }}</div>
-                                            <div class="text-[10px] font-mono text-slate-500">{{ $bk->time_slot }}</div>
+                                            @if($isToday)
+                                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                                    <span>TODAY</span>
+                                                    <span class="font-normal text-emerald-700">• {{ $bk->time_slot }}</span>
+                                                </div>
+                                            @elseif($isTomorrow)
+                                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                                                    <span>TOMORROW</span>
+                                                    <span class="font-normal text-amber-700">• {{ $bk->time_slot }}</span>
+                                                </div>
+                                            @elseif($isPast)
+                                                <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                    <span>OVERDUE • {{ $bk->booking_date->format('M d, Y') }}</span>
+                                                </div>
+                                                <div class="text-[10px] font-mono text-slate-400 mt-0.5">{{ $bk->time_slot }}</div>
+                                            @else
+                                                <div class="font-bold text-slate-900">{{ $bk->booking_date->format('M d, Y') }}</div>
+                                                <div class="text-[10px] font-mono text-slate-500">{{ $bk->time_slot }}</div>
+                                            @endif
                                         </td>
                                         <td class="py-3.5 px-4">
-                                            <div class="font-bold text-xs text-slate-900">
-                                                {{ $bk->bay_number ?? 'No Bay Assigned' }}
-                                            </div>
-                                            <div class="text-[11px] text-slate-500 mt-0.5">
+                                            @if($bk->bay_number)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                                    Bay #{{ $bk->bay_number }}
+                                                </span>
+                                            @else
+                                                <span class="text-slate-400 text-xs italic">No Bay Assigned</span>
+                                            @endif
+                                            <div class="text-[11px] text-slate-600 mt-0.5 font-medium">
                                                 {{ $bk->assignedTechnician?->name ?? 'Unassigned' }}
                                             </div>
                                         </td>
@@ -318,7 +471,7 @@
                                             <div class="flex items-center justify-end gap-1">
                                                 <button type="button"
                                                         @click="openDetails({{ json_encode($bkJson) }})"
-                                                        class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-[11px] transition shadow-xs flex items-center gap-1"
+                                                        class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-[11px] transition shadow-xs flex items-center gap-1 cursor-pointer"
                                                         title="Quick Details">
                                                     <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                     <span>Details</span>
@@ -333,7 +486,7 @@
                                                       onsubmit="return confirm('Cancel/Archive this appointment?');" class="inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Archive appointment">
+                                                    <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer" title="Archive appointment">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                     </button>
                                                 </form>

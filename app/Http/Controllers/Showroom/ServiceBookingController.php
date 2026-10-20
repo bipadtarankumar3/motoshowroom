@@ -26,6 +26,9 @@ class ServiceBookingController extends Controller
         $date = $request->query('date');
         $status = $request->query('status');
         $serviceType = $request->query('service_type');
+        $timeframe = $request->query('timeframe');
+        $assignedTo = $request->query('assigned_to');
+        $paymentStatus = $request->query('payment_status');
 
         $query = $showroom->serviceBookings()
             ->with(['assignedTechnician', 'user', 'bike'])
@@ -33,14 +36,32 @@ class ServiceBookingController extends Controller
             ->filterDate($date)
             ->filterStatus($status)
             ->when(! empty($serviceType) && $serviceType !== 'all', fn ($q) => $q->where('service_type', $serviceType))
+            ->when(! empty($assignedTo) && $assignedTo !== 'all', fn ($q) => $q->where('assigned_to_user_id', $assignedTo))
+            ->when(! empty($paymentStatus) && $paymentStatus !== 'all', fn ($q) => $q->where('payment_status', $paymentStatus))
+            ->when(! empty($timeframe) && $timeframe !== 'all', function ($q) use ($timeframe) {
+                match ($timeframe) {
+                    'today' => $q->whereDate('booking_date', today()),
+                    'tomorrow' => $q->whereDate('booking_date', today()->addDay()),
+                    'this_week' => $q->whereBetween('booking_date', [today()->startOfWeek(), today()->endOfWeek()]),
+                    'upcoming' => $q->whereDate('booking_date', '>=', today()),
+                    'past' => $q->whereDate('booking_date', '<', today()),
+                    'in_service' => $q->where('status', BookingStatus::InService->value),
+                    'ready' => $q->where('status', BookingStatus::ReadyForCollection->value),
+                    'pending' => $q->where('status', BookingStatus::Pending->value),
+                    default => null,
+                };
+            })
             ->latest('booking_date');
 
         $bookings = $query->paginate(15)->withQueryString();
 
         $todayTotal = $showroom->serviceBookings()->whereDate('booking_date', today())->count();
+        $tomorrowTotal = $showroom->serviceBookings()->whereDate('booking_date', today()->addDay())->count();
+        $thisWeekTotal = $showroom->serviceBookings()->whereBetween('booking_date', [today()->startOfWeek(), today()->endOfWeek()])->count();
         $inServiceCount = $showroom->serviceBookings()->where('status', BookingStatus::InService->value)->count();
         $readyCount = $showroom->serviceBookings()->where('status', BookingStatus::ReadyForCollection->value)->count();
         $pendingCount = $showroom->serviceBookings()->where('status', BookingStatus::Pending->value)->count();
+        $completedCount = $showroom->serviceBookings()->where('status', BookingStatus::Completed->value)->count();
 
         $showroom->seedDefaultServicesIfNeeded();
         $customServices = $showroom->services()->orderBy('sort_order')->orderBy('id')->get();
@@ -58,9 +79,12 @@ class ServiceBookingController extends Controller
             'showroom',
             'bookings',
             'todayTotal',
+            'tomorrowTotal',
+            'thisWeekTotal',
             'inServiceCount',
             'readyCount',
             'pendingCount',
+            'completedCount',
             'statuses',
             'types',
             'technicians',
@@ -68,6 +92,9 @@ class ServiceBookingController extends Controller
             'date',
             'status',
             'serviceType',
+            'timeframe',
+            'assignedTo',
+            'paymentStatus',
             'customServices',
             'totalServicesCount',
             'paymentEnabledCount',
