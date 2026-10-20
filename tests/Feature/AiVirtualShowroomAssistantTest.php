@@ -15,7 +15,10 @@ use App\Models\SubscriptionPlan;
 use App\Models\User;
 use App\Services\SubscriptionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AiVirtualShowroomAssistantTest extends TestCase
@@ -155,7 +158,8 @@ class AiVirtualShowroomAssistantTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('AI Virtual Showroom Advisor');
         $response->assertSee('Concierge Settings');
-        $response->assertSee('Customer Conversation History');
+        $response->assertSee('Showroom Presenter Mode');
+        $response->assertDontSee('Customer Conversation History');
         $response->assertDontSee('AI Assistant Gated Feature');
     }
 
@@ -567,5 +571,187 @@ class AiVirtualShowroomAssistantTest extends TestCase
         ]);
         $this->assertSame('male', $setting->effective_voice_gender);
         $this->assertEquals(0.88, $setting->effective_voice_pitch);
+    }
+
+    public function test_ai_assistant_setting_welcome_video_accessors(): void
+    {
+        $setting = $this->showroomA->getOrCreateAiSetting();
+
+        $this->assertFalse($setting->has_welcome_video);
+        $this->assertNull($setting->welcome_video_url);
+
+        $setting->update([
+            'welcome_video_path' => 'https://cdn.example.com/namaste-welcome.mp4',
+            'welcome_video_type' => 'url',
+        ]);
+
+        $this->assertTrue($setting->has_welcome_video);
+        $this->assertSame('https://cdn.example.com/namaste-welcome.mp4', $setting->welcome_video_url);
+
+        $setting->update([
+            'welcome_video_path' => 'ai-video/1/video.mp4',
+            'welcome_video_type' => 'upload',
+        ]);
+
+        $this->assertTrue($setting->has_welcome_video);
+        $this->assertStringContainsString('storage/ai-video/1/video.mp4', $setting->welcome_video_url);
+    }
+
+    public function test_showroom_owner_can_update_and_remove_welcome_video_via_url(): void
+    {
+        $this->actingAs($this->ownerA);
+
+        $response = $this->put(route('showrooms.manage.ai.settings', $this->showroomA), [
+            'welcome_video_url' => 'https://cdn.example.com/veo-namaste.mp4',
+            'is_enabled' => '1',
+            'voice_enabled' => '1',
+        ]);
+
+        $response->assertRedirect(route('showrooms.manage.ai.index', $this->showroomA));
+
+        $setting = $this->showroomA->fresh()->getOrCreateAiSetting();
+        $this->assertSame('https://cdn.example.com/veo-namaste.mp4', $setting->welcome_video_path);
+        $this->assertSame('url', $setting->welcome_video_type);
+        $this->assertTrue($setting->has_welcome_video);
+
+        // Now remove video
+        $removeResponse = $this->put(route('showrooms.manage.ai.settings', $this->showroomA), [
+            'remove_welcome_video' => '1',
+            'is_enabled' => '1',
+            'voice_enabled' => '1',
+        ]);
+
+        $removeResponse->assertRedirect(route('showrooms.manage.ai.index', $this->showroomA));
+
+        $setting->refresh();
+        $this->assertNull($setting->welcome_video_path);
+        $this->assertSame('none', $setting->welcome_video_type);
+        $this->assertFalse($setting->has_welcome_video);
+    }
+
+    public function test_showroom_owner_can_upload_welcome_video_file(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->ownerA);
+
+        $videoFile = UploadedFile::fake()->create('namaste-welcome.mp4', 2048, 'video/mp4');
+
+        $response = $this->put(route('showrooms.manage.ai.settings', $this->showroomA), [
+            'welcome_video' => $videoFile,
+            'is_enabled' => '1',
+            'voice_enabled' => '1',
+        ]);
+
+        $response->assertRedirect(route('showrooms.manage.ai.index', $this->showroomA));
+
+        $setting = $this->showroomA->fresh()->getOrCreateAiSetting();
+        $this->assertNotNull($setting->welcome_video_path);
+        $this->assertSame('upload', $setting->welcome_video_type);
+        Storage::disk('public')->assertExists($setting->welcome_video_path);
+    }
+
+    public function test_showroom_owner_can_generate_gemini_video_and_poll_completion(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->ownerA);
+
+        Http::fake([
+            'https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-fast-generate-preview:predictLongRunning*' => Http::response([
+                'name' => 'operations/test-op-123',
+            ], 200),
+            'https://generativelanguage.googleapis.com/v1beta/operations/test-op-123' => Http::response([
+                'done' => true,
+                'response' => [
+                    'generatedVideos' => [
+                        [
+                            'video' => [
+                                'bytesBase64Encoded' => base64_encode('fake-video-bytes'),
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        // 1. Initiate Generation
+        $initResponse = $this->postJson(route('showrooms.manage.ai.generate-video', $this->showroomA), [
+            'gemini_api_key' => 'AIzaSyTestApiKey123',
+            'prompt' => 'A woman saying namaste in showroom',
+            'duration' => 8,
+            'resolution' => '720p',
+        ]);
+
+        $initResponse->assertOk()
+            ->assertJson([
+                'success' => true,
+                'operation_name' => 'operations/test-op-123',
+            ]);
+
+        // 2. Poll for completion
+        $pollResponse = $this->postJson(route('showrooms.manage.ai.check-video', $this->showroomA), [
+            'operation_name' => 'operations/test-op-123',
+            'gemini_api_key' => 'AIzaSyTestApiKey123',
+        ]);
+
+        $pollResponse->assertOk()
+            ->assertJson([
+                'done' => true,
+                'success' => true,
+            ]);
+
+        $setting = $this->showroomA->fresh()->getOrCreateAiSetting();
+        $this->assertNotNull($setting->welcome_video_path);
+        $this->assertTrue($setting->has_welcome_video);
+        $this->assertSame('upload', $setting->welcome_video_type);
+        $this->assertSame('AIzaSyTestApiKey123', $setting->gemini_api_key);
+        Storage::disk('public')->assertExists($setting->welcome_video_path);
+    }
+
+    public function test_gemini_video_generation_requires_api_key(): void
+    {
+        $this->actingAs($this->ownerA);
+
+        $response = $this->postJson(route('showrooms.manage.ai.generate-video', $this->showroomA), [
+            'prompt' => 'A woman saying namaste in showroom',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+            ]);
+    }
+
+    public function test_showroom_owner_can_toggle_between_avatar_and_video_presenter_modes(): void
+    {
+        $this->actingAs($this->ownerA);
+        $setting = $this->showroomA->getOrCreateAiSetting();
+        $setting->update([
+            'is_enabled' => true,
+            'welcome_video_path' => 'https://cdn.example.com/welcome.mp4',
+            'welcome_video_type' => 'url',
+            'presenter_mode' => 'video',
+        ]);
+
+        $this->assertSame('video', $setting->fresh()->effective_presenter_mode);
+
+        // Render widget with video mode active
+        $viewVideo = $this->blade('<x-ai-assistant-widget :showroom="$showroom" />', ['showroom' => $this->showroomA->fresh()]);
+        $viewVideo->assertSee('ai-welcome-video-player');
+        $viewVideo->assertDontSee('ai-living-character');
+
+        // Toggle back to avatar mode
+        $response = $this->put(route('showrooms.manage.ai.settings', $this->showroomA), [
+            'presenter_mode' => 'avatar',
+            'is_enabled' => '1',
+            'voice_enabled' => '1',
+        ]);
+
+        $response->assertRedirect(route('showrooms.manage.ai.index', $this->showroomA));
+        $this->assertSame('avatar', $this->showroomA->fresh()->aiSetting->effective_presenter_mode);
+
+        // Render widget with avatar mode active
+        $viewAvatar = $this->blade('<x-ai-assistant-widget :showroom="$showroom" />', ['showroom' => $this->showroomA->fresh()]);
+        $viewAvatar->assertSee('ai-living-character');
+        $viewAvatar->assertDontSee('ai-welcome-video-player');
     }
 }

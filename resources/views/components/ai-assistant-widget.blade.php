@@ -12,6 +12,8 @@
     $voiceGender = $aiSetting->effective_voice_gender;
     $voicePitch = $aiSetting->effective_voice_pitch;
     $voiceName = $aiSetting->voice_name;
+    $welcomeVideoUrl = $aiSetting->welcome_video_url;
+    $hasWelcomeVideo = ($aiSetting->effective_presenter_mode === 'video') && ! empty($welcomeVideoUrl);
 
     // Exact mouth anchor coordinates for cutouts
     $mouthLeft = $avatarType === 'female_saree' ? '50.0%' : '49.5%';
@@ -120,52 +122,64 @@
             </div>
 
             <!-- =========================================================
-                 REALISTIC CUTOUT CHARACTER WITH NATURAL LIP-SYNCING
-                 (NOT a static picture box - Cutout + Aura + Animated Mouth)
+                 REALISTIC AI PRESENTER (VIDEO OR CUTOUT AVATAR)
                  ========================================================= -->
-            <div class="relative w-full max-w-[340px] h-[340px] sm:h-[380px] my-2 flex items-center justify-center select-none">
+            @if($hasWelcomeVideo)
+                <!-- Photorealistic AI Welcome Video (Google AI Studio / Veo / ElevenLabs) -->
+                <div class="relative w-full max-w-[440px] aspect-video my-3 rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-2xl flex items-center justify-center">
+                    <video id="ai-welcome-video-player"
+                           src="{{ $welcomeVideoUrl }}"
+                           class="w-full h-full object-cover"
+                           playsinline
+                           preload="auto"
+                           controls></video>
+                </div>
+            @else
+                <!-- Realistic Cutout Character with Natural Breathing & SVG Mouth -->
+                <div class="relative w-full max-w-[340px] h-[340px] sm:h-[380px] my-2 flex items-center justify-center select-none">
 
-                <!-- Golden Radial Halo Aura (Blends character seamlessly into the canvas) -->
-                <div class="absolute inset-0 m-auto w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-tr from-amber-300/35 via-rose-300/25 to-cyan-300/25 blur-2xl animate-aura-glow pointer-events-none"></div>
+                    <!-- Golden Radial Halo Aura (Blends character seamlessly into the canvas) -->
+                    <div class="absolute inset-0 m-auto w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-tr from-amber-300/35 via-rose-300/25 to-cyan-300/25 blur-2xl animate-aura-glow pointer-events-none"></div>
 
-                <!-- Living Breathing Character Container -->
-                <div id="ai-living-character" class="relative h-full w-auto max-w-full flex items-end justify-center animate-avatar-life">
+                    <!-- Living Breathing Character Container -->
+                    <div id="ai-living-character" class="relative h-full w-auto max-w-full flex items-end justify-center animate-avatar-life">
 
-                    <!-- Transparent Cutout Avatar Image with Drop Shadow Depth -->
-                    <img id="ai-character-cutout"
-                         src="{{ $avatarUrl }}"
-                         alt="{{ $showroom->name }} AI Advisor"
-                         class="h-full w-auto object-contain max-h-[380px] pointer-events-none"
-                         style="filter: drop-shadow(0 20px 25px rgba(15, 23, 42, 0.18));">
+                        <!-- Transparent Cutout Avatar Image with Drop Shadow Depth -->
+                        <img id="ai-character-cutout"
+                             src="{{ $avatarUrl }}"
+                             alt="{{ $showroom->name }} AI Advisor"
+                             class="h-full w-auto object-contain max-h-[380px] pointer-events-none"
+                             style="filter: drop-shadow(0 20px 25px rgba(15, 23, 42, 0.18));">
 
-                    <!-- Organic Lip-Sync Mouth Mesh Overlay -->
-                    <div id="ai-lip-sync-overlay"
-                         class="absolute pointer-events-none transition-opacity duration-150 opacity-0"
-                         style="left: {{ $mouthLeft }}; top: {{ $mouthTop }}; width: {{ $mouthWidth }}; height: {{ $mouthHeight }}; transform: translate(-50%, -50%);">
+                        <!-- Organic Lip-Sync Mouth Mesh Overlay -->
+                        <div id="ai-lip-sync-overlay"
+                             class="absolute pointer-events-none transition-opacity duration-150 opacity-0"
+                             style="left: {{ $mouthLeft }}; top: {{ $mouthTop }}; width: {{ $mouthWidth }}; height: {{ $mouthHeight }}; transform: translate(-50%, -50%);">
 
-                        <!-- Morphing SVG Mouth Cavity (Phoneme articulation: Teeth, Tongue, Cavity) -->
-                        <svg viewBox="0 0 50 30" class="w-full h-full overflow-visible" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Upper Lip Line -->
-                            <path d="M 4 12 Q 25 7 46 12" stroke="#a34e44" stroke-width="2.5" stroke-linecap="round"/>
-                            <!-- Open Mouth Cavity -->
-                            <path d="M 5 12 Q 25 30 45 12 Z" fill="#3b0f11"/>
-                            <!-- Upper Teeth Row -->
-                            <path d="M 9 12 Q 25 18 41 12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-                            <!-- Tongue -->
-                            <ellipse cx="25" cy="18" rx="10" ry="5" fill="#cf4e58"/>
-                            <!-- Lower Lip Highlight -->
-                            <path d="M 6 13 Q 25 29 44 13" stroke="#b85b52" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
+                            <!-- Morphing SVG Mouth Cavity (Phoneme articulation: Teeth, Tongue, Cavity) -->
+                            <svg viewBox="0 0 50 30" class="w-full h-full overflow-visible" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Upper Lip Line -->
+                                <path d="M 4 12 Q 25 7 46 12" stroke="#a34e44" stroke-width="2.5" stroke-linecap="round"/>
+                                <!-- Open Mouth Cavity -->
+                                <path d="M 5 12 Q 25 30 45 12 Z" fill="#3b0f11"/>
+                                <!-- Upper Teeth Row -->
+                                <path d="M 9 12 Q 25 18 41 12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+                                <!-- Tongue -->
+                                <ellipse cx="25" cy="18" rx="10" ry="5" fill="#cf4e58"/>
+                                <!-- Lower Lip Highlight -->
+                                <path d="M 6 13 Q 25 29 44 13" stroke="#b85b52" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
 
-                    <!-- Subtle Natural Eyelid Blink Overlay -->
-                    <div id="ai-blink-overlay"
-                         class="absolute pointer-events-none opacity-0"
-                         style="left: {{ $mouthLeft }}; top: calc({{ $mouthTop }} - 5.5%); width: 70px; height: 18px; transform: translate(-50%, -50%); animation: naturalEyelidBlink 4.8s infinite;">
-                        <div class="w-full h-[2px] bg-slate-900/40 rounded-full mx-auto"></div>
+                        <!-- Subtle Natural Eyelid Blink Overlay -->
+                        <div id="ai-blink-overlay"
+                             class="absolute pointer-events-none opacity-0"
+                             style="left: {{ $mouthLeft }}; top: calc({{ $mouthTop }} - 5.5%); width: 70px; height: 18px; transform: translate(-50%, -50%); animation: naturalEyelidBlink 4.8s infinite;">
+                            <div class="w-full h-[2px] bg-slate-900/40 rounded-full mx-auto"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
             <!-- Speech Audio Waves Status Indicator -->
             <div id="ai-speech-status-bar" class="flex items-center gap-2 mb-2">
@@ -256,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const characterContainer = document.getElementById('ai-living-character');
     const visualizerBars = document.getElementById('ai-bars-visualizer');
     const statusLabel = document.getElementById('ai-status-label');
+    const welcomeVideo = document.getElementById('ai-welcome-video-player');
 
     if (!centerModal) return;
 
@@ -270,6 +285,12 @@ document.addEventListener('DOMContentLoaded', function () {
     let audioElement = null;
     let isSpeaking = false;
     let hasPlayedOnce = false;
+
+    if (welcomeVideo) {
+        welcomeVideo.addEventListener('play', () => setLipSyncState(true));
+        welcomeVideo.addEventListener('pause', () => setLipSyncState(false));
+        welcomeVideo.addEventListener('ended', () => setLipSyncState(false));
+    }
 
     function isFemaleVoice(name) {
         const n = name.toLowerCase();
@@ -322,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (visualizerBars) visualizerBars.classList.remove('hidden');
             if (statusLabel) {
-                statusLabel.textContent = "Speaking Welcome Greeting...";
+                statusLabel.textContent = welcomeVideo ? "Playing AI Welcome Video..." : "Speaking Welcome Greeting...";
                 statusLabel.classList.remove('text-slate-500');
                 statusLabel.classList.add('text-amber-700');
             }
@@ -343,8 +364,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Play Voice Speech (Web Speech API or studio audio file)
+    // Play Voice Speech (Web Speech API, studio audio file, or welcome video)
     function startVoiceSpeech(isUserGesture = false) {
+        // Photorealistic AI Video Player
+        if (welcomeVideo) {
+            welcomeVideo.currentTime = 0;
+            if (isUserGesture) {
+                welcomeVideo.muted = false;
+                const p = welcomeVideo.play();
+                if (p !== undefined) {
+                    p.then(() => {
+                        hasPlayedOnce = true;
+                        setLipSyncState(true);
+                        if (tapActionBox) tapActionBox.classList.add('hidden');
+                    }).catch(err => console.log('Video play error:', err));
+                }
+            } else {
+                const p = welcomeVideo.play();
+                if (p !== undefined) {
+                    p.then(() => {
+                        hasPlayedOnce = true;
+                        setLipSyncState(true);
+                        if (tapActionBox) tapActionBox.classList.add('hidden');
+                    }).catch(() => {
+                        welcomeVideo.muted = true;
+                        welcomeVideo.play().catch(e => console.log('Muted video autoplay error:', e));
+                        if (tapActionBox) tapActionBox.classList.remove('hidden');
+                    });
+                }
+            }
+            return;
+        }
+
         if (!voiceEnabled) return;
 
         // Custom Studio Audio File
@@ -424,6 +475,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function minimizeCenterModal() {
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
         if (audioElement) audioElement.pause();
+        if (welcomeVideo) welcomeVideo.pause();
         setLipSyncState(false);
 
         centerModal.classList.remove('opacity-100');

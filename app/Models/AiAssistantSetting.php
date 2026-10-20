@@ -30,6 +30,10 @@ class AiAssistantSetting extends Model
         'voice_name',
         'voice_welcome_text',
         'voice_audio_path',
+        'welcome_video_path',
+        'welcome_video_type',
+        'gemini_api_key',
+        'presenter_mode',
         'is_enabled',
         'suggested_prompts',
         'custom_faqs',
@@ -127,6 +131,50 @@ class AiAssistantSetting extends Model
         }
 
         return asset('storage/'.$this->voice_audio_path);
+    }
+
+    /**
+     * Get photorealistic welcome video URL if uploaded or linked.
+     */
+    public function getWelcomeVideoUrlAttribute(): ?string
+    {
+        if (empty($this->welcome_video_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->welcome_video_path, 'http://') || str_starts_with($this->welcome_video_path, 'https://')) {
+            return $this->welcome_video_path;
+        }
+
+        return asset('storage/'.$this->welcome_video_path);
+    }
+
+    /**
+     * Check if a welcome video is configured.
+     */
+    public function getHasWelcomeVideoAttribute(): bool
+    {
+        return ! empty($this->welcome_video_path);
+    }
+
+    /**
+     * Get effective Gemini API key for this showroom.
+     */
+    public function getEffectiveGeminiApiKeyAttribute(): ?string
+    {
+        return $this->gemini_api_key ?: config('showroom.ai_assistant.api_key') ?: env('GEMINI_API_KEY');
+    }
+
+    /**
+     * Get effective presenter mode ('avatar' or 'video').
+     */
+    public function getEffectivePresenterModeAttribute(): string
+    {
+        if ($this->presenter_mode === 'video' && $this->has_welcome_video) {
+            return 'video';
+        }
+
+        return 'avatar';
     }
 
     /**
