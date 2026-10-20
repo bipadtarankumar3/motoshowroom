@@ -12,21 +12,16 @@
         0%, 94%, 100% { opacity: 0; }
         96%, 98% { opacity: 0.95; }
     }
-    @keyframes mouthPhonemeSync {
-        0% { transform: translate(-50%, -50%) scaleY(0.15) scaleX(0.85); }
-        25% { transform: translate(-50%, -50%) scaleY(0.85) scaleX(1.1); }
-        50% { transform: translate(-50%, -50%) scaleY(0.35) scaleX(0.95); }
-        75% { transform: translate(-50%, -50%) scaleY(0.95) scaleX(1.15); }
-        100% { transform: translate(-50%, -50%) scaleY(0.2) scaleX(0.9); }
+    /* Real-time mouth — no CSS animation, driven entirely by JS */
+    #preview-mouth-overlay svg path,
+    #preview-mouth-overlay svg ellipse {
+        transition: none;
     }
     .animate-avatar-life {
         animation: avatarLifeBreathe 4s ease-in-out infinite;
     }
     .animate-avatar-blink {
         animation: naturalEyelidBlink 4.8s infinite;
-    }
-    .animate-avatar-speaking {
-        animation: mouthPhonemeSync 0.24s ease-in-out infinite alternate;
     }
 </style>
 <div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
@@ -549,15 +544,21 @@
 
                                 @php
                                     $initialMode = old('presenter_mode', $setting->presenter_mode ?? 'avatar');
+                                    $adminAvatarModelUrl = ($setting->avatar_type === 'male_tvs' || $setting->effective_voice_gender === 'male')
+                                        ? asset('models/avatars/advisor-male.glb')
+                                        : asset('models/avatars/advisor-female.glb');
                                 @endphp
 
-                                <!-- 1. Living Breathing Real Human Container -->
-                                <div id="preview-character-container" class="{{ $initialMode === 'avatar' ? '' : 'hidden' }} relative w-full h-full overflow-hidden flex items-end justify-center animate-avatar-life">
-                                    <!-- Real Human Photo -->
+                                <!-- 1. Living Breathing Real 3D Human Presenter Container -->
+                                <div id="preview-character-container" class="{{ $initialMode === 'avatar' ? '' : 'hidden' }} relative w-full h-full overflow-hidden flex items-end justify-center">
+                                    <!-- 3D Avatar WebGL Canvas Mount -->
+                                    <div id="preview-3d-avatar-canvas" class="w-full h-full absolute inset-0 z-10 pointer-events-none"></div>
+
+                                    <!-- Real Human Photo Fallback -->
                                     <img id="preview-avatar-img"
                                          src="{{ $setting->avatar_type === 'female_saree' ? asset('images/ai-avatars/avatar-female-saree.jpg') : asset('images/ai-avatars/avatar-male-tvs.jpg') }}"
                                          alt="Real Human Advisor"
-                                         class="w-full h-full object-cover object-top transition-transform duration-300"
+                                         class="w-full h-full object-cover object-top transition-opacity duration-300"
                                          style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
 
                                     <!-- Subtle Natural Eyelid Blink Overlay -->
@@ -567,16 +568,16 @@
                                         <div class="w-full h-[2px] bg-slate-900/40 rounded-full mx-auto"></div>
                                     </div>
 
-                                    <!-- Organic Talking Mouth Overlay (Articulates during speech) -->
+                                    <!-- Organic Talking Mouth Overlay (JS-driven real-time lip-sync) -->
                                     <div id="preview-mouth-overlay"
                                          class="absolute pointer-events-none transition-opacity duration-150 opacity-0"
                                          style="left: 50%; top: 33.5%; width: 32px; height: 16px; transform: translate(-50%, -50%);">
-                                        <svg viewBox="0 0 50 30" class="w-full h-full overflow-visible" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <svg id="preview-mouth-svg" viewBox="0 0 50 30" class="w-full h-full overflow-visible" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M 4 12 Q 25 7 46 12" stroke="#a34e44" stroke-width="2.5" stroke-linecap="round"/>
-                                            <path d="M 5 12 Q 25 30 45 12 Z" fill="#3b0f11"/>
-                                            <path d="M 9 12 Q 25 18 41 12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-                                            <ellipse cx="25" cy="18" rx="9" ry="4" fill="#cf4e58"/>
-                                            <path d="M 6 13 Q 25 29 44 13" stroke="#b85b52" stroke-width="2" stroke-linecap="round"/>
+                                            <path id="preview-mouth-cavity" d="M 5 12 Q 25 12 45 12 Z" fill="#3b0f11"/>
+                                            <path d="M 9 12 Q 25 16 41 12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+                                            <ellipse id="preview-mouth-tongue" cx="25" cy="18" rx="9" ry="0" fill="#cf4e58"/>
+                                            <path d="M 6 13 Q 25 13 44 13" stroke="#b85b52" stroke-width="2" stroke-linecap="round"/>
                                         </svg>
                                     </div>
 
@@ -705,6 +706,112 @@ let currentVoiceGender = "{{ old('voice_gender', $setting->effective_voice_gende
 let savedVoiceName = "{{ old('voice_name', $setting->voice_name ?? '') }}";
 let activeAudio = null;
 
+// ── Real-Time Audio Lip-Sync Engine (Preview Stage) ──────────────────────
+let previewAudioCtx = null;
+let previewAnalyser = null;
+let previewFreqData = null;
+let previewLipRafId = null;
+let previewSynthAmp = 0;
+let previewSynthRafId = null;
+let previewIsSpeaking = false;
+
+const previewMouthCavity = () => document.getElementById('preview-mouth-cavity');
+const previewMouthTongue = () => document.getElementById('preview-mouth-tongue');
+
+function ensurePreviewAudioCtx() {
+    if (!previewAudioCtx || previewAudioCtx.state === 'closed') {
+        previewAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (previewAudioCtx.state === 'suspended') previewAudioCtx.resume().catch(() => {});
+}
+
+function connectPreviewAnalyser(sourceNode) {
+    if (!previewAudioCtx) return;
+    if (previewAnalyser) { try { previewAnalyser.disconnect(); } catch(e) {} }
+    previewAnalyser = previewAudioCtx.createAnalyser();
+    previewAnalyser.fftSize = 256;
+    previewAnalyser.smoothingTimeConstant = 0.6;
+    previewFreqData = new Uint8Array(previewAnalyser.frequencyBinCount);
+    sourceNode.connect(previewAnalyser);
+    previewAnalyser.connect(previewAudioCtx.destination);
+}
+
+function startPreviewSynthLoop() {
+    let t = 0;
+    const tick = () => {
+        if (!previewIsSpeaking) return;
+        t += 0.18;
+        previewSynthAmp = Math.max(0,
+            0.35 * Math.abs(Math.sin(t * 2.1)) +
+            0.25 * Math.abs(Math.sin(t * 3.7)) +
+            0.15 * Math.abs(Math.sin(t * 5.3))
+        );
+        previewSynthRafId = requestAnimationFrame(tick);
+    };
+    previewSynthRafId = requestAnimationFrame(tick);
+}
+
+function startPreviewLipSyncLoop() {
+    if (previewLipRafId) cancelAnimationFrame(previewLipRafId);
+    const cavityEl = previewMouthCavity();
+    const tongueEl = previewMouthTongue();
+    const mouthOverlayEl = document.getElementById('preview-mouth-overlay');
+    const equalizerBars = document.querySelectorAll('#preview-equalizer-row > div:first-child > span');
+
+    const loop = () => {
+        if (!previewIsSpeaking) return;
+        let amp = 0;
+        if (previewAnalyser && previewFreqData) {
+            previewAnalyser.getByteFrequencyData(previewFreqData);
+            const s = Math.floor(previewFreqData.length * 0.05);
+            const e = Math.floor(previewFreqData.length * 0.45);
+            let sum = 0;
+            for (let i = s; i < e; i++) sum += previewFreqData[i];
+            amp = sum / ((e - s) * 255);
+        } else {
+            amp = previewSynthAmp;
+        }
+
+        const openY   = 12 + amp * 20;
+        const tongueRy = amp * 4;
+        const scaleX  = 1 + amp * 0.15;
+
+        // Drive 3D Avatar mouth morph targets
+        if (window.preview3DAvatar) {
+            window.preview3DAvatar.setSpeaking(true, amp, previewAnalyser ? 'audio' : 'speech');
+        }
+
+        if (cavityEl) {
+            cavityEl.setAttribute('d', `M 5 12 Q 25 ${openY.toFixed(1)} 45 12 Z`);
+            cavityEl.style.transform = `scaleX(${scaleX.toFixed(3)})`;
+            cavityEl.style.transformOrigin = 'center';
+        }
+        if (tongueEl) tongueEl.setAttribute('ry', tongueRy.toFixed(1));
+
+        // Drive the animated equalizer bars in the preview panel
+        equalizerBars.forEach((bar, i) => {
+            const h = 4 + amp * 14 * (0.55 + 0.45 * Math.sin(Date.now() / 110 + i));
+            bar.style.height = Math.round(h) + 'px';
+        });
+
+        previewLipRafId = requestAnimationFrame(loop);
+    };
+    previewLipRafId = requestAnimationFrame(loop);
+}
+
+function stopPreviewLipSync() {
+    if (previewLipRafId) { cancelAnimationFrame(previewLipRafId); previewLipRafId = null; }
+    if (previewSynthRafId) { cancelAnimationFrame(previewSynthRafId); previewSynthRafId = null; }
+    previewSynthAmp = 0;
+    previewIsSpeaking = false;
+    if (window.preview3DAvatar) {
+        window.preview3DAvatar.setSpeaking(false, 0);
+    }
+    const c = previewMouthCavity(); if (c) c.setAttribute('d', 'M 5 12 Q 25 12 45 12 Z');
+    const t = previewMouthTongue(); if (t) t.setAttribute('ry', '0');
+}
+// ── End Preview Lip-Sync Engine ───────────────────────────────────────
+
 function selectPresenterMode(mode) {
     const radioAvatar = document.getElementById('radio-mode-avatar');
     const radioVideo = document.getElementById('radio-mode-video');
@@ -807,6 +914,9 @@ function selectAvatar(choice) {
         if (uploadBox) uploadBox.classList.add('hidden');
         if (previewImg) previewImg.src = "{{ asset('images/ai-avatars/avatar-male-tvs.jpg') }}";
         if (personaTitle) personaTitle.textContent = "Rohit (TVS Advisor)";
+        if (window.preview3DAvatar) {
+            window.preview3DAvatar.loadModel("{{ asset('models/avatars/advisor-male.glb') }}");
+        }
         const mouthOverlay = document.getElementById('preview-mouth-overlay');
         const blinkOverlay = document.getElementById('preview-blink-overlay');
         if (mouthOverlay) {
@@ -835,6 +945,9 @@ function selectAvatar(choice) {
         if (uploadBox) uploadBox.classList.add('hidden');
         if (previewImg) previewImg.src = "{{ asset('images/ai-avatars/avatar-female-saree.jpg') }}";
         if (personaTitle) personaTitle.textContent = "Priya (Female Advisor)";
+        if (window.preview3DAvatar) {
+            window.preview3DAvatar.loadModel("{{ asset('models/avatars/advisor-female.glb') }}");
+        }
         const mouthOverlay = document.getElementById('preview-mouth-overlay');
         const blinkOverlay = document.getElementById('preview-blink-overlay');
         if (mouthOverlay) {
@@ -993,6 +1106,7 @@ function findBestVoice(lang, gender, preferredName) {
 }
 
 function setSpeakingUIState(isSpeaking) {
+    previewIsSpeaking = isSpeaking;
     const halo = document.getElementById('preview-speaking-halo');
     const equalizer = document.getElementById('preview-equalizer-row');
     const statusText = document.getElementById('preview-status-text');
@@ -1010,7 +1124,7 @@ function setSpeakingUIState(isSpeaking) {
         }
         if (mouthOverlay) {
             mouthOverlay.classList.remove('opacity-0');
-            mouthOverlay.classList.add('opacity-100', 'animate-avatar-speaking');
+            mouthOverlay.classList.add('opacity-100');
         }
         if (hudDot) hudDot.className = "w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping";
         if (hudStatus) hudStatus.textContent = "SPEAKING LIVE";
@@ -1021,6 +1135,8 @@ function setSpeakingUIState(isSpeaking) {
         }
         if (btnText) btnText.textContent = "Speaking Greeting...";
         if (stopBtn) stopBtn.classList.remove('hidden');
+        // Start real-time lip-sync loop
+        startPreviewLipSyncLoop();
     } else {
         if (halo) {
             halo.classList.add('opacity-0');
@@ -1039,6 +1155,8 @@ function setSpeakingUIState(isSpeaking) {
         }
         if (btnText) btnText.textContent = "Listen Spoken Greeting";
         if (stopBtn) stopBtn.classList.add('hidden');
+        // Stop real-time lip-sync loop
+        stopPreviewLipSync();
     }
 }
 
@@ -1052,6 +1170,7 @@ function stopVoicePlayback() {
         window.speechSynthesis.cancel();
     }
     setSpeakingUIState(false);
+    stopPreviewLipSync();
 }
 
 function playVoiceTest() {
@@ -1063,10 +1182,22 @@ function playVoiceTest() {
     const audioUrl = "{{ $setting->voice_audio_url }}";
 
     if (audioUrl) {
+        ensurePreviewAudioCtx();
         setSpeakingUIState(true);
+        // Start synthetic loop immediately as fallback; will be replaced if analyser connects
+        startPreviewSynthLoop();
         activeAudio = new Audio(audioUrl);
+        activeAudio.crossOrigin = 'anonymous';
         activeAudio.onended = () => setSpeakingUIState(false);
         activeAudio.onerror = () => setSpeakingUIState(false);
+        activeAudio.onplay = () => {
+            if (previewAudioCtx) {
+                try {
+                    const src = previewAudioCtx.createMediaElementSource(activeAudio);
+                    connectPreviewAnalyser(src);
+                } catch(e) { /* already connected or CORS */ }
+            }
+        };
         activeAudio.play().catch(e => {
             console.log('Audio playback error', e);
             setSpeakingUIState(false);
@@ -1091,7 +1222,19 @@ function playVoiceTest() {
             utterance.voice = bestVoice;
         }
 
-        utterance.onstart = () => setSpeakingUIState(true);
+        utterance.onstart = () => {
+            setSpeakingUIState(true);
+            startPreviewSynthLoop();
+        };
+        utterance.onboundary = (event) => {
+            if (event.name === 'word') {
+                const text = utterance.text;
+                const word = text.slice(event.charIndex).split(/\s+/)[0] || '';
+                if (window.preview3DAvatar) {
+                    window.preview3DAvatar.pulseWord(word);
+                }
+            }
+        };
         utterance.onend = () => setSpeakingUIState(false);
         utterance.onerror = () => setSpeakingUIState(false);
 
@@ -1327,6 +1470,30 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // Initialize 3D Avatar for Management Preview Stage
+    const previewCanvasMount = document.getElementById('preview-3d-avatar-canvas');
+    const previewAvatarImg = document.getElementById('preview-avatar-img');
+    const previewMouthOverlayEl = document.getElementById('preview-mouth-overlay');
+    const previewBlinkOverlayEl = document.getElementById('preview-blink-overlay');
+
+    function initAdminPreview3D() {
+        if (!previewCanvasMount || window.preview3DAvatar) return;
+        if (window.create3DAvatar) {
+            window.preview3DAvatar = window.create3DAvatar(previewCanvasMount, {
+                modelUrl: "{{ $adminAvatarModelUrl }}",
+                cameraFov: 27,
+                onLoad: function() {
+                    if (previewAvatarImg) previewAvatarImg.style.display = 'none';
+                    if (previewMouthOverlayEl) previewMouthOverlayEl.style.display = 'none';
+                    if (previewBlinkOverlayEl) previewBlinkOverlayEl.style.display = 'none';
+                }
+            });
+        } else {
+            setTimeout(initAdminPreview3D, 80);
+        }
+    }
+    initAdminPreview3D();
 });
 </script>
 @endpush

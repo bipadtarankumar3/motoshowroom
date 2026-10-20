@@ -15,15 +15,13 @@
     $welcomeVideoUrl = $aiSetting->welcome_video_url;
     $hasWelcomeVideo = ($aiSetting->effective_presenter_mode === 'video') && ! empty($welcomeVideoUrl);
 
-    // Exact mouth anchor coordinates for cutouts
-    $mouthLeft = $avatarType === 'female_saree' ? '50.0%' : '49.5%';
-    $mouthTop = $avatarType === 'female_saree' ? '33.8%' : '30.0%';
-    $mouthWidth = $avatarType === 'female_saree' ? '38px' : '40px';
-    $mouthHeight = $avatarType === 'female_saree' ? '20px' : '22px';
+    $advisorModelUrl = ($avatarType === 'male_tvs' || $voiceGender === 'male')
+        ? asset('models/avatars/advisor-male.glb')
+        : asset('models/avatars/advisor-female.glb');
 @endphp
 
 @if($aiAvailable && $aiSetting->is_enabled)
-<!-- AI Character & Natural Lip-Sync Styles -->
+<!-- AI Character & Real-Time Audio Lip-Sync Styles -->
 <style>
     @keyframes avatarLifeBreathe {
         0%, 100% {
@@ -45,26 +43,12 @@
         }
     }
 
-    @keyframes mouthPhonemeSync {
-        0% { transform: translate(-50%, -50%) scaleY(0.12) scaleX(0.85); }
-        20% { transform: translate(-50%, -50%) scaleY(0.85) scaleX(1.1); }
-        40% { transform: translate(-50%, -50%) scaleY(0.35) scaleX(0.95); }
-        60% { transform: translate(-50%, -50%) scaleY(0.95) scaleX(1.15); }
-        80% { transform: translate(-50%, -50%) scaleY(0.4) scaleX(0.9); }
-        100% { transform: translate(-50%, -50%) scaleY(0.18) scaleX(0.88); }
-    }
-
-    @keyframes jawSpeechSync {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(2.5px); }
-    }
-
     @keyframes naturalEyelidBlink {
         0%, 94%, 100% { opacity: 0; }
         96%, 98% { opacity: 0.95; }
     }
 
-    @keyframes soundBarDance {
+    @keyframes soundBarRealtime {
         0%, 100% { height: 4px; }
         50% { height: 16px; }
     }
@@ -77,23 +61,19 @@
         animation: auraRadialPulse 3.5s ease-in-out infinite;
     }
 
-    .avatar-mouth-active {
-        animation: mouthPhonemeSync 0.26s ease-in-out infinite alternate;
-    }
-
-    .avatar-jaw-active {
-        animation: jawSpeechSync 0.26s ease-in-out infinite alternate;
+    /* Real-time lip-sync overlay — driven by JS, not CSS animation */
+    #ai-lip-sync-overlay {
+        transition: opacity 0.12s ease;
+        transform-origin: center;
+        transform: translate(-50%, -50%);
     }
 
     .sound-bar {
         width: 3px;
         background-color: #f59e0b;
         border-radius: 999px;
-        animation: soundBarDance 0.8s ease-in-out infinite;
+        transition: height 0.06s ease;
     }
-    .sound-bar:nth-child(2) { animation-delay: 0.15s; }
-    .sound-bar:nth-child(3) { animation-delay: 0.3s; }
-    .sound-bar:nth-child(4) { animation-delay: 0.45s; }
 </style>
 
 <div id="ai-speech-root" class="font-sans" style="font-family: inherit;">
@@ -135,49 +115,13 @@
                            controls></video>
                 </div>
             @else
-                <!-- Realistic Cutout Character with Natural Breathing & SVG Mouth -->
-                <div class="relative w-full max-w-[340px] h-[340px] sm:h-[380px] my-2 flex items-center justify-center select-none">
+                <!-- Interactive 3D GLB Presenter: Namaste Greeting Pose & Real-Time Lip-Sync Speech -->
+                <div class="relative w-full max-w-[360px] h-[380px] sm:h-[420px] my-2 flex items-center justify-center select-none overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50/50 via-white to-slate-50/80 border border-slate-200/80 shadow-md">
+                    <!-- Soft Warm Halo Ambient Background -->
+                    <div class="absolute inset-0 m-auto w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-tr from-amber-200/35 via-rose-200/20 to-sky-200/25 blur-3xl pointer-events-none"></div>
 
-                    <!-- Golden Radial Halo Aura (Blends character seamlessly into the canvas) -->
-                    <div class="absolute inset-0 m-auto w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-tr from-amber-300/35 via-rose-300/25 to-cyan-300/25 blur-2xl animate-aura-glow pointer-events-none"></div>
-
-                    <!-- Living Breathing Character Container -->
-                    <div id="ai-living-character" class="relative h-full w-auto max-w-full flex items-end justify-center animate-avatar-life">
-
-                        <!-- Transparent Cutout Avatar Image with Drop Shadow Depth -->
-                        <img id="ai-character-cutout"
-                             src="{{ $avatarUrl }}"
-                             alt="{{ $showroom->name }} AI Advisor"
-                             class="h-full w-auto object-contain max-h-[380px] pointer-events-none"
-                             style="filter: drop-shadow(0 20px 25px rgba(15, 23, 42, 0.18));">
-
-                        <!-- Organic Lip-Sync Mouth Mesh Overlay -->
-                        <div id="ai-lip-sync-overlay"
-                             class="absolute pointer-events-none transition-opacity duration-150 opacity-0"
-                             style="left: {{ $mouthLeft }}; top: {{ $mouthTop }}; width: {{ $mouthWidth }}; height: {{ $mouthHeight }}; transform: translate(-50%, -50%);">
-
-                            <!-- Morphing SVG Mouth Cavity (Phoneme articulation: Teeth, Tongue, Cavity) -->
-                            <svg viewBox="0 0 50 30" class="w-full h-full overflow-visible" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Upper Lip Line -->
-                                <path d="M 4 12 Q 25 7 46 12" stroke="#a34e44" stroke-width="2.5" stroke-linecap="round"/>
-                                <!-- Open Mouth Cavity -->
-                                <path d="M 5 12 Q 25 30 45 12 Z" fill="#3b0f11"/>
-                                <!-- Upper Teeth Row -->
-                                <path d="M 9 12 Q 25 18 41 12" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-                                <!-- Tongue -->
-                                <ellipse cx="25" cy="18" rx="10" ry="5" fill="#cf4e58"/>
-                                <!-- Lower Lip Highlight -->
-                                <path d="M 6 13 Q 25 29 44 13" stroke="#b85b52" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-
-                        <!-- Subtle Natural Eyelid Blink Overlay -->
-                        <div id="ai-blink-overlay"
-                             class="absolute pointer-events-none opacity-0"
-                             style="left: {{ $mouthLeft }}; top: calc({{ $mouthTop }} - 5.5%); width: 70px; height: 18px; transform: translate(-50%, -50%); animation: naturalEyelidBlink 4.8s infinite;">
-                            <div class="w-full h-[2px] bg-slate-900/40 rounded-full mx-auto"></div>
-                        </div>
-                    </div>
+                    <!-- 3D WebGL Avatar Canvas Mount -->
+                    <div id="ai-3d-avatar-canvas" class="relative w-full h-full flex items-center justify-center z-10"></div>
                 </div>
             @endif
 
@@ -238,13 +182,13 @@
          class="hidden fixed bottom-6 right-4 sm:right-6 z-40">
         <button type="button" id="ai-pill-trigger-btn"
                 class="group relative flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none cursor-pointer">
-            <!-- Cutout Character Thumbnail with Living Aura -->
+            <!-- Namaste Avatar Pill Icon -->
             <div class="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-to-tr from-amber-100 to-rose-50 border border-amber-300 shadow-xs flex items-center justify-center shrink-0">
-                <img src="{{ $avatarUrl }}" alt="{{ $showroom->name }} AI Advisor" class="h-full w-auto object-cover">
+                <span class="text-lg select-none">🙏</span>
                 <span class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse"></span>
             </div>
             <div class="text-left hidden sm:block">
-                <span class="text-xs font-black text-slate-900 block leading-tight">🙏 AI Advisor</span>
+                <span class="text-xs font-black text-slate-900 block leading-tight">🙏 3D AI Advisor</span>
                 <span class="text-[10px] text-amber-700 font-semibold block">Tap to hear welcome voice</span>
             </div>
             <span class="w-7 h-7 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
@@ -266,11 +210,30 @@ document.addEventListener('DOMContentLoaded', function () {
     const replayBtn = document.getElementById('ai-center-replay-btn');
     const tapListenBtn = document.getElementById('ai-tap-listen-btn');
     const tapActionBox = document.getElementById('ai-one-tap-action-box');
-    const lipSyncOverlay = document.getElementById('ai-lip-sync-overlay');
-    const characterContainer = document.getElementById('ai-living-character');
     const visualizerBars = document.getElementById('ai-bars-visualizer');
     const statusLabel = document.getElementById('ai-status-label');
     const welcomeVideo = document.getElementById('ai-welcome-video-player');
+    const avatarCanvasContainer = document.getElementById('ai-3d-avatar-canvas');
+    const model3DUrl = "{{ $advisorModelUrl }}";
+
+    // ── Mount 3D GLB Avatar with Namaste Pose ────────────────────────────
+    function initShowroom3DAvatar() {
+        if (!avatarCanvasContainer || window.showroom3DAvatar) return;
+
+        if (window.create3DAvatar) {
+            window.showroom3DAvatar = window.create3DAvatar(avatarCanvasContainer, {
+                modelUrl: model3DUrl,
+                interactive: true,
+                cameraFov: 28,
+                onLoad: function() {
+                    console.log('[Showroom 3D] Namaste GLB Advisor mounted successfully');
+                }
+            });
+        } else {
+            setTimeout(initShowroom3DAvatar, 80);
+        }
+    }
+    initShowroom3DAvatar();
 
     if (!centerModal) return;
 
@@ -286,8 +249,121 @@ document.addEventListener('DOMContentLoaded', function () {
     let isSpeaking = false;
     let hasPlayedOnce = false;
 
+    // ── Real-time Audio-Driven Lip-Sync Engine ─────────────────────────────
+    let audioCtx = null;
+    let analyser = null;
+    let freqData = null;
+    let lipSyncRafId = null;
+    let speechSynthAmplitude = 0; // synthetic amplitude fallback for SpeechSynthesisAPI
+    let speechSynthRafId = null;
+
+    function ensureAudioContext() {
+        if (!audioCtx || audioCtx.state === 'closed') {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume().catch(() => {});
+        }
+    }
+
+    function connectAnalyserToAudio(sourceNode) {
+        if (!audioCtx) return;
+        if (analyser) {
+            try { analyser.disconnect(); } catch(e) {}
+        }
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.6;
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+    }
+
+    function startLipSyncLoop() {
+        if (lipSyncRafId) cancelAnimationFrame(lipSyncRafId);
+        const loop = () => {
+            if (!isSpeaking) return;
+            let amplitude = 0;
+            if (analyser && freqData) {
+                analyser.getByteFrequencyData(freqData);
+                // Focus on vocal frequency range (roughly 300–3000 Hz within our FFT bins)
+                const binStart = Math.floor(freqData.length * 0.05);
+                const binEnd   = Math.floor(freqData.length * 0.45);
+                let sum = 0;
+                for (let i = binStart; i < binEnd; i++) sum += freqData[i];
+                amplitude = sum / ((binEnd - binStart) * 255); // 0..1
+            } else {
+                // Fallback: synthetic sine-wave amplitude for Web Speech API
+                amplitude = speechSynthAmplitude;
+            }
+
+            // Send real-time amplitude to 3D Avatar Viseme Engine
+            if (window.showroom3DAvatar) {
+                window.showroom3DAvatar.setSpeaking(true, amplitude, analyser ? 'audio' : 'speech');
+            }
+
+            // Animate 2D fallback mouth cavity
+            const openY = 12 + amplitude * 20;       // 12 (closed) … 32 (wide open)
+            const tongueRy = amplitude * 5;           // 0 (closed) … 5 (open)
+            const scaleX = 1 + amplitude * 0.18;      // slight horizontal stretch
+
+            if (mouthCavityPath) {
+                mouthCavityPath.setAttribute('d', `M 5 12 Q 25 ${openY.toFixed(1)} 45 12 Z`);
+                mouthCavityPath.style.transform = `scaleX(${scaleX.toFixed(3)})`;
+                mouthCavityPath.style.transformOrigin = 'center';
+            }
+            if (mouthTongueEl) {
+                mouthTongueEl.setAttribute('ry', tongueRy.toFixed(1));
+            }
+
+            // Drive the visualizer bars with real amplitude
+            if (visualizerBars) {
+                const bars = visualizerBars.querySelectorAll('.sound-bar');
+                bars.forEach((bar, i) => {
+                    const h = 4 + amplitude * 14 * (0.6 + 0.4 * Math.sin(Date.now() / 120 + i));
+                    bar.style.height = Math.round(h) + 'px';
+                });
+            }
+
+            lipSyncRafId = requestAnimationFrame(loop);
+        };
+        lipSyncRafId = requestAnimationFrame(loop);
+    }
+
+    function stopLipSyncLoop() {
+        if (lipSyncRafId) { cancelAnimationFrame(lipSyncRafId); lipSyncRafId = null; }
+        if (speechSynthRafId) { cancelAnimationFrame(speechSynthRafId); speechSynthRafId = null; }
+        if (window.showroom3DAvatar) {
+            window.showroom3DAvatar.setSpeaking(false, 0);
+        }
+        // Reset mouth to closed position
+        if (mouthCavityPath) mouthCavityPath.setAttribute('d', 'M 5 12 Q 25 12 45 12 Z');
+        if (mouthTongueEl)  mouthTongueEl.setAttribute('ry', '0');
+        if (visualizerBars) {
+            visualizerBars.querySelectorAll('.sound-bar').forEach(b => b.style.height = '4px');
+        }
+    }
+
+    // Synthetic oscillating amplitude for Web Speech API (no AudioContext access)
+    function startSyntheticAmplitudeLoop() {
+        let t = 0;
+        const tick = () => {
+            if (!isSpeaking) return;
+            t += 0.18;
+            // Multi-frequency blend mimics natural speech cadence
+            speechSynthAmplitude = Math.max(0,
+                0.35 * Math.abs(Math.sin(t * 2.1)) +
+                0.25 * Math.abs(Math.sin(t * 3.7)) +
+                0.15 * Math.abs(Math.sin(t * 5.3))
+            );
+            speechSynthRafId = requestAnimationFrame(tick);
+        };
+        speechSynthRafId = requestAnimationFrame(tick);
+    }
+    // ── End Lip-Sync Engine ────────────────────────────────────────────────
+
     if (welcomeVideo) {
-        welcomeVideo.addEventListener('play', () => setLipSyncState(true));
+        welcomeVideo.addEventListener('play', () => setLipSyncState(true, 'video'));
         welcomeVideo.addEventListener('pause', () => setLipSyncState(false));
         welcomeVideo.addEventListener('ended', () => setLipSyncState(false));
     }
@@ -331,29 +407,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Synchronize Mouth Lip-Sync with Speech State
-    function setLipSyncState(speaking) {
+    function setLipSyncState(speaking, source) {
         isSpeaking = speaking;
         if (speaking) {
             if (lipSyncOverlay) {
                 lipSyncOverlay.classList.remove('opacity-0');
-                lipSyncOverlay.classList.add('opacity-100', 'avatar-mouth-active');
-            }
-            if (characterContainer) {
-                characterContainer.classList.add('avatar-jaw-active');
+                lipSyncOverlay.classList.add('opacity-100');
             }
             if (visualizerBars) visualizerBars.classList.remove('hidden');
             if (statusLabel) {
-                statusLabel.textContent = welcomeVideo ? "Playing AI Welcome Video..." : "Speaking Welcome Greeting...";
+                statusLabel.textContent = (source === 'video') ? "Playing AI Welcome Video..." : "Speaking Welcome Greeting...";
                 statusLabel.classList.remove('text-slate-500');
                 statusLabel.classList.add('text-amber-700');
             }
+            // Start the real-time render loop
+            if (source !== 'video') startSyntheticAmplitudeLoop();
+            startLipSyncLoop();
         } else {
             if (lipSyncOverlay) {
-                lipSyncOverlay.classList.remove('avatar-mouth-active', 'opacity-100');
+                lipSyncOverlay.classList.remove('opacity-100');
                 lipSyncOverlay.classList.add('opacity-0');
-            }
-            if (characterContainer) {
-                characterContainer.classList.remove('avatar-jaw-active');
             }
             if (visualizerBars) visualizerBars.classList.add('hidden');
             if (statusLabel) {
@@ -361,6 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 statusLabel.classList.remove('text-amber-700');
                 statusLabel.classList.add('text-slate-500');
             }
+            stopLipSyncLoop();
         }
     }
 
@@ -398,11 +472,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!voiceEnabled) return;
 
-        // Custom Studio Audio File
+        // Custom Studio Audio File — connected to Web Audio API for real-time lip-sync
         if (voiceAudioUrl) {
+            ensureAudioContext();
             if (!audioElement) {
                 audioElement = new Audio(voiceAudioUrl);
-                audioElement.addEventListener('play', () => setLipSyncState(true));
+                audioElement.crossOrigin = 'anonymous';
+                audioElement.addEventListener('play', () => {
+                    setLipSyncState(true, 'audio');
+                    // Connect analyser node for real amplitude data
+                    if (audioCtx) {
+                        try {
+                            const src = audioCtx.createMediaElementSource(audioElement);
+                            connectAnalyserToAudio(src);
+                        } catch(e) {
+                            // Already connected or CORS issue — fallback synthetic loop already started
+                        }
+                    }
+                });
                 audioElement.addEventListener('ended', () => setLipSyncState(false));
                 audioElement.addEventListener('pause', () => setLipSyncState(false));
                 audioElement.addEventListener('error', () => setLipSyncState(false));
@@ -438,8 +525,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 utterance.onstart = () => {
                     hasPlayedOnce = true;
-                    setLipSyncState(true);
+                    // Web Speech API doesn't expose audio stream — use synthetic amplitude loop
+                    setLipSyncState(true, 'speech');
                     if (tapActionBox) tapActionBox.classList.add('hidden');
+                };
+                utterance.onboundary = (event) => {
+                    if (event.name === 'word') {
+                        const text = utterance.text;
+                        const word = text.slice(event.charIndex).split(/\s+/)[0] || '';
+                        if (window.showroom3DAvatar) {
+                            window.showroom3DAvatar.pulseWord(word);
+                        }
+                    }
                 };
                 utterance.onend = () => setLipSyncState(false);
                 utterance.onerror = () => setLipSyncState(false);
