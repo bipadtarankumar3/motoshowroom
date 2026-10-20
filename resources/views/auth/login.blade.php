@@ -477,6 +477,7 @@
                                 <label class="flex items-center gap-2 cursor-pointer select-none">
                                     <input type="checkbox"
                                            name="remember"
+                                           value="1"
                                            checked
                                            class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500/20">
                                     <span class="text-xs text-slate-700 font-semibold">Remember me</span>

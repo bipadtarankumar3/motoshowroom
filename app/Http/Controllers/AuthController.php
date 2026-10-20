@@ -80,7 +80,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         if ($user->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard'))->with('success', "Welcome back, Admin {$user->name}!");
+            return redirect()->route('admin.dashboard')->with('success', "Welcome back, Admin {$user->name}!");
         }
 
         $showroom = $user->showrooms()->first();
