@@ -33,6 +33,7 @@ use App\Http\Controllers\Showroom\PublicServiceController;
 use App\Http\Controllers\Showroom\ServiceBookingController;
 use App\Http\Controllers\Showroom\SettingController;
 use App\Http\Controllers\Showroom\ShowroomAnalyticsController;
+use App\Http\Controllers\Showroom\ShowroomProfileController;
 use App\Http\Controllers\Showroom\ShowroomServicePackageController;
 use App\Http\Controllers\Showroom\SupportController;
 use App\Http\Controllers\Showroom\WebsiteBuilderController;
@@ -370,6 +371,11 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         // Showroom Settings & Profile
         Route::get('/manage/settings', [SettingController::class, 'edit'])->name('showrooms.manage.settings');
         Route::put('/manage/settings', [SettingController::class, 'update'])->name('showrooms.manage.settings.update');
+
+        // Showroom Owner Profile & Details Edit
+        Route::get('/manage/profile', [ShowroomProfileController::class, 'show'])->name('showrooms.manage.profile');
+        Route::get('/manage/profile/edit', [ShowroomProfileController::class, 'edit'])->name('showrooms.manage.profile.edit');
+        Route::put('/manage/profile', [ShowroomProfileController::class, 'update'])->name('showrooms.manage.profile.update');
 
         // Showroom Technical Support & Help Center
         Route::get('/manage/support', [SupportController::class, 'index'])->name('showrooms.manage.support');

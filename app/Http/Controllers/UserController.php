@@ -274,6 +274,20 @@ class UserController extends Controller
             'audit_events_count' => AuditLog::where('user_id', $user->id)->count(),
         ];
 
+        $showroom = $user->showrooms->first();
+        if ($showroom || ! $currentUser->isAdmin()) {
+            return view('showrooms.profile.show', compact(
+                'user',
+                'showroom',
+                'isOwnProfile',
+                'payments',
+                'enquiries',
+                'serviceBookings',
+                'auditLogs',
+                'telemetry'
+            ));
+        }
+
         return view('admin.users.show', compact(
             'user',
             'isOwnProfile',
@@ -297,6 +311,11 @@ class UserController extends Controller
         }
 
         $isOwnProfile = $currentUser->id === $user->id;
+        $showroom = $user->showrooms->first();
+
+        if ($showroom || ! $currentUser->isAdmin()) {
+            return view('showrooms.profile.edit', compact('user', 'showroom', 'isOwnProfile'));
+        }
 
         return view('admin.users.edit', compact('user', 'isOwnProfile'));
     }
@@ -542,10 +561,18 @@ class UserController extends Controller
     }
 
     /**
-     * Redirect to authenticated user's own details page.
+     * Redirect to authenticated user's own details page or showroom profile.
      */
     public function profile(): RedirectResponse
     {
-        return redirect()->route('users.show', Auth::user());
+        /** @var User $user */
+        $user = Auth::user();
+        $showroom = $user->showrooms()->first();
+
+        if ($showroom) {
+            return redirect()->route('showrooms.manage.profile', $showroom);
+        }
+
+        return redirect()->route('users.show', $user);
     }
 }

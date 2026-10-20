@@ -18,7 +18,7 @@ class UpdateUserRequest extends FormRequest
             return false;
         }
 
-        $targetUser = $this->route('user');
+        $targetUser = $this->route('user') ?? $this->user();
         $targetUserId = is_object($targetUser) ? $targetUser->id : (int) $targetUser;
 
         return $currentUser->isAdmin() || $currentUser->id === $targetUserId;
@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $targetUser = $this->route('user');
+        $targetUser = $this->route('user') ?? $this->user();
         $targetUserId = is_object($targetUser) ? $targetUser->id : (int) $targetUser;
 
         $rules = [
