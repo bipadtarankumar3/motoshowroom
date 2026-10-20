@@ -586,19 +586,15 @@
                                         </span>
                                     </div>
 
-                                    {{-- 360 + Wishlist --}}
-                                    <div class="absolute top-3 right-3 flex gap-1.5 z-10">
-                                        @if($showroom->canAccessFeature('has_360_viewer') && $fBike->has360View())
+                                    {{-- 360 Badge (Only if checked in admin panel) --}}
+                                    @if($showroom->canAccessFeature('has_360_viewer') && $fBike->has_360_view)
+                                        <div class="absolute top-3 right-3 z-10">
                                             <a href="{{ route('showrooms.bikes.360', [$showroom, $fBike]) }}"
-                                               class="px-2 py-1 rounded-lg text-[10px] font-mono font-black bg-slate-900/85 text-cyan-400 border border-cyan-500/30 hover:scale-105 transition-transform backdrop-blur-sm">
+                                               class="px-2 py-1 rounded-lg text-[10px] font-mono font-black bg-slate-900/85 text-cyan-400 border border-cyan-500/30 hover:scale-105 transition-transform backdrop-blur-sm shadow-xs">
                                                 360°
                                             </a>
-                                        @endif
-                                        <button type="button"
-                                                class="w-8 h-8 rounded-full bg-white/90 text-slate-400 hover:scale-110 flex items-center justify-center transition-all cursor-pointer shadow-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                                        </button>
-                                    </div>
+                                        </div>
+                                    @endif
 
                                     {{-- Hover: quick buy overlay --}}
                                     <div class="absolute bottom-0 inset-x-0 p-3 z-10 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
@@ -612,12 +608,9 @@
 
                                 {{-- Card Body --}}
                                 <div class="p-5 flex-1 flex flex-col gap-4">
-                                    {{-- Brand + Stars --}}
+                                    {{-- Brand --}}
                                     <div class="flex items-start justify-between gap-2">
                                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ $fBike->brand }} &bull; {{ $fBike->model_year }}</span>
-                                        <div class="flex text-amber-400 shrink-0">
-                                            @for($i = 0; $i < 5; $i++) <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg> @endfor
-                                        </div>
                                     </div>
 
                                     {{-- Bike Name --}}
