@@ -8,8 +8,8 @@
             <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm relative overflow-hidden">
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                     <div class="flex items-center gap-5">
-                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl text-white shadow-md shadow-red-500/20 shrink-0"
-                             style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }}">
+                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl shadow-md shrink-0"
+                             style="background-color: {{ $showroom->primary_color }}; color: {{ $showroom->primary_text_color }}; box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                             {{ strtoupper(substr($showroom->name, 0, 1)) }}
                         </div>
 
@@ -55,7 +55,9 @@
                         </button>
 
                         <a href="{{ route('showrooms.manage.bikes.create', $showroom) }}"
-                           class="px-3.5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 transition flex items-center gap-1.5" id="btn-add-bike">
+                           class="px-3.5 py-2.5 rounded-xl btn-brand-primary font-bold text-xs shadow-md transition flex items-center gap-1.5"
+                           style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;"
+                           id="btn-add-bike">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>+ Add Motorcycle</span>
                         </a>

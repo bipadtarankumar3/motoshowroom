@@ -628,4 +628,59 @@ class Showroom extends Model
     {
         return $this->hasMany(AiConversation::class, 'tenant_id')->latest();
     }
+
+    /**
+     * Effective primary brand color with safe fallback.
+     */
+    public function getPrimaryColorAttribute(): string
+    {
+        return ! empty($this->brand_color_primary) ? $this->brand_color_primary : '#dc2626';
+    }
+
+    /**
+     * Effective accent brand color with safe fallback.
+     */
+    public function getAccentColorAttribute(): string
+    {
+        return ! empty($this->brand_color_accent) ? $this->brand_color_accent : '#0f172a';
+    }
+
+    /**
+     * High-contrast text color (#0f172a or #ffffff) for elements on primary brand background.
+     */
+    public function getPrimaryTextColorAttribute(): string
+    {
+        return $this->calculateContrastTextColor($this->primary_color);
+    }
+
+    /**
+     * High-contrast text color (#0f172a or #ffffff) for elements on accent brand background.
+     */
+    public function getAccentTextColorAttribute(): string
+    {
+        return $this->calculateContrastTextColor($this->accent_color);
+    }
+
+    /**
+     * Calculate whether dark or light text is optimal based on hex luminance.
+     */
+    protected function calculateContrastTextColor(string $hex): string
+    {
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+        }
+        if (strlen($hex) !== 6) {
+            return '#ffffff';
+        }
+
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        // Relative luminance using ITU-R BT.601 coefficients
+        $luminance = ($r * 299 + $g * 587 + $b * 114) / 1000;
+
+        return $luminance > 165 ? '#0f172a' : '#ffffff';
+    }
 }

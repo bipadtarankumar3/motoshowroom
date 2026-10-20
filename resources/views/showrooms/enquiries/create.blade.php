@@ -13,7 +13,7 @@
         <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-6">
             <a href="{{ route('showrooms.show', $showroom) }}" class="hover:text-slate-900 transition">Home</a>
             <span>/</span>
-            <span class="text-rose-600 font-bold">Book Test Ride / Enquiry</span>
+            <span class="font-bold" style="color: {{ $showroom->primary_color }};">Book Test Ride / Enquiry</span>
         </div>
 
         <!-- Success Flash Message -->
@@ -262,7 +262,9 @@
                 <!-- Submit Button -->
                 <div class="pt-4 border-t border-slate-100">
                     <button type="submit"
-                            class="w-full py-4 px-6 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm tracking-wide shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2 group" id="btn-submit-enquiry">
+                            class="w-full py-4 px-6 rounded-2xl btn-brand-primary font-black text-sm tracking-wide shadow-md transition flex items-center justify-center gap-2 group cursor-pointer"
+                            style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;"
+                            id="btn-submit-enquiry">
                         <span>Confirm & Submit Request</span>
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </button>

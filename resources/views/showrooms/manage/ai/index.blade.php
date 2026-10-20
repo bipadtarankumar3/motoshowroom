@@ -187,7 +187,8 @@
                         </div>
 
                         <button type="submit" @disabled(! $hasFeature)
-                                class="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs transition shadow-xs disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="w-full py-2.5 rounded-xl btn-brand-primary font-bold text-xs transition shadow-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                             Save Assistant Configuration
                         </button>
                     </form>

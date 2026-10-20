@@ -86,7 +86,8 @@
                             </div>
 
                             <button type="submit"
-                                    class="px-6 py-3 rounded-xl bg-gradient-to-r from-slate-900 via-rose-600 to-[#FF6B00] hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center justify-center gap-2 shrink-0">
+                                    class="px-6 py-3 rounded-xl btn-brand-primary font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                                    style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                                 <span>Track Job Card</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                             </button>
@@ -95,7 +96,7 @@
                         <div class="flex items-center justify-between px-2 pt-2 text-[11px] text-slate-500 font-medium">
                             <span>Supported: Service Ref ID or Vehicle Registration</span>
                             @if($bookingRecord)
-                                <a href="{{ route('showrooms.services.track', $showroom) }}" class="text-rose-600 hover:text-rose-700 font-semibold">Clear Search</a>
+                                <a href="{{ route('showrooms.services.track', $showroom) }}" class="font-semibold hover:underline" style="color: {{ $showroom->primary_color }};">Clear Search</a>
                             @endif
                         </div>
                     </div>

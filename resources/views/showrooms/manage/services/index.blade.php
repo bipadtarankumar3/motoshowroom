@@ -90,7 +90,7 @@
 
             <div class="flex flex-wrap items-center gap-2.5">
                 <button type="button" @click="createModalOpen = true"
-                        class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-2">
+                        class="btn-brand-primary px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer" id="btn-add-service-package-top">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     <span>Add Service Package</span>
                 </button>
@@ -410,7 +410,7 @@
                 </div>
 
                 <button type="button" @click="createModalOpen = true"
-                        class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 shrink-0">
+                        class="btn-brand-primary px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0 cursor-pointer" id="btn-add-service-package">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     <span>+ Add New Package</span>
                 </button>
@@ -558,7 +558,7 @@
                         Add your first motorcycle maintenance or repair service package with custom pricing and payment requirements.
                     </p>
                     <button type="button" @click="createModalOpen = true"
-                            class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition">
+                            class="btn-brand-primary px-6 py-3 rounded-xl font-bold text-xs shadow-md transition cursor-pointer">
                         + Create First Package
                     </button>
                 </div>
@@ -680,7 +680,7 @@
                                 Cancel
                             </button>
                             <button type="submit"
-                                    class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition">
+                                    class="btn-brand-primary px-6 py-2.5 rounded-xl text-xs font-bold shadow-md transition cursor-pointer" id="btn-save-service-package">
                                 Save Service Package
                             </button>
                         </div>
@@ -805,7 +805,7 @@
                                 Cancel
                             </button>
                             <button type="submit"
-                                    class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition">
+                                    class="btn-brand-primary px-6 py-2.5 rounded-xl text-xs font-bold shadow-md transition cursor-pointer" id="btn-update-service-package">
                                 Update Service Package
                             </button>
                         </div>

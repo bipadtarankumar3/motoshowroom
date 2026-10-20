@@ -240,7 +240,7 @@
                     </a>
                     <button type="submit"
                             id="btn-save-campaign"
-                            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-purple-600/20 transition">
+                            class="btn-brand-primary px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md transition cursor-pointer">
                         Publish Campaign
                     </button>
                 </div>

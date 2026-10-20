@@ -33,7 +33,7 @@
                 <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
                     <a href="{{ route('showrooms.manage', $showroom) }}" class="hover:text-slate-900 transition">Showroom Back-Office</a>
                     <span>/</span>
-                    <span class="text-rose-600 font-bold">Category Catalog</span>
+                    <span class="text-brand-primary font-bold">Category Catalog</span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black font-display text-slate-900 tracking-tight flex items-center gap-3">
                     <span>Motorcycle Category Master</span>
@@ -56,7 +56,7 @@
 
                 <button type="button"
                         @click="showCreateModal = true; createPreviewUrl = ''"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider shadow-md transition cursor-pointer hover:scale-[1.01] active:scale-[0.99]">
+                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl btn-brand-primary text-xs font-black uppercase tracking-wider shadow-md transition cursor-pointer hover:scale-[1.01] active:scale-[0.99]" id="btn-create-category">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Add New Category</span>
                 </button>
@@ -370,7 +370,7 @@
 
                 <div class="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
                     <button type="button" @click="showCreateModal = false" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100 cursor-pointer">Cancel</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider shadow-md cursor-pointer">Create Category</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl btn-brand-primary text-xs font-black uppercase tracking-wider shadow-md cursor-pointer" id="btn-submit-category">Create Category</button>
                 </div>
             </form>
         </div>
@@ -464,7 +464,7 @@
 
                     <div class="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
                         <button type="button" @click="editingCategory = null" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100 cursor-pointer">Cancel</button>
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider shadow-md cursor-pointer">Save Changes</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl btn-brand-primary text-xs font-black uppercase tracking-wider shadow-md cursor-pointer" id="btn-save-edit-category">Save Changes</button>
                     </div>
                 </form>
             </template>

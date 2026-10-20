@@ -162,8 +162,8 @@
                     <div class="flex items-center gap-3">
                         <button type="button"
                                 @click="showCreateModal = true"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-xs font-black uppercase tracking-wider shadow-md shadow-red-600/20 transition-all cursor-pointer hover:opacity-95 active:scale-95"
-                                style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }};">
+                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl btn-brand-primary text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer active:scale-95"
+                                style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>Add New Banner</span>
                         </button>

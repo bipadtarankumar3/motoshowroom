@@ -76,10 +76,10 @@
                                     <img :src="previewUrl" alt="{{ $showroom->name }}" class="max-h-full max-w-full object-contain">
                                 </template>
                                 <template x-if="!previewUrl">
-                                    <div class="w-full h-full rounded-xl flex flex-col items-center justify-center font-display font-black text-white text-2xl shadow-xs"
-                                         style="background: linear-gradient(135deg, {{ $showroom->brand_color_primary ?? '#dc2626' }}, {{ $showroom->brand_color_accent ?? '#991b1b' }})">
+                                    <div class="w-full h-full rounded-xl flex flex-col items-center justify-center font-display font-black text-2xl shadow-xs"
+                                         style="background: linear-gradient(135deg, {{ $showroom->primary_color }}, {{ $showroom->accent_color }}); color: {{ $showroom->primary_text_color }};">
                                         <span>{{ strtoupper(substr($showroom->name, 0, 1)) }}</span>
-                                        <span class="text-[9px] uppercase tracking-widest font-sans font-bold text-white/80 mt-1">Default</span>
+                                        <span class="text-[9px] uppercase tracking-widest font-sans font-bold opacity-80 mt-1">Default</span>
                                     </div>
                                 </template>
                             </div>

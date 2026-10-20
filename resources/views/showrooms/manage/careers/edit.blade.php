@@ -219,7 +219,8 @@
                                    name="is_active"
                                    value="1"
                                    @checked(old('is_active', $jobOpening->is_active))
-                                   class="w-4 h-4 mt-0.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer">
+                                   style="accent-color: {{ $showroom->primary_color }}"
+                                   class="w-4 h-4 mt-0.5 rounded border-slate-300 cursor-pointer">
                             <label for="is_active" class="text-xs font-medium text-slate-700 cursor-pointer select-none">
                                 <span class="font-bold text-slate-900 block mb-0.5">Accept Applications</span>
                                 Active listing accepting candidate applications on public portal
@@ -230,7 +231,8 @@
                         <div class="pt-2 flex flex-col gap-2.5">
                             <button type="submit"
                                     id="btn-update-vacancy"
-                                    class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+                                    class="w-full py-3 px-4 rounded-xl btn-brand-primary font-bold text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                                    style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 <span>Save Changes</span>
                             </button>
@@ -245,13 +247,15 @@
                     <div class="rounded-3xl bg-slate-50 border border-slate-200/80 p-6 space-y-3">
                         <div class="flex items-center justify-between">
                             <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Candidate Pipeline</h4>
-                            <span class="text-xs font-extrabold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">{{ $jobOpening->applications_count ?? $jobOpening->applications()->count() }} Applicants</span>
+                            <span class="text-xs font-extrabold px-2 py-0.5 rounded-full border"
+                                  style="color: {{ $showroom->primary_text_color === '#0f172a' ? '#0f172a' : $showroom->primary_color }}; background-color: {{ $showroom->primary_color }}18; border-color: {{ $showroom->primary_color }}35;">{{ $jobOpening->applications_count ?? $jobOpening->applications()->count() }} Applicants</span>
                         </div>
                         <p class="text-xs text-slate-500 leading-relaxed">
                             Review and manage candidates who submitted resumes for this specific vacancy.
                         </p>
                         <a href="{{ route('showrooms.manage.applicants.index', [$showroom, 'job' => $jobOpening->id]) }}"
-                           class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 pt-1">
+                           class="inline-flex items-center gap-1.5 text-xs font-bold pt-1 hover:underline"
+                           style="color: {{ $showroom->primary_color }}">
                             <span>View Candidates</span>
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </a>

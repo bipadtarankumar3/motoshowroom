@@ -77,8 +77,9 @@
                 @forelse($conversation->messages as $msg)
                     @if($msg->sender === 'user')
                         <div class="flex items-start justify-end gap-3">
-                            <div class="max-w-[80%] rounded-2xl rounded-tr-sm p-4 bg-gradient-to-r from-rose-600 to-rose-500 text-white shadow-xs">
-                                <div class="text-[10px] text-rose-200 uppercase font-bold tracking-wider mb-1 flex items-center justify-between gap-4">
+                            <div class="max-w-[80%] rounded-2xl rounded-tr-sm p-4 shadow-xs"
+                                 style="background-color: {{ $showroom->primary_color }}; color: {{ $showroom->primary_text_color }};">
+                                <div class="text-[10px] uppercase font-bold tracking-wider mb-1 flex items-center justify-between gap-4 opacity-80">
                                     <span>Visitor</span>
                                     <span>{{ $msg->created_at->format('h:i:s A') }}</span>
                                 </div>
@@ -87,7 +88,8 @@
                         </div>
                     @else
                         <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center shrink-0 text-rose-600 mt-1">
+                            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-1"
+                                 style="background-color: {{ $showroom->primary_color }}18; color: {{ $showroom->primary_text_color === '#0f172a' ? '#0f172a' : $showroom->primary_color }}; border: 1px solid {{ $showroom->primary_color }}35;">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             </div>
                             <div class="max-w-[80%] rounded-2xl rounded-tl-sm p-4 bg-slate-50 border border-slate-200 text-slate-800 shadow-xs">

@@ -17,11 +17,11 @@
                     <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
                         <a href="{{ route('showrooms.show', $showroom) }}" class="hover:text-slate-900 transition">Home</a>
                         <span>/</span>
-                        <span class="text-rose-600 font-bold">Careers</span>
+                        <span class="font-bold" style="color: {{ $showroom->primary_color }};">Careers</span>
                     </div>
 
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-display text-slate-900 tracking-tight leading-tight">
-                        Build Your Career With <span class="text-rose-600">{{ $showroom->name }}</span>
+                        Build Your Career With <span style="color: {{ $showroom->primary_color }};">{{ $showroom->name }}</span>
                     </h1>
 
                     <p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
@@ -30,7 +30,7 @@
 
                     <!-- Feature Badges -->
                     <div class="flex flex-wrap items-center gap-3 pt-2">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full badge-brand-primary text-xs font-bold">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             1-Min Video Pitch
                         </span>
@@ -47,13 +47,14 @@
 
                 <!-- Action Card in Hero -->
                 <div class="lg:w-96 shrink-0 bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm">
-                    <span class="text-xs font-bold text-rose-600 uppercase tracking-wider block mb-1">Fast-Track Application</span>
+                    <span class="text-xs font-bold uppercase tracking-wider block mb-1" style="color: {{ $showroom->primary_color }};">Fast-Track Application</span>
                     <h3 class="text-lg font-bold font-display text-slate-900 mb-2">No Open Opening Matches?</h3>
                     <p class="text-xs text-slate-500 leading-relaxed mb-5">
                         Submit an open application with a 60-second video pitch. Our hiring directors review spontaneous pitches weekly.
                     </p>
                     <a href="{{ route('showrooms.careers.general-apply', $showroom) }}"
-                       class="w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-600/20 transition hover:scale-[1.02] active:scale-[0.98]">
+                       class="w-full inline-flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl btn-brand-primary font-bold text-xs uppercase tracking-wider shadow-md transition hover:scale-[1.02] active:scale-[0.98]"
+                       style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         <span>Record 1-Min Video Pitch</span>
                     </a>
@@ -97,7 +98,9 @@
 
                 <!-- Action Buttons -->
                 <div class="sm:col-span-2 flex items-center gap-2">
-                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl shadow-xs transition">
+                    <button type="submit"
+                            class="w-full btn-brand-primary font-bold text-xs uppercase tracking-wider py-3.5 px-4 rounded-2xl shadow-xs transition"
+                            style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                         Filter
                     </button>
                     @if($search || ($department && $department !== 'all') || ($jobType && $jobType !== 'all'))
@@ -121,7 +124,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                     @foreach($jobOpenings as $job)
-                        <div class="rounded-3xl bg-white border border-slate-200 p-6 flex flex-col justify-between hover:border-rose-400 hover:shadow-xl transition-all duration-200 group shadow-xs">
+                        <div class="rounded-3xl bg-white border border-slate-200 p-6 flex flex-col justify-between hover:border-slate-400 hover:shadow-xl transition-all duration-200 group shadow-xs">
                             <div>
                                 <div class="flex items-center justify-between gap-2 mb-3">
                                     <span class="text-xs px-2.5 py-1 rounded-lg font-bold {{ $job->department->badgeClasses() }}">
@@ -132,7 +135,7 @@
                                     </span>
                                 </div>
 
-                                <h3 class="text-xl font-bold font-display text-slate-900 group-hover:text-rose-600 transition mb-3 line-clamp-2">
+                                <h3 class="text-xl font-bold font-display text-slate-900 transition mb-3 line-clamp-2">
                                     <a href="{{ route('showrooms.careers.show', [$showroom, $job]) }}">
                                         {{ $job->title }}
                                     </a>
@@ -173,7 +176,8 @@
                                 @endif
 
                                 <a href="{{ route('showrooms.careers.show', [$showroom, $job]) }}"
-                                   class="inline-flex items-center gap-1 text-xs font-bold text-rose-600 group-hover:text-rose-700 hover:underline">
+                                   class="inline-flex items-center gap-1 text-xs font-bold hover:underline"
+                                   style="color: {{ $showroom->primary_color }};">
                                     <span>Details & Pitch</span>
                                     <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </a>

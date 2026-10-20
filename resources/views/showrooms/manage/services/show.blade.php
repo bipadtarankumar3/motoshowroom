@@ -214,7 +214,8 @@
 
                     <div class="flex items-center justify-end">
                         <button type="submit" id="btn-save-job-card"
-                                class="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-600/20 transition">
+                                class="px-6 py-2.5 rounded-xl btn-brand-primary font-bold text-xs uppercase tracking-wider shadow-md transition"
+                                style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                             Save Changes
                         </button>
                     </div>

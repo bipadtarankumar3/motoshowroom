@@ -35,7 +35,8 @@
         <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 shadow-xs mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 text-white flex items-center justify-center font-black text-2xl shadow-md shadow-rose-600/20 shrink-0">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl shadow-md shrink-0"
+                         style="background-color: {{ $showroom->primary_color }}; color: {{ $showroom->primary_text_color }}; box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                         {{ strtoupper(substr($applicant->applicant_name, 0, 1)) }}
                     </div>
                     <div>
@@ -47,7 +48,7 @@
                         </div>
                         <p class="text-xs text-slate-500 mt-1">
                             Applied for <strong class="text-slate-900">{{ $applicant->jobOpening?->title ?? ($applicant->desired_role . ' (Open Application)') }}</strong>
-                            &bull; Reference <span class="font-mono text-rose-600 font-bold">#{{ $applicant->applicant_number }}</span>
+                            &bull; Reference <span class="font-mono font-bold" style="color: {{ $showroom->primary_color }};">#{{ $applicant->applicant_number }}</span>
                         </p>
                     </div>
                 </div>
@@ -271,7 +272,8 @@
                         <div class="pt-2">
                             <button type="submit"
                                     id="btn-update-applicant"
-                                    class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-600/20 transition">
+                                    class="w-full py-3 px-4 rounded-xl btn-brand-primary font-bold text-xs uppercase tracking-wider shadow-md transition"
+                                    style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                                 Update Candidate Status
                             </button>
                         </div>

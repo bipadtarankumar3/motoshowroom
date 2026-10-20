@@ -78,7 +78,9 @@
                     </a>
                 @else
                     <a href="{{ route('showrooms.manage.bikes.create', $showroom) }}"
-                       class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-2 group" id="btn-add-bike">
+                       class="px-5 py-2.5 rounded-xl btn-brand-primary font-bold text-xs shadow-md transition flex items-center gap-2 group"
+                       style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;"
+                       id="btn-add-bike">
                         <svg class="w-4 h-4 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                         <span>Add Motorcycle</span>
                     </a>
@@ -108,11 +110,11 @@
 
             <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] uppercase font-bold text-rose-600 tracking-wider">Plan Quota</span>
+                    <span class="text-[10px] uppercase font-bold tracking-wider" style="color: {{ $showroom->primary_color }};">Plan Quota</span>
                     <span class="text-[10px] font-mono text-slate-500">{{ $totalBikes }} / {{ $maxLimit ?? '∞' }}</span>
                 </div>
                 <div class="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden border border-slate-200">
-                    <div class="bg-gradient-to-r from-rose-600 to-rose-400 h-2 rounded-full transition-all" style="width: {{ $quotaUsedPercent }}%"></div>
+                    <div class="h-2 rounded-full transition-all" style="width: {{ $quotaUsedPercent }}%; background-color: {{ $showroom->primary_color }};"></div>
                 </div>
                 <span class="text-[10px] text-slate-500 mt-1 block">{{ $quotaUsedPercent }}% capacity utilized</span>
             </div>

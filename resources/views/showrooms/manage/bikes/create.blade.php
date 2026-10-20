@@ -725,7 +725,9 @@
                 </a>
 
                 <button type="submit"
-                        class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-2" id="btn-save-bike">
+                        class="px-6 py-2.5 rounded-xl btn-brand-primary font-bold text-xs shadow-md transition flex items-center gap-2"
+                        style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;"
+                        id="btn-save-bike">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     <span>Save & Publish Motorcycle</span>
                 </button>

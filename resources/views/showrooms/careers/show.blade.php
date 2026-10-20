@@ -284,7 +284,8 @@
                         <div class="pt-2">
                             <button type="submit"
                                     id="btn-submit-application"
-                                    class="w-full py-4 px-6 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-600/20 transition hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
+                                    class="w-full py-4 px-6 rounded-2xl btn-brand-primary font-bold text-xs uppercase tracking-wider shadow-lg transition hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+                                    style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                 <span>Submit Job Application</span>
                             </button>

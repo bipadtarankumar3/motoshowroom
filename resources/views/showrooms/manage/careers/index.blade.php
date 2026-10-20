@@ -65,14 +65,15 @@
             <div class="flex items-center gap-3">
                 <a href="{{ route('showrooms.manage.applicants.index', $showroom) }}"
                    class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 hover:text-slate-900 font-bold text-xs shadow-xs transition flex items-center gap-2">
-                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    <svg class="w-4 h-4" style="color: {{ $showroom->primary_color }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     <span>ATS Candidates ({{ $totalApplications }})</span>
                 </a>
 
                 @if ($hasModuleAccess)
                     <a href="{{ route('showrooms.manage.careers.create', $showroom) }}"
                        id="btn-add-opening"
-                       class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition flex items-center gap-2 group">
+                       class="px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2 group btn-brand-primary"
+                       style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                         <svg class="w-4 h-4 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                         <span>Post Vacancy</span>
                     </a>
@@ -98,8 +99,8 @@
             </div>
 
             <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-xs">
-                <span class="text-xs text-rose-600 font-medium block">Applications Received</span>
-                <span class="text-2xl sm:text-3xl font-black font-display text-rose-600 mt-1 block">{{ $totalApplications }}</span>
+                <span class="text-xs font-semibold block" style="color: {{ $showroom->primary_color }}">Applications Received</span>
+                <span class="text-2xl sm:text-3xl font-black font-display mt-1 block" style="color: {{ $showroom->primary_color }}">{{ $totalApplications }}</span>
             </div>
 
             <div class="rounded-2xl bg-white border border-slate-200 p-5 shadow-xs">
@@ -117,12 +118,12 @@
                            name="search"
                            value="{{ $search }}"
                            placeholder="Search vacancy title or keywords..."
-                           class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 pl-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                           class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 pl-9 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary">
                     <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
 
                 <div class="sm:col-span-3">
-                    <select name="department" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                    <select name="department" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary">
                         <option value="all">All Departments</option>
                         @foreach($departments as $dept)
                             <option value="{{ $dept->value }}" @selected($department === $dept->value)>{{ $dept->label() }}</option>
@@ -131,7 +132,7 @@
                 </div>
 
                 <div class="sm:col-span-2">
-                    <select name="type" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                    <select name="type" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary">
                         <option value="all">All Types</option>
                         @foreach($jobTypes as $jt)
                             <option value="{{ $jt->value }}" @selected($jobType === $jt->value)>{{ $jt->label() }}</option>
@@ -140,7 +141,7 @@
                 </div>
 
                 <div class="sm:col-span-2">
-                    <select name="status" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                    <select name="status" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary">
                         <option value="all">All Statuses</option>
                         <option value="active" @selected($status === 'active')>Active Only</option>
                         <option value="inactive" @selected($status === 'inactive')>Inactive Only</option>

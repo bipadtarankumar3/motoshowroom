@@ -22,12 +22,12 @@
         <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-slate-50 to-slate-100 border border-slate-200 p-8 sm:p-12 mb-10 shadow-sm">
             <div class="absolute -right-16 -bottom-16 w-80 h-80 rounded-full bg-rose-500/10 blur-3xl pointer-events-none"></div>
             <div class="relative z-10 max-w-3xl">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold uppercase tracking-wider mb-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full badge-brand-primary text-xs font-bold uppercase tracking-wider mb-3">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     Spontaneous Application & 1-Min Video Pitch
                 </span>
                 <h1 class="text-3xl sm:text-5xl font-black font-display text-slate-900 tracking-tight leading-tight">
-                    Pitch Yourself to <span class="text-rose-600">{{ $showroom->name }}</span>
+                    Pitch Yourself to <span style="color: {{ $showroom->primary_color }};">{{ $showroom->name }}</span>
                 </h1>
                 <p class="text-base sm:text-lg text-slate-600 mt-4 leading-relaxed">
                     Don't see an exact vacancy listed? We are always on the lookout for talented motorcycle specialists, technicians, advisors, and riders. Fill out your details, record your 1-minute video pitch, and join our candidate pool.
@@ -281,9 +281,10 @@
                         <div class="pt-2">
                             <button type="submit"
                                     id="btn-submit-general-application"
-                                    class="w-full py-3.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2">
+                                    class="w-full py-3.5 px-4 rounded-xl btn-brand-primary font-bold text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                                    style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                Submit Application & Video Pitch
+                                <span>Submit Application & Video Pitch</span>
                             </button>
                         </div>
                     </form>

@@ -141,7 +141,7 @@
                     </a>
                     <button type="submit"
                             id="btn-update-campaign"
-                            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition">
+                            class="btn-brand-primary px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition cursor-pointer">
                         Save Changes
                     </button>
                 </div>

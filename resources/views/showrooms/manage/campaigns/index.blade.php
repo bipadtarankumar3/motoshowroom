@@ -141,7 +141,7 @@
                 @if ($hasModuleAccess)
                     <a href="{{ route('showrooms.manage.campaigns.create', $showroom) }}"
                        id="btn-add-campaign"
-                       class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider shadow-sm shadow-purple-600/20 transition flex items-center gap-2 group cursor-pointer">
+                       class="btn-brand-primary px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center gap-2 group cursor-pointer">
                         <svg class="w-4 h-4 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                         <span>New Campaign</span>
                     </a>

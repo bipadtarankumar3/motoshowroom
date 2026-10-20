@@ -33,8 +33,8 @@
                     <img src="{{ $showroom->logo_url }}" alt="{{ $showroom->name }}"
                          class="w-10 h-10 rounded-2xl object-contain bg-white border border-slate-200 shadow-xs group-hover:scale-105 transition-transform flex-shrink-0 p-1">
                 @else
-                    <span class="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-white text-base shadow-md group-hover:scale-105 transition-transform flex-shrink-0"
-                          style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }}">
+                    <span class="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-base shadow-md group-hover:scale-105 transition-transform flex-shrink-0"
+                          style="background-color: {{ $showroom->primary_color }}; color: {{ $showroom->primary_text_color }};">
                         {{ strtoupper(substr($showroom->name, 0, 1)) }}
                     </span>
                 @endif
@@ -55,7 +55,7 @@
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 pt-2 pb-1.5">Main</p>
 
             @php
-                $primaryColor = $showroom->brand_color_primary ?? '#dc2626';
+                $primaryColor = $showroom->primary_color;
                 $manageMainLinks = [
                     ['route' => 'showrooms.manage', 'label' => 'Overview', 'params' => [$showroom], 'pattern' => 'showrooms.manage',
                      'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>'],
@@ -196,8 +196,8 @@
                     id="btn-manage-user-menu"
                 >
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-xs flex-shrink-0 shadow-xs ring-2 ring-white"
-                             style="background-color: {{ $primaryColor }}">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-xs ring-2 ring-white"
+                             style="background-color: {{ $primaryColor }}; color: {{ $showroom->primary_text_color }};">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                         <div class="min-w-0">
@@ -337,8 +337,8 @@
                         id="btn-manage-header-user-menu"
                         class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl border border-slate-200/80 bg-white hover:bg-slate-50 hover:border-slate-300 transition shadow-2xs group cursor-pointer"
                     >
-                        <div class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white text-xs shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform"
-                             style="background-color: {{ $primaryColor }}">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform"
+                             style="background-color: {{ $primaryColor }}; color: {{ $showroom->primary_text_color }};">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                         <div class="hidden sm:block text-left leading-tight">

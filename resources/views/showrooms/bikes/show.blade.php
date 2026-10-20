@@ -222,7 +222,7 @@
                             <div class="flex items-center gap-2">
                                 <button type="button"
                                         @click="mode = '360'"
-                                        :class="mode === '360' ? 'bg-gradient-to-r from-slate-900 via-rose-600 to-[#FF6B00] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
+                                        :class="mode === '360' ? 'btn-brand-primary shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
                                         class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 cursor-pointer">
                                     <svg class="w-4 h-4" :class="isAutoSpinning || (studioView === 'glb' && glbAutoRotate) ? 'animate-spin-slow' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                     <span>Interactive 360° Studio</span>
@@ -245,9 +245,9 @@
                                         <span class="text-xs font-bold text-slate-900">3D GLB Orbit</span>
                                         <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
                                     @elseif($defaultStudioView === 'turntable')
-                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <svg class="w-3.5 h-3.5" style="color: {{ $showroom->primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                         <span class="text-xs font-bold text-slate-900">Turntable</span>
-                                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                                        <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: {{ $showroom->primary_color }};"></span>
                                     @elseif($defaultStudioView === 'video')
                                         <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                         <span class="text-xs font-bold text-slate-900">Video Loop</span>
@@ -629,7 +629,7 @@
 
                         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-1">
                             <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Max Power</span>
-                            <p class="text-lg font-black font-mono text-rose-600">{{ $bike->power_bhp ? $bike->power_bhp . ' bhp' : 'N/A' }}</p>
+                            <p class="text-lg font-black font-mono" style="color: {{ $showroom->primary_color }};">{{ $bike->power_bhp ? $bike->power_bhp . ' bhp' : 'N/A' }}</p>
                             <span class="text-[10px] text-slate-500">Peak Output</span>
                         </div>
 
@@ -776,7 +776,7 @@
                     {{-- Brand & Title --}}
                     <div>
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-black text-rose-600 uppercase tracking-widest">{{ $bike->brand }}</span>
+                            <span class="text-xs font-black uppercase tracking-widest" style="color: {{ $showroom->primary_color }};">{{ $bike->brand }}</span>
                             <span class="font-mono text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">{{ $bike->sku }}</span>
                         </div>
                         <h1 class="text-2xl sm:text-3xl font-black font-display text-slate-900 mt-1 leading-tight">
@@ -926,7 +926,7 @@
             <div class="pt-10 border-t border-slate-200 space-y-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <span class="text-xs uppercase font-bold text-rose-600 tracking-wider">Explore Alternative Machines</span>
+                        <span class="text-xs uppercase font-bold tracking-wider" style="color: {{ $showroom->primary_color }};">Explore Alternative Machines</span>
                         <h3 class="text-2xl font-black font-display text-slate-900 mt-0.5">Similar Motorcycles in Showroom</h3>
                     </div>
                     <a href="{{ route('showrooms.bikes.index', $showroom) }}" class="text-xs font-bold text-slate-500 hover:text-slate-900 transition flex items-center gap-1">

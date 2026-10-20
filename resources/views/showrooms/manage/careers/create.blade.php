@@ -217,7 +217,8 @@
                                    name="is_active"
                                    value="1"
                                    @checked(old('is_active', true))
-                                   class="w-4 h-4 mt-0.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500 cursor-pointer">
+                                   style="accent-color: {{ $showroom->primary_color }}"
+                                   class="w-4 h-4 mt-0.5 rounded border-slate-300 cursor-pointer">
                             <label for="is_active" class="text-xs font-medium text-slate-700 cursor-pointer select-none">
                                 <span class="font-bold text-slate-900 block mb-0.5">Accept Applications</span>
                                 Immediately display position on showroom public careers page
@@ -228,7 +229,8 @@
                         <div class="pt-2 flex flex-col gap-2.5">
                             <button type="submit"
                                     id="btn-save-vacancy"
-                                    class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+                                    class="w-full py-3 px-4 rounded-xl btn-brand-primary font-bold text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                                    style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 <span>Publish Vacancy</span>
                             </button>
@@ -242,22 +244,23 @@
                     <!-- Dealership Recruiting Tips Card -->
                     <div class="rounded-3xl bg-slate-50 border border-slate-200/80 p-6 space-y-3">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background-color: {{ $showroom->primary_color }}22; color: {{ $showroom->primary_text_color === '#0f172a' ? '#0f172a' : $showroom->primary_color }};">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
                             <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Hiring Guidelines</h4>
                         </div>
                         <ul class="text-xs text-slate-600 space-y-2 leading-relaxed">
                             <li class="flex items-start gap-2">
-                                <span class="text-rose-500 font-bold">•</span>
+                                <span class="font-bold" style="color: {{ $showroom->primary_color }};">•</span>
                                 <span>Be explicit about required motorcycle brand certifications (e.g., Royal Enfield, KTM, Yamaha).</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-rose-500 font-bold">•</span>
+                                <span class="font-bold" style="color: {{ $showroom->primary_color }};">•</span>
                                 <span>Clearly specify workshop bay shifts, showroom working hours, and weekend rostering.</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="text-rose-500 font-bold">•</span>
+                                <span class="font-bold" style="color: {{ $showroom->primary_color }};">•</span>
                                 <span>Highlight commission structures and performance incentives for sales positions.</span>
                             </li>
                         </ul>

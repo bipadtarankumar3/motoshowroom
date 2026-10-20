@@ -456,8 +456,8 @@
                     </a>
 
                     <button type="submit"
-                            class="px-7 py-3 rounded-xl text-white font-bold text-sm shadow-md transition flex items-center gap-2 hover:brightness-110 active:scale-95"
-                            style="background-color: {{ $showroom->brand_color_primary ?? '#dc2626' }}"
+                            class="px-7 py-3 rounded-xl btn-brand-primary font-bold text-sm shadow-md transition flex items-center gap-2 cursor-pointer active:scale-95"
+                            style="box-shadow: 0 4px 14px 0 {{ $showroom->primary_color }}33;"
                             id="btn-save-website">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Save Storefront Settings</span>

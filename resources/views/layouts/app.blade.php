@@ -16,18 +16,48 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
-    @if(isset($showroom) && !empty($showroom->brand_color_primary))
+    @php
+        $resolvedShowroom = $showroom ?? (app()->bound(\App\Services\TenantContext::class) && app(\App\Services\TenantContext::class)->hasTenant() ? app(\App\Services\TenantContext::class)->getTenant() : null);
+    @endphp
+    @if(isset($resolvedShowroom))
         <style>
             :root {
-                --brand-primary: {{ $showroom->brand_color_primary }};
-                --brand-accent: {{ $showroom->brand_color_accent ?? '#0f172a' }};
+                --brand-primary: {{ $resolvedShowroom->primary_color }};
+                --brand-primary-text: {{ $resolvedShowroom->primary_text_color }};
+                --brand-accent: {{ $resolvedShowroom->accent_color }};
+                --brand-accent-text: {{ $resolvedShowroom->accent_text_color }};
             }
-            .bg-brand-primary { background-color: var(--brand-primary) !important; }
+            .bg-brand-primary { background-color: var(--brand-primary) !important; color: var(--brand-primary-text) !important; }
             .text-brand-primary { color: var(--brand-primary) !important; }
             .border-brand-primary { border-color: var(--brand-primary) !important; }
             .ring-brand-primary { --tw-ring-color: var(--brand-primary) !important; }
-            .hover\:bg-brand-primary:hover { background-color: var(--brand-primary) !important; }
+            .hover\:bg-brand-primary:hover { background-color: var(--brand-primary) !important; color: var(--brand-primary-text) !important; }
             .hover\:text-brand-primary:hover { color: var(--brand-primary) !important; }
+            .hover\:border-brand-primary:hover { border-color: var(--brand-primary) !important; }
+            .focus\:border-brand-primary:focus { border-color: var(--brand-primary) !important; }
+            .focus\:ring-brand-primary:focus { --tw-ring-color: var(--brand-primary) !important; }
+            .btn-brand-primary {
+                background-color: var(--brand-primary) !important;
+                color: var(--brand-primary-text) !important;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .btn-brand-primary:hover {
+                filter: brightness(0.94);
+                box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+            }
+            .btn-brand-accent {
+                background-color: var(--brand-accent) !important;
+                color: var(--brand-accent-text) !important;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .btn-brand-accent:hover {
+                filter: brightness(1.1);
+            }
+            .badge-brand-primary {
+                background-color: {{ $resolvedShowroom->primary_color }}18 !important;
+                color: {{ $resolvedShowroom->primary_text_color === '#0f172a' ? '#0f172a' : $resolvedShowroom->primary_color }} !important;
+                border: 1px solid {{ $resolvedShowroom->primary_color }}35 !important;
+            }
         </style>
     @endif
 </head>
