@@ -35,8 +35,18 @@ class ServiceBookingController extends Controller
             ->search($search)
             ->filterDate($date)
             ->filterStatus($status)
-            ->when(! empty($serviceType) && $serviceType !== 'all', fn ($q) => $q->where('service_type', $serviceType))
+            ->when(! empty($serviceType) && $serviceType !== 'all', function ($q) use ($serviceType) {
+                $q->where(function ($sq) use ($serviceType) {
+                    $sq->where('service_type', $serviceType)
+                        ->orWhere('showroom_service_id', is_numeric($serviceType) ? (int) $serviceType : 0)
+                        ->orWhereHas('showroomService', function ($ssq) use ($serviceType) {
+                            $ssq->where('slug', $serviceType)
+                                ->orWhere('name', 'like', '%'.str_replace(['_', '-'], ' ', $serviceType).'%');
+                        });
+                });
+            })
             ->when(! empty($assignedTo) && $assignedTo !== 'all', fn ($q) => $q->where('assigned_to_user_id', $assignedTo))
+
             ->when(! empty($paymentStatus) && $paymentStatus !== 'all', fn ($q) => $q->where('payment_status', $paymentStatus))
             ->when(! empty($timeframe) && $timeframe !== 'all', function ($q) use ($timeframe) {
                 match ($timeframe) {
