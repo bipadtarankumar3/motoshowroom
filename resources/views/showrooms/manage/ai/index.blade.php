@@ -247,18 +247,6 @@
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Spoken Voice Persona & Gender</label>
                                 <div class="grid grid-cols-2 gap-2.5">
-                                    <!-- Female Voice Option -->
-                                    <label id="card-voice-female" onclick="selectVoiceGender('female')"
-                                           class="voice-card flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition bg-white {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? 'border-amber-500 ring-2 ring-amber-400/20 bg-amber-50/40' : 'border-slate-200 hover:border-slate-300' }}">
-                                        <input type="radio" name="voice_gender" id="radio-voice-female" value="female" {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? 'checked' : '' }} class="sr-only">
-                                        <span class="text-xl">👩</span>
-                                        <div class="text-left flex-1 min-w-0">
-                                            <span class="text-xs font-bold text-slate-900 block leading-tight">Female Voice</span>
-                                            <span class="text-[10px] text-slate-500 block">Sweet & Welcoming (महिला)</span>
-                                        </div>
-                                        <span id="check-voice-female" class="text-amber-600 text-xs font-black {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? '' : 'hidden' }}">✓</span>
-                                    </label>
-
                                     <!-- Male Voice Option -->
                                     <label id="card-voice-male" onclick="selectVoiceGender('male')"
                                            class="voice-card flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition bg-white {{ old('voice_gender', $setting->effective_voice_gender) === 'male' ? 'border-amber-500 ring-2 ring-amber-400/20 bg-amber-50/40' : 'border-slate-200 hover:border-slate-300' }}">
@@ -269,6 +257,18 @@
                                             <span class="text-[10px] text-slate-500 block">TVS Advisor (पुरुष)</span>
                                         </div>
                                         <span id="check-voice-male" class="text-amber-600 text-xs font-black {{ old('voice_gender', $setting->effective_voice_gender) === 'male' ? '' : 'hidden' }}">✓</span>
+                                    </label>
+
+                                    <!-- Female Voice Option -->
+                                    <label id="card-voice-female" onclick="selectVoiceGender('female')"
+                                           class="voice-card flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition bg-white {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? 'border-amber-500 ring-2 ring-amber-400/20 bg-amber-50/40' : 'border-slate-200 hover:border-slate-300' }}">
+                                        <input type="radio" name="voice_gender" id="radio-voice-female" value="female" {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? 'checked' : '' }} class="sr-only">
+                                        <span class="text-xl">👩</span>
+                                        <div class="text-left flex-1 min-w-0">
+                                            <span class="text-xs font-bold text-slate-900 block leading-tight">Female Voice</span>
+                                            <span class="text-[10px] text-slate-500 block">Sweet & Welcoming (महिला)</span>
+                                        </div>
+                                        <span id="check-voice-female" class="text-amber-600 text-xs font-black {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? '' : 'hidden' }}">✓</span>
                                     </label>
                                 </div>
                                 <input type="hidden" name="voice_pitch" id="input_voice_pitch" value="{{ old('voice_pitch', $setting->effective_voice_pitch) }}">
