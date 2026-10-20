@@ -291,6 +291,7 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::get('/manage/bikes/{bike}/edit', [BikeController::class, 'edit'])->name('showrooms.manage.bikes.edit');
         Route::put('/manage/bikes/{bike}', [BikeController::class, 'update'])->name('showrooms.manage.bikes.update');
         Route::delete('/manage/bikes/{bike}', [BikeController::class, 'destroy'])->name('showrooms.manage.bikes.destroy');
+        Route::delete('/manage/bikes/{bike}/images/{image}', [BikeController::class, 'destroyImage'])->name('showrooms.manage.bikes.images.destroy');
         Route::post('/manage/bikes/{bike}/toggle-featured', [BikeController::class, 'toggleFeatured'])->name('showrooms.manage.bikes.toggle-featured');
         Route::post('/manage/bikes/{bike}/toggle-published', [BikeController::class, 'togglePublished'])->name('showrooms.manage.bikes.toggle-published');
 

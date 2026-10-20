@@ -6,6 +6,7 @@ use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class BikeImage extends Model
 {
@@ -64,5 +65,20 @@ class BikeImage extends Model
     public function bike(): BelongsTo
     {
         return $this->belongsTo(Bike::class);
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (BikeImage $image): void {
+            if ($image->image_url && str_contains($image->image_url, '/storage/')) {
+                $parts = explode('/storage/', $image->image_url);
+                if (! empty($parts[1])) {
+                    Storage::disk('public')->delete($parts[1]);
+                }
+            }
+        });
     }
 }

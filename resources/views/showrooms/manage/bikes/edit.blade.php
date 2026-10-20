@@ -63,7 +63,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('showrooms.manage.bikes.update', [$showroom, $bike]) }}" class="space-y-8" id="edit-bike-form">
+        <form method="POST" action="{{ route('showrooms.manage.bikes.update', [$showroom, $bike]) }}" enctype="multipart/form-data" class="space-y-8" id="edit-bike-form">
             @csrf
             @method('PUT')
 
@@ -278,44 +278,395 @@
                           class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">{{ old('description', $bike->description) }}</textarea>
             </div>
 
-            <!-- Section 4: Photo Gallery -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-                <h2 class="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-xs font-black">4</span>
-                    <span>High-Resolution Photo Gallery</span>
-                </h2>
-                <p class="text-xs text-slate-500 mb-4">Update photo URLs to showcase in customer image slider.</p>
+            <!-- Section 4: Photo Gallery, Thumbnail & 360° Studio Files -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs" x-data="bikeMediaEditManager()">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-5 mb-6 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-xs font-black">4</span>
+                            <span>Motorcycle Media & 360° Studio</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Manage cover thumbnail, high-resolution photo gallery, and interactive 360° turntable presentation.</p>
+                    </div>
+                    @if($bike->has_360_view || $bike->frames360->count() > 0 || !empty($bike->model_3d_path))
+                        <a href="{{ route('showrooms.manage.bikes.360', [$showroom, $bike]) }}" target="_blank"
+                           class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-bold hover:bg-cyan-100 transition shadow-2xs self-start sm:self-auto">
+                            <svg class="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>Open 360° Studio ({{ $bike->frames360->count() }} frames)</span>
+                        </a>
+                    @endif
+                </div>
 
-                <div class="space-y-3" id="images-container">
-                    @forelse($bike->images as $idx => $img)
-                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-                            <div class="sm:col-span-8">
-                                <label class="block text-[11px] text-slate-500 mb-1">Image URL {{ $idx + 1 }} @if($img->is_primary) (Primary Photo) @endif</label>
-                                <input type="url" name="images[{{ $idx }}][image_url]" value="{{ $img->image_url }}"
-                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                <!-- 4A: Main Cover / Thumbnail Photo -->
+                <div class="mb-6 p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </div>
-                            <div class="sm:col-span-4">
-                                <label class="block text-[11px] text-slate-500 mb-1">Caption</label>
-                                <input type="text" name="images[{{ $idx }}][alt_text]" value="{{ $img->alt_text }}"
-                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
-                                <input type="hidden" name="images[{{ $idx }}][is_primary]" value="{{ $img->is_primary ? '1' : '0' }}">
+                            <div>
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-900">Cover Thumbnail Photo</h3>
+                                <p class="text-[11px] text-slate-500">The primary motorcycle image displayed on catalog cards, featured showcases, and search results.</p>
                             </div>
                         </div>
-                    @empty
-                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-                            <div class="sm:col-span-8">
-                                <label class="block text-[11px] text-slate-500 mb-1">Primary Image URL</label>
-                                <input type="url" name="images[0][image_url]" value="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1200&q=80"
-                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">Primary</span>
+                    </div>
+
+                    @php
+                        $primaryImage = $bike->primaryImage ?? $bike->images->first();
+                    @endphp
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        @if($primaryImage)
+                            <div x-show="!thumbnail" class="md:col-span-5 flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <img src="{{ $primaryImage->image_url }}" alt="Current Primary Cover" class="w-24 h-18 object-cover rounded-lg border border-slate-200 bg-white shadow-2xs" onerror="this.src='https://placehold.co/120x90?text=Cover'">
+                                <div class="min-w-0 flex-1">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 mb-1">
+                                        Active Showcase Cover
+                                    </span>
+                                    <p class="text-xs font-semibold text-slate-800 truncate">{{ $primaryImage->alt_text ?? 'Current Main Cover' }}</p>
+                                    <p class="text-[10px] text-slate-400 truncate">{{ $primaryImage->image_url }}</p>
+                                </div>
                             </div>
-                            <div class="sm:col-span-4">
-                                <label class="block text-[11px] text-slate-500 mb-1">Caption</label>
-                                <input type="text" name="images[0][alt_text]" value="Showcase View"
-                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
-                                <input type="hidden" name="images[0][is_primary]" value="1">
+                        @endif
+
+                        <div :class="{{ $primaryImage ? "'md:col-span-7'" : "'md:col-span-12'" }}">
+                            <!-- Dropzone to upload/replace -->
+                            <div x-show="!thumbnail" class="p-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 hover:border-rose-400 transition text-center cursor-pointer group">
+                                <label for="thumbnail_file_edit" class="cursor-pointer block">
+                                    <span class="text-xs font-bold text-slate-900 group-hover:text-rose-600">
+                                        {{ $primaryImage ? 'Click to upload a new cover thumbnail' : 'Click to select motorcycle cover thumbnail' }}
+                                    </span>
+                                    <span class="text-[11px] text-slate-400 block mt-0.5">JPG, PNG, WebP up to 10MB</span>
+                                </label>
+                                <input type="file" name="thumbnail" id="thumbnail_file_edit" accept="image/*" @change="handleThumbnailSelect($event)" class="hidden">
+                            </div>
+
+                            <!-- Selected New Thumbnail Preview -->
+                            <div x-show="thumbnail" class="flex items-center justify-between p-3 bg-emerald-50/50 rounded-xl border border-emerald-200">
+                                <div class="flex items-center gap-3">
+                                    <img :src="thumbnail ? thumbnail.preview : ''" class="w-16 h-12 object-cover rounded-lg border border-slate-200 shadow-2xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-emerald-700 block">New Cover Ready</span>
+                                        <p class="text-xs font-bold text-slate-900 truncate max-w-xs" x-text="thumbnail ? thumbnail.name : ''"></p>
+                                        <p class="text-[10px] text-slate-500" x-text="thumbnail ? thumbnail.size : ''"></p>
+                                    </div>
+                                </div>
+                                <button type="button" @click="removeThumbnail()" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition border border-rose-200">
+                                    Revert
+                                </button>
                             </div>
                         </div>
-                    @endforelse
+                    </div>
+                </div>
+
+                <!-- 4B: Multiple Normal Bike Gallery Photos Upload -->
+                <div class="mb-6 p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-900">Motorcycle Photo Gallery</h3>
+                                <p class="text-[11px] text-slate-500">Upload multiple high-resolution photos for the customer photo carousel.</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">Carousel</span>
+                    </div>
+
+                    <div class="p-5 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 hover:border-indigo-400 transition text-center cursor-pointer group">
+                        <label for="bike_files" class="cursor-pointer block">
+                            <div class="w-9 h-9 mx-auto rounded-xl bg-white text-indigo-600 flex items-center justify-center mb-1.5 shadow-2xs group-hover:scale-105 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            </div>
+                            <span class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600">Click to upload multiple gallery photos</span>
+                            <span class="text-[11px] text-slate-400 block mt-0.5">Select multiple images together (JPG, PNG, WebP up to 10MB each)</span>
+                        </label>
+                        <input type="file" name="bike_files[]" id="bike_files" multiple accept="image/*" @change="handleFileSelect($event)" class="hidden">
+                    </div>
+
+                    <!-- Selected Files Preview Grid -->
+                    <template x-if="files.length > 0">
+                        <div class="mt-4 pt-4 border-t border-slate-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-800" x-text="files.length + ' new photo(s) selected for upload'"></span>
+                                <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    Ready to append upon saving
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                                <template x-for="(file, idx) in files" :key="idx">
+                                    <div class="relative rounded-xl border border-slate-200 overflow-hidden bg-white shadow-2xs group">
+                                        <img :src="file.preview" class="w-full h-20 object-cover">
+                                        <button type="button" @click="removeGalleryFile(idx)"
+                                                class="absolute top-1 right-1 w-5 h-5 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center text-xs transition shadow-2xs"
+                                                title="Remove this photo">
+                                            &times;
+                                        </button>
+                                        <div class="p-1.5 text-[10px] truncate text-slate-700 bg-white" x-text="file.name"></div>
+                                        <div class="px-1.5 pb-1 text-[9px] text-slate-400" x-text="file.size"></div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- 4C: Interactive 360° & 3D Media Suite -->
+                <div class="mb-6 p-5 rounded-2xl bg-slate-50/70 border border-slate-200 shadow-2xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-3 border-b border-slate-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-900">Interactive 360° & 3D Media Suite</h3>
+                                <p class="text-[11px] text-slate-500">Choose between sequential turntable frames, 3D WebGL CAD models, external embeds, or turntable videos.</p>
+                            </div>
+                        </div>
+
+                        <label class="inline-flex items-center gap-2 cursor-pointer select-none shrink-0 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs hover:border-slate-300 transition">
+                            <input type="checkbox" name="has_360_view" value="1" {{ old('has_360_view', $bike->has_360_view) ? 'checked' : '' }} class="w-4 h-4 rounded text-slate-900 focus:ring-slate-900 border-slate-300">
+                            <span class="text-xs font-semibold text-slate-800">Enable 360° View</span>
+                        </label>
+                    </div>
+
+                    <!-- Type Selector Segmented Control -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-1.5 mb-4 p-1.5 bg-slate-200/60 rounded-2xl border border-slate-200">
+                        <!-- Option 1: Turntable Frames -->
+                        <button type="button" @click="viewerType = 'image_sequence'"
+                                :class="viewerType === 'image_sequence' ? 'bg-white text-slate-900 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'"
+                                class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition cursor-pointer">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition"
+                                 :class="viewerType === 'image_sequence' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-xs leading-tight truncate">Turntable Frames</div>
+                                <div class="text-[10px] text-slate-500 truncate">Sequential photos</div>
+                            </div>
+                        </button>
+
+                        <!-- Option 2: 3D Model -->
+                        <button type="button" @click="viewerType = 'gltf_model'"
+                                :class="viewerType === 'gltf_model' ? 'bg-white text-slate-900 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'"
+                                class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition cursor-pointer">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition"
+                                 :class="viewerType === 'gltf_model' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-xs leading-tight truncate">3D WebGL Model</div>
+                                <div class="text-[10px] text-slate-500 truncate">.GLB / .GLTF file</div>
+                            </div>
+                        </button>
+
+                        <!-- Option 3: External Embed -->
+                        <button type="button" @click="viewerType = 'external_embed'"
+                                :class="viewerType === 'external_embed' ? 'bg-white text-slate-900 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'"
+                                class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition cursor-pointer">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition"
+                                 :class="viewerType === 'external_embed' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-xs leading-tight truncate">Virtual Tour Embed</div>
+                                <div class="text-[10px] text-slate-500 truncate">SpinCar / Sirv</div>
+                            </div>
+                        </button>
+
+                        <!-- Option 4: Turntable Video -->
+                        <button type="button" @click="viewerType = 'video_loop'"
+                                :class="viewerType === 'video_loop' ? 'bg-white text-slate-900 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium'"
+                                class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition cursor-pointer">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition"
+                                 :class="viewerType === 'video_loop' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-xs leading-tight truncate">Turntable Video</div>
+                                <div class="text-[10px] text-slate-500 truncate">MP4 / WebM loop</div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Hidden input to submit selected viewer_type -->
+                    <input type="hidden" name="viewer_type" :value="viewerType">
+
+                    <!-- TYPE 1: Turntable Image Sequence Dropzone -->
+                    <div x-show="viewerType === 'image_sequence'" class="space-y-3">
+                        <div class="p-6 rounded-2xl bg-white border-2 border-dashed border-slate-300 hover:border-slate-400 transition group text-center cursor-pointer shadow-2xs">
+                            <label for="frames_360" class="cursor-pointer block">
+                                <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-100 text-slate-900 flex items-center justify-center mb-2.5 group-hover:scale-105 transition shadow-2xs">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                </div>
+                                <span class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-700 block">Select 360° turntable frame images</span>
+                                <span class="text-[11px] text-slate-500 block mt-0.5">Select sequential photos (e.g. 16, 24, 36, or 72 frames) ordered clockwise (0° to 360°)</span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-semibold border border-slate-200">
+                                    JPG, PNG, WebP up to 10MB per frame
+                                </span>
+                            </label>
+                            <input type="file" name="frames_360[]" id="frames_360" multiple accept="image/*" @change="handleFramesSelect($event)" class="hidden">
+                        </div>
+
+                        <!-- 360 Frames Preview Grid -->
+                        <template x-if="frames360.length > 0">
+                            <div class="mt-3 pt-3 border-t border-slate-200">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold text-slate-900" x-text="frames360.length + ' sequential 360° frames loaded'"></span>
+                                    <span class="text-[11px] text-emerald-600 font-semibold">Angles auto-calculated clockwise</span>
+                                </div>
+                                <div class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1.5 bg-white rounded-xl border border-slate-200">
+                                    <template x-for="(frame, idx) in frames360" :key="idx">
+                                        <div class="relative rounded-lg border border-slate-200 overflow-hidden bg-white shadow-2xs text-center group">
+                                            <img :src="frame.preview" class="w-full h-14 object-cover">
+                                            <button type="button" @click="removeFrame(idx)"
+                                                    class="absolute top-1 right-1 w-4 h-4 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center text-[10px] transition shadow-2xs"
+                                                    title="Remove frame">
+                                                &times;
+                                            </button>
+                                            <div class="text-[9px] font-bold text-slate-800 py-0.5 bg-slate-100" x-text="frame.angle"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- TYPE 2: 3D WebGL CAD Model (.GLB / .GLTF) -->
+                    <div x-show="viewerType === 'gltf_model'" class="space-y-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                        <div class="p-5 rounded-xl border-2 border-dashed border-slate-300 hover:border-slate-400 transition text-center cursor-pointer bg-slate-50/50 group">
+                            <label for="model_3d_file" class="cursor-pointer block">
+                                <div class="w-10 h-10 mx-auto rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center mb-2 group-hover:scale-105 transition shadow-2xs">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                </div>
+                                <span class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-700">Click to upload 3D Model File (.GLB or .GLTF)</span>
+                                <span class="text-[11px] text-slate-500 block mt-0.5">Compatible with Three.js WebGL orbit viewer & Google &lt;model-viewer&gt; (up to 50MB)</span>
+                            </label>
+                            <input type="file" name="model_3d_file" id="model_3d_file" accept=".glb,.gltf" @change="handleModel3dSelect($event)" class="hidden">
+                        </div>
+
+                        <div x-show="model3dName" class="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs font-semibold text-emerald-800">
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span x-text="'Selected 3D file: ' + model3dName"></span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Or Enter 3D Model CDN / Storage URL</label>
+                            <input type="url" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'gltf_model' ? $bike->model_3d_path : '') }}"
+                                   placeholder="https://cdn.example.com/models/motorcycle.glb"
+                                   class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500">
+                        </div>
+                    </div>
+
+                    <!-- TYPE 3: External Virtual Tour / Embed -->
+                    <div x-show="viewerType === 'external_embed'" class="space-y-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 mb-1.5">External 360° Virtual Tour or Viewer URL</label>
+                            <input type="url" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'external_embed' ? $bike->model_3d_path : '') }}"
+                                   placeholder="https://spincar.com/view/... or https://sirv.com/... or https://my.matterport.com/show/?m=..."
+                                   class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500">
+                            <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
+                                <span class="text-[10px] text-slate-400 font-medium mr-1">Supported platforms:</span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">SpinCar</span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">Sirv 360</span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">Matterport</span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">Sketchfab</span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">Kuula</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TYPE 4: Turntable Video Loop -->
+                    <div x-show="viewerType === 'video_loop'" class="space-y-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+                        <div class="p-5 rounded-xl border-2 border-dashed border-slate-300 hover:border-slate-400 transition text-center cursor-pointer bg-slate-50/50 group">
+                            <label for="video_360_file" class="cursor-pointer block">
+                                <div class="w-10 h-10 mx-auto rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center mb-2 group-hover:scale-105 transition shadow-2xs">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </div>
+                                <span class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-700">Click to upload 360° Rotating Video (.MP4 / .WebM)</span>
+                                <span class="text-[11px] text-slate-500 block mt-0.5">High definition 360 turntable video loop (up to 50MB)</span>
+                            </label>
+                            <input type="file" name="video_360_file" id="video_360_file" accept="video/mp4,video/webm,video/quicktime" @change="handleVideo360Select($event)" class="hidden">
+                        </div>
+
+                        <div x-show="video360Name" class="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs font-semibold text-emerald-800">
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span x-text="'Selected video file: ' + video360Name"></span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Or Provide 360 Video Stream URL</label>
+                            <input type="url" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'video_loop' ? $bike->model_3d_path : '') }}"
+                                   placeholder="https://cdn.example.com/videos/turntable-360.mp4"
+                                   class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4D: Current Gallery Photos & URLs -->
+                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800">Current Gallery Images & External URLs</label>
+                            <p class="text-[11px] text-slate-500">Manage, edit captions, or remove existing photos from the motorcycle gallery.</p>
+                        </div>
+                        <button type="button" @click="addPhotoUrlRow()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs">
+                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Add Photo URL</span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-3" id="images-container">
+                        @forelse($bike->images as $idx => $img)
+                            <div class="gallery-image-row grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs group hover:border-slate-300 transition" id="image-row-{{ $img->id }}">
+                                <div class="sm:col-span-2 flex items-center justify-center relative">
+                                    <img src="{{ $img->image_url }}" alt="{{ $img->alt_text }}" class="w-16 h-12 rounded-lg object-cover border border-slate-200 bg-white" onerror="this.src='https://placehold.co/100x75?text=Image'">
+                                    @if($img->is_primary)
+                                        <span class="absolute -top-1.5 -left-1.5 bg-rose-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-2xs">Cover</span>
+                                    @endif
+                                </div>
+                                <div class="sm:col-span-5">
+                                    <label class="block text-[11px] text-slate-500 mb-1">Image URL {{ $idx + 1 }} @if($img->is_primary) (Primary Photo) @endif</label>
+                                    <input type="url" name="images[{{ $idx }}][image_url]" value="{{ $img->image_url }}"
+                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                </div>
+                                <div class="sm:col-span-4">
+                                    <label class="block text-[11px] text-slate-500 mb-1">Caption</label>
+                                    <input type="text" name="images[{{ $idx }}][alt_text]" value="{{ $img->alt_text }}"
+                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                    <input type="hidden" name="images[{{ $idx }}][is_primary]" value="{{ $img->is_primary ? '1' : '0' }}">
+                                </div>
+                                <div class="sm:col-span-1 flex items-center justify-center sm:pt-4">
+                                    <button type="button"
+                                            @click="deleteExistingImage({{ $img->id }}, '{{ route('showrooms.manage.bikes.images.destroy', [$showroom, $bike, $img]) }}', $el.closest('#image-row-{{ $img->id }}'))"
+                                            :disabled="deletingImageId === {{ $img->id }}"
+                                            class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition cursor-pointer"
+                                            title="Delete this photo">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="gallery-image-row grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                                <div class="sm:col-span-8">
+                                    <label class="block text-[11px] text-slate-500 mb-1">Primary Image URL</label>
+                                    <input type="url" name="images[0][image_url]" value="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1200&q=80"
+                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                </div>
+                                <div class="sm:col-span-4">
+                                    <label class="block text-[11px] text-slate-500 mb-1">Caption</label>
+                                    <input type="text" name="images[0][alt_text]" value="Showcase View"
+                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                                    <input type="hidden" name="images[0][is_primary]" value="1">
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
             </div>
 
@@ -396,4 +747,128 @@
         </form>
     </main>
 </div>
+
+<script>
+function bikeMediaEditManager() {
+    return {
+        thumbnail: null,
+        files: [],
+        frames360: [],
+        viewerType: '{{ old('viewer_type', $bike->viewer_type ?? 'image_sequence') }}',
+        model3dName: '',
+        video360Name: '',
+        deletingImageId: null,
+        handleThumbnailSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.thumbnail = {
+                    name: file.name,
+                    size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                    preview: URL.createObjectURL(file)
+                };
+            }
+        },
+        removeThumbnail() {
+            this.thumbnail = null;
+            const input = document.getElementById('thumbnail_file_edit');
+            if (input) input.value = '';
+        },
+        handleFileSelect(event) {
+            const selected = Array.from(event.target.files);
+            this.files = selected.map(file => ({
+                name: file.name,
+                size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                preview: URL.createObjectURL(file)
+            }));
+        },
+        removeGalleryFile(idx) {
+            this.files.splice(idx, 1);
+            const input = document.getElementById('bike_files');
+            if (input && this.files.length === 0) {
+                input.value = '';
+            }
+        },
+        handleFramesSelect(event) {
+            const selected = Array.from(event.target.files);
+            const count = selected.length;
+            this.frames360 = selected.map((file, idx) => ({
+                name: file.name,
+                angle: count > 0 ? Math.round((idx / count) * 360) + '°' : '0°',
+                preview: URL.createObjectURL(file)
+            }));
+        },
+        removeFrame(idx) {
+            this.frames360.splice(idx, 1);
+            const input = document.getElementById('frames_360');
+            if (input && this.frames360.length === 0) {
+                input.value = '';
+            }
+        },
+        handleModel3dSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.model3dName = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+            }
+        },
+        handleVideo360Select(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.video360Name = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+            }
+        },
+        async deleteExistingImage(imageId, deleteUrl, el) {
+            if (!confirm('Are you sure you want to remove this photo from the gallery?')) {
+                return;
+            }
+            this.deletingImageId = imageId;
+            try {
+                const res = await fetch(deleteUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (res.ok) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.95)';
+                    setTimeout(() => el.remove(), 200);
+                } else {
+                    alert('Failed to remove image. Please try again.');
+                }
+            } catch (e) {
+                el.remove();
+            } finally {
+                this.deletingImageId = null;
+            }
+        },
+        addPhotoUrlRow() {
+            const container = document.getElementById('images-container');
+            if (!container) return;
+            const count = container.querySelectorAll('.gallery-image-row').length + Date.now();
+            const newRow = document.createElement('div');
+            newRow.className = 'gallery-image-row grid grid-cols-1 sm:grid-cols-12 gap-3 items-center bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs';
+            newRow.innerHTML = `
+                <div class="sm:col-span-2 flex items-center justify-center text-xs text-slate-400 font-semibold">New Photo</div>
+                <div class="sm:col-span-5">
+                    <label class="block text-[11px] text-slate-500 mb-1">Image URL</label>
+                    <input type="url" name="images[${count}][image_url]" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                </div>
+                <div class="sm:col-span-4">
+                    <label class="block text-[11px] text-slate-500 mb-1">Caption</label>
+                    <input type="text" name="images[${count}][alt_text]" placeholder="Angle or feature description" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
+                    <input type="hidden" name="images[${count}][is_primary]" value="0">
+                </div>
+                <div class="sm:col-span-1 flex items-center justify-center sm:pt-4">
+                    <button type="button" onclick="this.closest('.gallery-image-row').remove()" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition cursor-pointer" title="Remove row">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            `;
+            container.appendChild(newRow);
+        }
+    };
+}
+</script>
 @endsection

@@ -6,13 +6,16 @@ use App\Enums\BikeCategory;
 use App\Enums\BikeStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Bike;
+use App\Models\BikeImage;
 use App\Models\Category;
 use App\Models\Showroom;
 use App\Services\AuditLogger;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -137,9 +140,19 @@ class BikeController extends Controller
             'spec_keys' => ['nullable', 'array'],
             'spec_values' => ['nullable', 'array'],
             'images' => ['nullable', 'array'],
-            'images.*.image_url' => ['required_with:images', 'url'],
+            'images.*.image_url' => ['nullable', 'url'],
             'images.*.alt_text' => ['nullable', 'string', 'max:255'],
             'images.*.is_primary' => ['nullable', 'boolean'],
+            'thumbnail' => ['nullable', 'file', 'image', 'max:10240'],
+            'bike_files' => ['nullable', 'array'],
+            'bike_files.*' => ['file', 'image', 'max:10240'],
+            'has_360_view' => ['nullable', 'boolean'],
+            'viewer_type' => ['nullable', 'string', 'in:image_sequence,gltf_model,external_embed,video_loop'],
+            'model_3d_path' => ['nullable', 'string', 'max:1024'],
+            'model_3d_file' => ['nullable', 'file', 'max:51200'],
+            'video_360_file' => ['nullable', 'file', 'mimes:mp4,webm,mov', 'max:51200'],
+            'frames_360' => ['nullable', 'array'],
+            'frames_360.*' => ['file', 'image', 'max:10240'],
             'variants' => ['nullable', 'array'],
             'variants.*.name' => ['required_with:variants', 'string', 'max:100'],
             'variants.*.color_name' => ['required_with:variants', 'string', 'max:100'],
@@ -186,7 +199,16 @@ class BikeController extends Controller
             ? $validated['category']
             : BikeCategory::Sports->value;
 
-        $bike = DB::transaction(function () use ($showroom, $validated, $slug, $sku, $specifications, $categoryId, $categoryValue) {
+        $viewerType = $request->input('viewer_type', 'image_sequence');
+        $model3dPath = $request->input('model_3d_path');
+
+        $has360View = $request->boolean('has_360_view')
+            || $request->hasFile('frames_360')
+            || $request->hasFile('model_3d_file')
+            || $request->hasFile('video_360_file')
+            || ! empty($model3dPath);
+
+        $bike = DB::transaction(function () use ($request, $showroom, $validated, $slug, $sku, $specifications, $categoryId, $categoryValue, $has360View, $viewerType, $model3dPath) {
             $bike = $showroom->bikes()->create([
                 'name' => $validated['name'],
                 'slug' => $slug,
@@ -207,11 +229,60 @@ class BikeController extends Controller
                 'status' => $validated['status'],
                 'is_featured' => ! empty($validated['is_featured']),
                 'is_published' => isset($validated['is_published']) ? (bool) $validated['is_published'] : true,
+                'has_360_view' => $has360View,
+                'viewer_type' => $viewerType,
+                'model_3d_path' => $model3dPath,
                 'description' => $validated['description'] ?? null,
                 'specifications' => $specifications,
             ]);
 
-            // Save images
+            // Handle 3D model file upload
+            if ($request->hasFile('model_3d_file')) {
+                $path = $request->file('model_3d_file')->store("showrooms/{$showroom->id}/bikes/{$bike->id}/3d", 'public');
+                $bike->update(['model_3d_path' => Storage::disk('public')->url($path)]);
+            } elseif ($request->hasFile('video_360_file')) {
+                $path = $request->file('video_360_file')->store("showrooms/{$showroom->id}/bikes/{$bike->id}/video", 'public');
+                $bike->update(['model_3d_path' => Storage::disk('public')->url($path)]);
+            }
+
+            $imageIndex = 0;
+
+            // 1. Process dedicated cover thumbnail upload
+            if ($request->hasFile('thumbnail')) {
+                $path = $request->file('thumbnail')->store("showrooms/{$showroom->id}/bikes/{$bike->id}/gallery", 'public');
+                $url = Storage::disk('public')->url($path);
+
+                $bike->images()->create([
+                    'tenant_id' => $showroom->id,
+                    'image_url' => $url,
+                    'alt_text' => "{$bike->name} Cover Thumbnail",
+                    'is_primary' => true,
+                    'is_360_frame' => false,
+                    'sort_order' => 0,
+                ]);
+                $imageIndex = 1;
+            }
+
+            // 2. Process uploaded normal bike gallery files
+            if ($request->hasFile('bike_files')) {
+                $hasPrimary = $bike->images()->where('is_primary', true)->exists();
+                foreach ($request->file('bike_files') as $file) {
+                    $path = $file->store("showrooms/{$showroom->id}/bikes/{$bike->id}/gallery", 'public');
+                    $url = Storage::disk('public')->url($path);
+
+                    $bike->images()->create([
+                        'tenant_id' => $showroom->id,
+                        'image_url' => $url,
+                        'alt_text' => "{$bike->name} Photo ".($imageIndex + 1),
+                        'is_primary' => ! $hasPrimary && $imageIndex === 0,
+                        'is_360_frame' => false,
+                        'sort_order' => $imageIndex,
+                    ]);
+                    $imageIndex++;
+                }
+            }
+
+            // 2. Process external image URLs
             if (! empty($validated['images'])) {
                 foreach ($validated['images'] as $index => $imgData) {
                     if (! empty($imgData['image_url'])) {
@@ -219,10 +290,35 @@ class BikeController extends Controller
                             'tenant_id' => $showroom->id,
                             'image_url' => $imgData['image_url'],
                             'alt_text' => $imgData['alt_text'] ?? "{$bike->name} Photo",
-                            'is_primary' => ! empty($imgData['is_primary']) || $index === 0,
-                            'sort_order' => $index,
+                            'is_primary' => $imageIndex === 0 && (! empty($imgData['is_primary']) || $index === 0),
+                            'is_360_frame' => false,
+                            'sort_order' => $imageIndex,
                         ]);
+                        $imageIndex++;
                     }
+                }
+            }
+
+            // 3. Process uploaded 360-degree turntable frames
+            if ($request->hasFile('frames_360')) {
+                $frames = $request->file('frames_360');
+                $totalFrames = count($frames);
+                $step = $totalFrames > 0 ? 360 / $totalFrames : 1;
+
+                foreach ($frames as $fIdx => $frameFile) {
+                    $angle = (int) round($fIdx * $step);
+                    $path = $frameFile->store("showrooms/{$showroom->id}/bikes/{$bike->id}/360", 'public');
+                    $url = Storage::disk('public')->url($path);
+
+                    $bike->allImages()->create([
+                        'tenant_id' => $showroom->id,
+                        'image_url' => $url,
+                        'alt_text' => "{$bike->name} 360 Frame {$angle}°",
+                        'is_primary' => false,
+                        'is_360_frame' => true,
+                        'frame_angle' => $angle,
+                        'sort_order' => $fIdx,
+                    ]);
                 }
             }
 
@@ -325,6 +421,16 @@ class BikeController extends Controller
             'images.*.image_url' => ['required_with:images', 'url'],
             'images.*.alt_text' => ['nullable', 'string', 'max:255'],
             'images.*.is_primary' => ['nullable', 'boolean'],
+            'thumbnail' => ['nullable', 'file', 'image', 'max:10240'],
+            'bike_files' => ['nullable', 'array'],
+            'bike_files.*' => ['file', 'image', 'max:10240'],
+            'has_360_view' => ['nullable', 'boolean'],
+            'viewer_type' => ['nullable', 'string', 'in:image_sequence,gltf_model,external_embed,video_loop'],
+            'model_3d_path' => ['nullable', 'string', 'max:1024'],
+            'model_3d_file' => ['nullable', 'file', 'max:51200'],
+            'video_360_file' => ['nullable', 'file', 'mimes:mp4,webm,mov', 'max:51200'],
+            'frames_360' => ['nullable', 'array'],
+            'frames_360.*' => ['file', 'image', 'max:10240'],
             'variants' => ['nullable', 'array'],
             'variants.*.id' => ['nullable', 'integer'],
             'variants.*.name' => ['required_with:variants', 'string', 'max:100'],
@@ -360,7 +466,22 @@ class BikeController extends Controller
 
         $oldValues = $bike->only(['name', 'sku', 'price', 'status', 'is_featured', 'is_published']);
 
-        DB::transaction(function () use ($bike, $showroom, $validated, $specifications, $categoryId, $categoryValue) {
+        $viewerType = $request->input('viewer_type', $bike->viewer_type ?? 'image_sequence');
+        $model3dPath = $request->input('model_3d_path', $bike->model_3d_path);
+
+        if ($request->hasFile('model_3d_file')) {
+            $path = $request->file('model_3d_file')->store("showrooms/{$showroom->id}/bikes/{$bike->id}/3d", 'public');
+            $model3dPath = Storage::disk('public')->url($path);
+        } elseif ($request->hasFile('video_360_file')) {
+            $path = $request->file('video_360_file')->store("showrooms/{$showroom->id}/bikes/{$bike->id}/video", 'public');
+            $model3dPath = Storage::disk('public')->url($path);
+        }
+
+        $has360View = $request->has('has_360_view')
+            ? $request->boolean('has_360_view')
+            : ($bike->has_360_view || $request->hasFile('frames_360') || ! empty($model3dPath));
+
+        DB::transaction(function () use ($request, $bike, $showroom, $validated, $specifications, $categoryId, $categoryValue, $has360View, $viewerType, $model3dPath) {
             $bike->update([
                 'name' => $validated['name'],
                 'sku' => strtoupper(trim($validated['sku'])),
@@ -380,23 +501,88 @@ class BikeController extends Controller
                 'status' => $validated['status'],
                 'is_featured' => ! empty($validated['is_featured']),
                 'is_published' => ! empty($validated['is_published']),
+                'has_360_view' => $has360View,
+                'viewer_type' => $viewerType,
+                'model_3d_path' => $model3dPath,
                 'description' => $validated['description'] ?? null,
                 'specifications' => $specifications,
             ]);
 
-            // Sync images
+            // Sync or update gallery images
             if (isset($validated['images'])) {
                 $bike->images()->delete();
+                $sort = 0;
                 foreach ($validated['images'] as $index => $imgData) {
                     if (! empty($imgData['image_url'])) {
                         $bike->images()->create([
                             'tenant_id' => $showroom->id,
                             'image_url' => $imgData['image_url'],
                             'alt_text' => $imgData['alt_text'] ?? "{$bike->name} Photo",
-                            'is_primary' => ! empty($imgData['is_primary']) || $index === 0,
-                            'sort_order' => $index,
+                            'is_primary' => ! empty($imgData['is_primary']) || $sort === 0,
+                            'is_360_frame' => false,
+                            'sort_order' => $sort,
                         ]);
+                        $sort++;
                     }
+                }
+            }
+
+            // Dedicated cover thumbnail update
+            if ($request->hasFile('thumbnail')) {
+                $bike->images()->where('is_primary', true)->update(['is_primary' => false]);
+                $path = $request->file('thumbnail')->store("showrooms/{$showroom->id}/bikes/{$bike->id}/gallery", 'public');
+                $url = Storage::disk('public')->url($path);
+
+                $bike->images()->create([
+                    'tenant_id' => $showroom->id,
+                    'image_url' => $url,
+                    'alt_text' => "{$bike->name} Cover Thumbnail",
+                    'is_primary' => true,
+                    'is_360_frame' => false,
+                    'sort_order' => 0,
+                ]);
+            }
+
+            // Append newly uploaded normal gallery files
+            if ($request->hasFile('bike_files')) {
+                $hasExistingPrimary = $bike->images()->where('is_primary', true)->exists();
+                $currentMaxSort = (int) ($bike->images()->max('sort_order') ?? 0);
+
+                foreach ($request->file('bike_files') as $idx => $file) {
+                    $path = $file->store("showrooms/{$showroom->id}/bikes/{$bike->id}/gallery", 'public');
+                    $url = Storage::disk('public')->url($path);
+
+                    $bike->images()->create([
+                        'tenant_id' => $showroom->id,
+                        'image_url' => $url,
+                        'alt_text' => "{$bike->name} Photo ".($currentMaxSort + $idx + 1),
+                        'is_primary' => (! $hasExistingPrimary && $idx === 0),
+                        'is_360_frame' => false,
+                        'sort_order' => $currentMaxSort + $idx + 1,
+                    ]);
+                }
+            }
+
+            // Upload additional 360-degree turntable frames
+            if ($request->hasFile('frames_360')) {
+                $frames = $request->file('frames_360');
+                $totalFrames = count($frames);
+                $step = $totalFrames > 0 ? 360 / $totalFrames : 1;
+
+                foreach ($frames as $fIdx => $frameFile) {
+                    $angle = (int) round($fIdx * $step);
+                    $path = $frameFile->store("showrooms/{$showroom->id}/bikes/{$bike->id}/360", 'public');
+                    $url = Storage::disk('public')->url($path);
+
+                    $bike->allImages()->create([
+                        'tenant_id' => $showroom->id,
+                        'image_url' => $url,
+                        'alt_text' => "{$bike->name} 360 Frame {$angle}°",
+                        'is_primary' => false,
+                        'is_360_frame' => true,
+                        'frame_angle' => $angle,
+                        'sort_order' => $fIdx,
+                    ]);
                 }
             }
 
@@ -546,5 +732,33 @@ class BikeController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
+    }
+
+    /**
+     * Delete an individual gallery image.
+     */
+    public function destroyImage(Request $request, Showroom $showroom, Bike $bike, BikeImage $image): RedirectResponse|JsonResponse
+    {
+        abort_if($bike->tenant_id !== $showroom->id || $image->bike_id !== $bike->id || $image->tenant_id !== $showroom->id, 404);
+
+        $wasPrimary = $image->is_primary;
+        $image->delete();
+
+        // If primary was deleted, promote first remaining gallery image as primary
+        if ($wasPrimary) {
+            $nextPrimary = $bike->images()->first();
+            if ($nextPrimary) {
+                $nextPrimary->update(['is_primary' => true]);
+            }
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo removed successfully.',
+            ]);
+        }
+
+        return back()->with('success', 'Photo removed successfully.');
     }
 }

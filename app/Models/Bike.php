@@ -142,7 +142,7 @@ class Bike extends Model
             return false;
         }
 
-        if ($this->viewer_type === 'gltf_model' && ! empty($this->model_3d_path)) {
+        if (in_array($this->viewer_type, ['gltf_model', 'external_embed', 'video_loop'], true) && ! empty($this->model_3d_path)) {
             return true;
         }
 
