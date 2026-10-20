@@ -83,7 +83,7 @@
                     </div>
                     <p class="text-3xl font-black font-display text-slate-900 mt-2">{{ $stats['formatted_mrr'] }}</p>
                     <div class="mt-3 text-xs text-slate-500 flex items-center justify-between">
-                        <span>ARR: <strong class="text-slate-800">{{ $stats['formatted_arr'] }}</strong></span>
+                        <span>Yearly: <strong class="text-slate-800">{{ $stats['formatted_arr'] }}</strong></span>
                         <span class="text-emerald-700 font-bold">{{ $stats['active_subscriptions'] }} Subscribed</span>
                     </div>
                 </div>

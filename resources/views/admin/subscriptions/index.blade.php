@@ -168,19 +168,19 @@
                     </div>
                     <p class="text-2xl sm:text-3xl font-black font-display text-emerald-600 mt-2">₹{{ number_format($financials['total_earned']) }}</p>
                     <div class="text-[11px] text-slate-500 font-medium mt-1">
-                        ARR: <strong class="text-slate-800 font-mono">₹{{ number_format($financials['arr']) }}</strong>/yr
+                        Yearly Run-rate: <strong class="text-slate-800 font-mono">₹{{ number_format($financials['arr']) }}</strong>/yr
                     </div>
                 </div>
 
                 <!-- Monthly Recurring Revenue (MRR) -->
                 <div class="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs relative overflow-hidden group">
                     <div class="flex items-center justify-between">
-                        <span class="text-[11px] uppercase font-bold tracking-wider text-slate-500">Platform MRR</span>
-                        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                        <span class="text-[11px] uppercase font-bold tracking-wider text-slate-600">Monthly Revenue</span>
+                        <span class="w-2 h-2 rounded-full bg-sky-500" title="Monthly Recurring Revenue"></span>
                     </div>
                     <p class="text-2xl sm:text-3xl font-black font-display text-slate-900 mt-2">₹{{ number_format($financials['mrr']) }}<span class="text-xs font-normal text-slate-400">/mo</span></p>
                     <div class="text-[11px] text-slate-500 font-medium mt-1">
-                        ARPU: <strong class="text-slate-800 font-mono">₹{{ number_format($financials['arpu']) }}</strong>/tenant
+                        Avg / Showroom: <strong class="text-slate-800 font-mono">₹{{ number_format($financials['arpu']) }}</strong>
                     </div>
                 </div>
 
@@ -214,7 +214,7 @@
                 <a href="{{ route('admin.subscriptions.index', array_merge(request()->except('page'), ['preset' => 'active'])) }}"
                    class="p-4 rounded-2xl border transition shadow-xs block group {{ request('preset') === 'active' ? 'bg-sky-50/70 border-sky-300 ring-2 ring-sky-500/20' : 'bg-white border-slate-200/90 hover:border-sky-200 hover:bg-sky-50/30' }}">
                     <div class="flex items-center justify-between">
-                        <span class="text-[11px] uppercase font-bold tracking-wider text-sky-700">Active Tenants</span>
+                        <span class="text-[11px] uppercase font-bold tracking-wider text-sky-700">Active Showrooms</span>
                         <span class="w-2 h-2 rounded-full bg-sky-500"></span>
                     </div>
                     <p class="text-2xl sm:text-3xl font-black font-display text-sky-600 mt-2">{{ number_format($stats['active']) }}</p>
@@ -522,7 +522,7 @@
                                                 <span class="text-[11px] text-slate-400 font-normal uppercase">/ {{ $subscription->billing_interval }}</span>
                                             </div>
                                             <div class="text-[10px] text-slate-500 font-medium">
-                                                Normalized MRR: <strong class="text-slate-700 font-mono">₹{{ number_format($normalizedMrr) }}/mo</strong>
+                                                Monthly Rate: <strong class="text-slate-700 font-mono">₹{{ number_format($normalizedMrr) }}/mo</strong>
                                             </div>
                                         </div>
                                     </td>
@@ -537,7 +537,7 @@
                                                 Paid Current Period
                                             </span>
                                             <div class="text-[10px] text-slate-400">
-                                                Est. LTV: <strong class="text-slate-600 font-mono">₹{{ number_format($annualArr) }}</strong>
+                                                Annual Total: <strong class="text-slate-600 font-mono">₹{{ number_format($annualArr) }}</strong>
                                             </div>
                                         </div>
                                     </td>
