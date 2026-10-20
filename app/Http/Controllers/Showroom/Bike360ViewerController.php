@@ -50,7 +50,7 @@ class Bike360ViewerController extends Controller
 
         $validated = $request->validate([
             'has_360_view' => ['nullable', 'boolean'],
-            'viewer_type' => ['required', 'string', 'in:image_sequence,gltf_model'],
+            'viewer_type' => ['required', 'string', 'in:image_sequence,gltf_model,video_loop'],
             'model_3d_path' => ['nullable', 'string', 'max:1024'],
             'auto_rotate' => ['nullable', 'boolean'],
             'rotation_speed' => ['nullable', 'integer', 'min:1', 'max:10'],

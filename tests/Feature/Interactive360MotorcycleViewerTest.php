@@ -602,4 +602,36 @@ class Interactive360MotorcycleViewerTest extends TestCase
         $this->assertDatabaseMissing('bike_images', ['id' => $existingFrame->id]);
         $this->assertSame(3, $this->bikeA->frames360()->count());
     }
+
+    public function test_frontend_renders_corresponding_viewer_for_selected_media_card(): void
+    {
+        // 1. When image_sequence (Turntable Frames) is selected
+        $this->bikeA->update([
+            'has_360_view' => true,
+            'viewer_type' => 'image_sequence',
+        ]);
+        $response = $this->get(route('showrooms.bikes.show', [$this->showroomA, $this->bikeA]));
+        $response->assertStatus(200);
+        $response->assertSee("studioView: 'turntable'", false);
+
+        // 2. When gltf_model (3D WebGL Model) is selected
+        $this->bikeA->update([
+            'has_360_view' => true,
+            'viewer_type' => 'gltf_model',
+            'model_3d_path' => 'https://cdn.example.com/bike.glb',
+        ]);
+        $response = $this->get(route('showrooms.bikes.show', [$this->showroomA, $this->bikeA]));
+        $response->assertStatus(200);
+        $response->assertSee("studioView: 'glb'", false);
+
+        // 3. When video_loop (Turntable Video) is selected
+        $this->bikeA->update([
+            'has_360_view' => true,
+            'viewer_type' => 'video_loop',
+            'model_3d_path' => 'https://cdn.example.com/bike-360.mp4',
+        ]);
+        $response = $this->get(route('showrooms.bikes.show', [$this->showroomA, $this->bikeA]));
+        $response->assertStatus(200);
+        $response->assertSee("studioView: 'video'", false);
+    }
 }

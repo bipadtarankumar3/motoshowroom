@@ -56,7 +56,7 @@
     <!-- Center Interactive Turntable Stage -->
     <main id="turntable-stage" class="relative flex-1 flex items-center justify-center cursor-grab active:cursor-grabbing overflow-hidden">
 
-        @if($bike->viewer_type === 'gltf_model' || !empty($bike->model_3d_path))
+        @if($bike->viewer_type === 'gltf_model')
             @php
                 $glbModelUrl = !empty($bike->model_3d_path)
                     ? $bike->model_3d_path
@@ -101,6 +101,18 @@
                     <svg class="w-4 h-4 text-cyan-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
                     <span>Drag horizontally or vertically to orbit 360° &bull; Pinch to zoom</span>
                 </div>
+            </div>
+        @elseif($bike->viewer_type === 'video_loop' && !empty($bike->model_3d_path))
+            <!-- Fullscreen Video Loop Player -->
+            <div class="relative w-full h-full max-w-6xl max-h-[85vh] flex items-center justify-center p-4">
+                <video src="{{ $bike->model_3d_path }}"
+                       class="w-full h-full object-contain rounded-2xl shadow-lg"
+                       autoplay
+                       loop
+                       muted
+                       playsinline
+                       controls>
+                </video>
             </div>
         @elseif($frames->isNotEmpty())
             <!-- 360 Turntable Frame Sequence -->

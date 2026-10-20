@@ -105,13 +105,20 @@
                     $glbModelUrl = !empty($bike->model_3d_path)
                         ? $bike->model_3d_path
                         : asset('models/motorcycle.glb');
+
+                    $defaultStudioView = match($bike->viewer_type) {
+                        'image_sequence' => 'turntable',
+                        'video_loop' => 'video',
+                        'gltf_model' => 'glb',
+                        default => ($allFrames->isNotEmpty() ? 'turntable' : (!empty($bike->model_3d_path) ? 'glb' : 'turntable')),
+                    };
                 @endphp
 
                 {{-- ═══ CARD 1: 360° VIRTUAL STUDIO TURNTABLE & 3D GLB ORBIT ═══ --}}
                 <div class="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 overflow-hidden shadow-xs space-y-5"
                      x-data="{
                          mode: '{{ $has360Viewer ? '360' : 'gallery' }}',
-                         studioView: '{{ $bike->viewer_type === 'gltf_model' || !empty($bike->model_3d_path) ? 'glb' : 'glb' }}',
+                         studioView: '{{ $defaultStudioView }}',
                          currentAngle: 0,
                          isDragging: false,
                          startX: 0,
@@ -119,6 +126,7 @@
                          autoSpinInterval: null,
                          isAutoSpinning: false,
                          glbAutoRotate: true,
+                         isVideoPlaying: true,
                          selectedGalleryPhoto: '{{ $bike->primary_image_url }}',
                          angles: [0, 45, 90, 135, 180, 225, 270, 315],
                          get angleText() {
@@ -132,10 +140,18 @@
                              if (a >= 248 && a <= 292) return '270° Left Side Flank Transmission';
                              return '315° Front-Left Dynamic Angle';
                          },
+                         get totalFrames() {
+                             return {{ $allFrames->isNotEmpty() ? $allFrames->count() : 8 }};
+                         },
                          get activeFrameIndex() {
-                             const step = 360 / 8;
-                             const idx = Math.round(this.currentAngle / step) % 8;
-                             return idx;
+                             const total = this.totalFrames;
+                             if (total <= 1) return 0;
+                             const step = 360 / total;
+                             const idx = Math.min(Math.floor((this.currentAngle % 360) / step), total - 1);
+                             return idx >= 0 ? idx : 0;
+                         },
+                         isAngleActive(deg) {
+                             return Math.abs(this.currentAngle - deg) <= 22 || (deg === 0 && this.currentAngle >= 338);
                          },
                          setAngle(deg) {
                              this.currentAngle = (deg % 360 + 360) % 360;
@@ -222,21 +238,39 @@
                             </div>
 
                             <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                {{-- 3D GLB vs Turntable Sub-Switcher --}}
+                                {{-- 3D GLB vs Turntable vs Video Sub-Switcher --}}
                                 <div class="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200" x-show="mode === '360'">
-                                    <button type="button" @click="studioView = 'glb'"
-                                            :class="studioView === 'glb' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
-                                            class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
-                                            title="Interactive 3D WebGL Model Orbit">
-                                        <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-                                        <span>3D GLB Orbit</span>
-                                    </button>
                                     <button type="button" @click="studioView = 'turntable'"
                                             :class="studioView === 'turntable' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
                                             class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
                                             title="Sequential Turntable Photos">
                                         <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                         <span>Turntable</span>
+                                        @if($bike->viewer_type === 'image_sequence')
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500" title="Active Admin Mode"></span>
+                                        @endif
+                                    </button>
+
+                                    <button type="button" @click="studioView = 'glb'"
+                                            :class="studioView === 'glb' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
+                                            class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
+                                            title="Interactive 3D WebGL Model Orbit">
+                                        <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                        <span>3D GLB Orbit</span>
+                                        @if($bike->viewer_type === 'gltf_model')
+                                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500" title="Active Admin Mode"></span>
+                                        @endif
+                                    </button>
+
+                                    <button type="button" @click="studioView = 'video'"
+                                            :class="studioView === 'video' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
+                                            class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
+                                            title="Turntable Video Loop">
+                                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                        <span>Video Loop</span>
+                                        @if($bike->viewer_type === 'video_loop')
+                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500" title="Active Admin Mode"></span>
+                                        @endif
                                     </button>
                                 </div>
 
@@ -249,6 +283,14 @@
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200" x-show="studioView === 'turntable'">
                                     <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
                                     <span x-text="angleText"></span>
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200" x-show="studioView === 'glb'">
+                                    <span class="w-2 h-2 rounded-full bg-cyan-500 animate-ping"></span>
+                                    <span>WebGL 3D Orbit</span>
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200" x-show="studioView === 'video'">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                                    <span>360° Video</span>
                                 </span>
                             </div>
                         </div>
@@ -471,14 +513,94 @@
 
                                     {{-- Fast Angle Preset Buttons --}}
                                     <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 pt-1 border-t border-slate-200/60">
-                                        <button type="button" @click="setAngle(0)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 0 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">0° Front</button>
-                                        <button type="button" @click="setAngle(45)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 1 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">45° Front-R</button>
-                                        <button type="button" @click="setAngle(90)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 2 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">90° Flank</button>
-                                        <button type="button" @click="setAngle(135)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 3 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">135° Rear-R</button>
-                                        <button type="button" @click="setAngle(180)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 4 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">180° Tail</button>
-                                        <button type="button" @click="setAngle(225)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 5 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">225° Rear-L</button>
-                                        <button type="button" @click="setAngle(270)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 6 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">270° Left</button>
-                                        <button type="button" @click="setAngle(315)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 7 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">315° Front-L</button>
+                                        <button type="button" @click="setAngle(0)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="isAngleActive(0) ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">0° Front</button>
+                                        <button type="button" @click="setAngle(45)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="isAngleActive(45) ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">45° Front-R</button>
+                                        <button type="button" @click="setAngle(90)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="isAngleActive(90) ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">90° Flank</button>
+                                        <button type="button" @click="setAngle(135)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="isAngleActive(135) ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">135° Rear-R</button>
+                                        <button type="button" @click="setAngle(180)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="isAngleActive(180) ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">180° Tail</button>
+                                        <button type="button" @click="setAngle(225)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="isAngleActive(225) ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">225° Rear-L</button>
+                                        <button type="button" @click="setAngle(270)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="isAngleActive(270) ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">270° Left</button>
+                                        <button type="button" @click="setAngle(315)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="isAngleActive(315) ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">315° Front-L</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ── SUB-MODE C: TURNTABLE VIDEO LOOP ── --}}
+                            <div x-show="studioView === 'video'" class="space-y-4">
+                                <div class="relative aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/90 border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
+
+                                    {{-- Ambient Studio Stage Lighting Elements --}}
+                                    <div class="absolute inset-0 bg-radial from-white via-transparent to-slate-900/10 pointer-events-none"></div>
+                                    <div class="absolute bottom-6 inset-x-12 h-16 bg-slate-900/20 blur-xl rounded-full pointer-events-none"></div>
+
+                                    @if(!empty($bike->model_3d_path))
+                                        <video id="bike-turntable-video"
+                                               src="{{ $bike->model_3d_path }}"
+                                               class="w-full h-full object-contain z-10"
+                                               autoplay
+                                               loop
+                                               muted
+                                               playsinline
+                                               @play="isVideoPlaying = true"
+                                               @pause="isVideoPlaying = false">
+                                        </video>
+                                    @else
+                                        <div class="text-center p-8 text-slate-500 z-10">
+                                            <svg class="w-12 h-12 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                            <p class="text-xs font-bold text-slate-700">No 360° video file or URL loaded</p>
+                                            <p class="text-[11px] text-slate-400 mt-0.5">Upload a video in the media suite to activate video turntable.</p>
+                                        </div>
+                                    @endif
+
+                                    {{-- Top HUD Overlays --}}
+                                    <div class="absolute top-4 left-4 flex items-center gap-2 pointer-events-none z-20">
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white shadow-xs">
+                                            {{ $bike->category->label() }}
+                                        </span>
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-white/90 text-indigo-800 border border-indigo-200/80 shadow-xs flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+                                            <span>Turntable Video Active</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="absolute top-4 right-4 pointer-events-none z-20">
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-white/90 text-slate-700 border border-slate-200 shadow-xs">
+                                            360° Seamless Video Loop
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Video Playback Controls Bar --}}
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                                        <div class="flex items-center gap-2">
+                                            <button type="button"
+                                                    @click="const v = document.getElementById('bike-turntable-video'); if (v) { if (v.paused) { v.play(); isVideoPlaying = true; } else { v.pause(); isVideoPlaying = false; } }"
+                                                    :class="isVideoPlaying ? 'bg-indigo-600 text-white' : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-100'"
+                                                    class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                                                <span x-text="isVideoPlaying ? '⏸ Pause Video' : '▶ Play Video'"></span>
+                                            </button>
+
+                                            <button type="button"
+                                                    @click="const v = document.getElementById('bike-turntable-video'); if (v) { v.currentTime = 0; v.play(); isVideoPlaying = true; }"
+                                                    class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                                                    title="Restart video">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                <span>Restart Loop</span>
+                                            </button>
+
+                                            <button type="button"
+                                                    @click="const v = document.getElementById('bike-turntable-video'); if (v) { v.muted = !v.muted; }"
+                                                    class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                                                    title="Toggle Sound">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                                                <span>Mute / Unmute</span>
+                                            </button>
+                                        </div>
+
+                                        <div class="text-[11px] font-mono text-slate-500 font-semibold">
+                                            <span>HD 360° Studio Loop</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

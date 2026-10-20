@@ -274,6 +274,9 @@
                                 <option value="gltf_model" {{ old('viewer_type', $bike->viewer_type) === 'gltf_model' ? 'selected' : '' }}>
                                     3D WebGL Model (Three.js GLTF/GLB)
                                 </option>
+                                <option value="video_loop" {{ old('viewer_type', $bike->viewer_type) === 'video_loop' ? 'selected' : '' }}>
+                                    Turntable Video Loop (MP4 / WebM)
+                                </option>
                             </select>
                         </div>
 
