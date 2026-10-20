@@ -3,12 +3,15 @@
 namespace Tests\Feature;
 
 use App\Enums\SubscriptionStatus;
+use App\Mail\StaffCreatedNotificationMail;
+use App\Mail\StaffWelcomeMail;
 use App\Models\Showroom;
 use App\Models\ShowroomMembership;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ShowroomStaffManagementTest extends TestCase
@@ -95,14 +98,15 @@ class ShowroomStaffManagementTest extends TestCase
 
     public function test_showroom_owner_can_add_staff_member_within_plan_limit(): void
     {
+        Mail::fake();
+
+        // Testing creation without role and department fields (since removed from modal)
         $response = $this->actingAs($this->owner)
             ->post(route('showrooms.manage.staff.store', $this->showroom), [
                 'name' => 'Vikram Verma',
                 'email' => 'vikram@apex.example',
                 'phone' => '+91 98765 11111',
-                'role' => 'sales_executive',
-                'department' => 'Sales & Customer Relations',
-                'designation' => 'Senior Test Ride Specialist',
+                'designation' => 'Senior Service Technician',
                 'shift' => 'General (9:30 AM - 6:30 PM)',
                 'availability_status' => 'available',
                 'notes' => 'Handling morning customer test rides',
@@ -118,11 +122,21 @@ class ShowroomStaffManagementTest extends TestCase
 
         $this->assertDatabaseHas('showroom_memberships', [
             'showroom_id' => $this->showroom->id,
-            'role' => 'sales_executive',
-            'department' => 'Sales & Customer Relations',
-            'designation' => 'Senior Test Ride Specialist',
+            'role' => 'staff',
+            'department' => 'Workshop',
+            'designation' => 'Senior Service Technician',
             'availability_status' => 'available',
         ]);
+
+        // Assert welcome email was queued to the staff member
+        Mail::assertQueued(StaffWelcomeMail::class, function ($mail) {
+            return $mail->hasTo('vikram@apex.example') && $mail->showroom->id === $this->showroom->id;
+        });
+
+        // Assert creation alert was queued to the creator (showroom owner)
+        Mail::assertQueued(StaffCreatedNotificationMail::class, function ($mail) {
+            return $mail->hasTo($this->owner->email) && $mail->staffUser->email === 'vikram@apex.example';
+        });
     }
 
     public function test_staff_creation_is_blocked_when_plan_quota_is_reached(): void

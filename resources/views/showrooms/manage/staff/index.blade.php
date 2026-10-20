@@ -192,21 +192,6 @@
                             <option value="off_duty" {{ request('status') === 'off_duty' ? 'selected' : '' }}>⚪ Off Duty</option>
                         </select>
 
-                        <!-- Department Filter -->
-                        <select name="department" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer">
-                            <option value="all" {{ request('department') === 'all' || !request('department') ? 'selected' : '' }}>All Departments</option>
-                            @foreach($departments as $dept)
-                                <option value="{{ $dept }}" {{ request('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                            @endforeach
-                        </select>
-
-                        <!-- Role Filter -->
-                        <select name="role" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer">
-                            <option value="all" {{ request('role') === 'all' || !request('role') ? 'selected' : '' }}>All Roles</option>
-                            @foreach($roles as $key => $label)
-                                <option value="{{ $key }}" {{ request('role') === $key ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -214,7 +199,7 @@
                             Apply Filter
                         </button>
 
-                        @if(request()->anyFilled(['q', 'status', 'department', 'role']))
+                        @if(request()->anyFilled(['q', 'status']))
                             <a href="{{ route('showrooms.manage.staff.index', $showroom) }}" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition">
                                 Clear
                             </a>
@@ -495,29 +480,13 @@
                             <input type="password" name="password" placeholder="Leave blank to auto-generate" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Dealership Role <span class="text-rose-500">*</span></label>
-                            <select name="role" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer">
-                                @foreach($roles as $key => $label)
-                                    @if($key !== 'owner')
-                                        <option value="{{ $key }}" {{ $key === 'sales_executive' ? 'selected' : '' }}>{{ $label }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Department</label>
-                            <select name="department" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer">
-                                @foreach($departments as $dept)
-                                    <option value="{{ $dept }}">{{ $dept }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <!-- Hidden defaults: Role = staff, Department = Workshop -->
+                        <input type="hidden" name="role" value="staff">
+                        <input type="hidden" name="department" value="Workshop">
 
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Designation Title</label>
-                            <input type="text" name="designation" placeholder="e.g. Senior Test Ride Advisor" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
+                            <input type="text" name="designation" placeholder="e.g. Senior Technician / Service Advisor" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
                         </div>
 
                         <div>
@@ -596,30 +565,13 @@
                             <input type="tel" name="phone" x-model="currentStaff.phone" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Dealership Role <span class="text-rose-500">*</span></label>
-                            <select name="role" x-model="currentStaff.role" :disabled="currentStaff.is_owner" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer disabled:bg-slate-100 disabled:text-slate-400">
-                                @foreach($roles as $key => $label)
-                                    <option value="{{ $key }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            <template x-if="currentStaff.is_owner">
-                                <input type="hidden" name="role" value="owner">
-                            </template>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Department</label>
-                            <select name="department" x-model="currentStaff.department" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer">
-                                @foreach($departments as $dept)
-                                    <option value="{{ $dept }}">{{ $dept }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <!-- Hidden defaults: Role = staff/owner, Department = Workshop -->
+                        <input type="hidden" name="role" :value="currentStaff.is_owner ? 'owner' : 'staff'">
+                        <input type="hidden" name="department" value="Workshop">
 
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Designation Title</label>
-                            <input type="text" name="designation" x-model="currentStaff.designation" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
+                            <input type="text" name="designation" x-model="currentStaff.designation" placeholder="e.g. Senior Technician / Service Advisor" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
                         </div>
 
                         <div>

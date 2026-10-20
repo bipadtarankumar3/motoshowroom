@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Showroom;
 
 use App\Http\Controllers\Controller;
+use App\Mail\StaffCreatedNotificationMail;
+use App\Mail\StaffWelcomeMail;
 use App\Models\Showroom;
 use App\Models\ShowroomMembership;
 use App\Models\User;
@@ -12,6 +14,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -96,24 +100,14 @@ class StaffController extends Controller
         $quotaPercentage = $maxStaffLimit > 0 ? min(100, round(($totalStaff / $maxStaffLimit) * 100)) : 100;
         $canAddStaff = ! $showroom->hasReachedStaffLimit();
 
-        // Standard Role & Department Options
+        // Standard Role & Department Options (Staff role & Workshop department only)
         $roles = [
             'owner' => 'Showroom Owner',
-            'sales_manager' => 'Sales Manager',
-            'service_manager' => 'Service Manager',
-            'sales_executive' => 'Sales Executive',
-            'service_advisor' => 'Service Advisor',
-            'technician' => 'Service Technician',
-            'staff' => 'General Staff',
+            'staff' => 'Staff',
         ];
 
         $departments = [
-            'Sales & Customer Relations',
-            'Workshop & Service Bay',
-            'Finance & Insurance',
-            'Storefront & Front Desk',
-            'Inventory & Logistics',
-            'Management & Admin',
+            'Workshop',
         ];
 
         return view('showrooms.manage.staff.index', compact(
@@ -150,7 +144,7 @@ class StaffController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'password' => ['nullable', 'string', 'min:8'],
-            'role' => ['required', Rule::in(['sales_manager', 'service_manager', 'sales_executive', 'service_advisor', 'technician', 'staff'])],
+            'role' => ['nullable', Rule::in(['staff', 'owner', 'sales_manager', 'service_manager', 'sales_executive', 'service_advisor', 'technician'])],
             'department' => ['nullable', 'string', 'max:100'],
             'designation' => ['nullable', 'string', 'max:100'],
             'shift' => ['nullable', 'string', 'max:100'],
@@ -158,7 +152,10 @@ class StaffController extends Controller
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        $role = $validated['role'] ?? 'staff';
+        $department = $validated['department'] ?? 'Workshop';
         $email = strtolower(trim($validated['email']));
+        $plainPassword = $request->filled('password') ? $request->input('password') : Str::random(10);
 
         // Find or create the user account
         $user = User::where('email', $email)->first();
@@ -181,7 +178,7 @@ class StaffController extends Controller
                 'name' => trim($validated['name']),
                 'email' => $email,
                 'phone' => $validated['phone'] ? trim($validated['phone']) : null,
-                'password' => Hash::make($validated['password'] ?? Str::random(12)),
+                'password' => Hash::make($plainPassword),
                 'role' => 'user',
                 'status' => 'active',
             ]);
@@ -189,15 +186,32 @@ class StaffController extends Controller
 
         $membership = $showroom->memberships()->create([
             'user_id' => $user->id,
-            'role' => $validated['role'],
-            'department' => $validated['department'] ?? 'Sales & Customer Relations',
-            'designation' => $validated['designation'] ?? ucwords(str_replace('_', ' ', $validated['role'])),
+            'role' => $role,
+            'department' => $department,
+            'designation' => $validated['designation'] ?? 'Workshop Staff',
             'shift' => $validated['shift'] ?? 'General (9:30 AM - 6:30 PM)',
             'availability_status' => $validated['availability_status'],
             'notes' => $validated['notes'] ?? null,
             'status' => 'active',
             'permissions' => ['all'],
         ]);
+
+        // 1. Send welcome email to the newly created staff member
+        try {
+            Mail::to($user->email)->send(new StaffWelcomeMail($showroom, $user, $membership, $plainPassword, auth()->user()));
+        } catch (\Throwable $e) {
+            Log::warning("Failed to dispatch StaffWelcomeMail to {$user->email}: ".$e->getMessage());
+        }
+
+        // 2. Send creation notification email to the creator (showroom owner/manager)
+        $creator = auth()->user();
+        if ($creator && ! empty($creator->email) && $creator->email !== $user->email) {
+            try {
+                Mail::to($creator->email)->send(new StaffCreatedNotificationMail($showroom, $user, $membership, $creator));
+            } catch (\Throwable $e) {
+                Log::warning("Failed to dispatch StaffCreatedNotificationMail to {$creator->email}: ".$e->getMessage());
+            }
+        }
 
         AuditLogger::log(
             action: 'showroom.staff_created',
@@ -206,7 +220,8 @@ class StaffController extends Controller
             newValues: [
                 'user_id' => $user->id,
                 'email' => $user->email,
-                'role' => $validated['role'],
+                'role' => $role,
+                'department' => $department,
                 'availability_status' => $validated['availability_status'],
                 'designation' => $membership->designation,
             ],
@@ -214,7 +229,7 @@ class StaffController extends Controller
         );
 
         return redirect()->route('showrooms.manage.staff.index', $showroom)
-            ->with('success', "Staff member '{$user->name}' added successfully.");
+            ->with('success', "Staff member '{$user->name}' added successfully. Welcome email sent to {$user->email} and confirmation sent to {$creator?->email}.");
     }
 
     /**
@@ -229,7 +244,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'role' => ['required', Rule::in(['owner', 'sales_manager', 'service_manager', 'sales_executive', 'service_advisor', 'technician', 'staff'])],
+            'role' => ['nullable', Rule::in(['owner', 'staff', 'sales_manager', 'service_manager', 'sales_executive', 'service_advisor', 'technician'])],
             'department' => ['nullable', 'string', 'max:100'],
             'designation' => ['nullable', 'string', 'max:100'],
             'shift' => ['nullable', 'string', 'max:100'],
@@ -238,8 +253,11 @@ class StaffController extends Controller
             'status' => ['required', Rule::in(['active', 'suspended', 'inactive'])],
         ]);
 
+        $role = $staff->isOwner() ? 'owner' : ($validated['role'] ?? 'staff');
+        $department = $validated['department'] ?? 'Workshop';
+
         // Prevent demoting the showroom owner if they are the primary owner
-        if ($staff->isOwner() && $validated['role'] !== 'owner') {
+        if ($staff->isOwner() && $role !== 'owner') {
             return redirect()->route('showrooms.manage.staff.index', $showroom)
                 ->with('error', 'The primary showroom owner role cannot be changed.');
         }
@@ -247,8 +265,8 @@ class StaffController extends Controller
         $oldValues = $staff->only(['role', 'department', 'designation', 'shift', 'availability_status', 'notes', 'status']);
 
         $staff->update([
-            'role' => $validated['role'],
-            'department' => $validated['department'] ?? $staff->department,
+            'role' => $role,
+            'department' => $department,
             'designation' => $validated['designation'] ?? $staff->designation,
             'shift' => $validated['shift'] ?? $staff->shift,
             'availability_status' => $validated['availability_status'],
