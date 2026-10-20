@@ -517,9 +517,9 @@
                         </div>
                         <p class="text-[10px] text-slate-400">
                             By signing in, you agree to our
-                            <a href="#" class="text-red-600 hover:underline font-medium">Terms & Conditions</a>
+                            <a href="{{ route('terms') }}" target="_blank" class="text-red-600 hover:underline font-medium">Terms & Conditions</a>
                             and
-                            <a href="#" class="text-red-600 hover:underline font-medium">Privacy Policy</a>.
+                            <a href="{{ route('privacy') }}" target="_blank" class="text-red-600 hover:underline font-medium">Privacy Policy</a>.
                         </p>
                     </div>
 

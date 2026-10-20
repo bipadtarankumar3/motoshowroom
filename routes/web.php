@@ -73,6 +73,15 @@ Route::get('/landing', function () {
     return view('welcome');
 })->name('landing');
 
+// Public Legal & Compliance Pages
+Route::get('/terms', function () {
+    return view('pages.terms');
+})->name('terms');
+
+Route::get('/privacy', function () {
+    return view('pages.privacy');
+})->name('privacy');
+
 // Guest Authentication Routes
 Route::middleware('guest')->group(function () {
     // Standard Registration & Login
