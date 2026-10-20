@@ -170,6 +170,11 @@
                     Showroom Owners ({{ $stats['owners'] }})
                 </a>
 
+                <a href="{{ route('admin.users.index', array_merge(request()->except('page'), ['role' => 'user', 'preset' => null])) }}"
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border flex items-center gap-1.5 {{ request('role') === 'user' ? 'bg-sky-600 text-white border-sky-600 shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-sky-50 hover:text-sky-800' }}">
+                    Regular Users ({{ $stats['regular_users'] }})
+                </a>
+
                 <a href="{{ route('admin.users.index', array_merge(request()->except('page'), ['role' => 'admin', 'preset' => null])) }}"
                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition border flex items-center gap-1.5 {{ request('role') === 'admin' ? 'bg-rose-600 text-white border-rose-600 shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-rose-50 hover:text-rose-800' }}">
                     Admins ({{ $stats['admins'] }})
