@@ -56,7 +56,53 @@
     <!-- Center Interactive Turntable Stage -->
     <main id="turntable-stage" class="relative flex-1 flex items-center justify-center cursor-grab active:cursor-grabbing overflow-hidden">
 
-        @if($frames->isNotEmpty())
+        @if($bike->viewer_type === 'gltf_model' || !empty($bike->model_3d_path))
+            @php
+                $glbModelUrl = !empty($bike->model_3d_path)
+                    ? $bike->model_3d_path
+                    : 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb';
+            @endphp
+            <div class="relative w-full h-full flex items-center justify-center">
+                <model-viewer
+                    src="{{ $glbModelUrl }}"
+                    alt="{{ $bike->name }} 3D WebGL Model"
+                    camera-controls
+                    touch-action="pan-y"
+                    auto-rotate
+                    rotation-per-second="25deg"
+                    shadow-intensity="1.6"
+                    shadow-softness="0.8"
+                    exposure="1.05"
+                    camera-orbit="0deg 75deg 105%"
+                    min-camera-orbit="auto auto 40%"
+                    max-camera-orbit="auto auto 220%"
+                    class="w-full h-full cursor-grab active:cursor-grabbing z-10"
+                    style="width: 100%; height: 100%; outline: none;"
+                >
+                    @foreach($hotspots as $spot)
+                        <button class="view-3d-hotspot" slot="hotspot-{{ $loop->index }}"
+                                data-position="{{ (($spot['x_pct'] ?? 50) - 50) / 40 }} 0.75 {{ ((50 - ($spot['y_pct'] ?? 50))) / 40 }}"
+                                data-normal="0 1 0">
+                            <div class="hotspot-3d-pin">
+                                <div class="hotspot-3d-dot"></div>
+                                <div class="hotspot-3d-card">
+                                    <span class="font-bold text-cyan-800 text-xs block">{{ $spot['title'] }}</span>
+                                    @if(!empty($spot['description']))
+                                        <span class="text-[10px] text-slate-500 block">{{ $spot['description'] }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </button>
+                    @endforeach
+                </model-viewer>
+
+                <div id="fullscreen-drag-hint"
+                     class="absolute top-6 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-white/90 border border-slate-300 text-xs font-semibold text-slate-700 shadow-sm flex items-center gap-2 pointer-events-none z-20">
+                    <svg class="w-4 h-4 text-cyan-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                    <span>Drag horizontally or vertically to orbit 360° &bull; Pinch to zoom</span>
+                </div>
+            </div>
+        @elseif($frames->isNotEmpty())
             <!-- 360 Turntable Frame Sequence -->
             <div id="turntable-viewport" class="relative w-full h-full max-w-6xl max-h-[75vh] flex items-center justify-center p-4 transition-transform duration-200">
                 @foreach($frames as $index => $frame)
@@ -356,5 +402,60 @@ document.addEventListener('DOMContentLoaded', function () {
     showFrame({{ (int) ($settings['default_angle'] ?? 0) }});
 });
 </script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<style>
+.view-3d-hotspot {
+    background: transparent;
+    border: none;
+    box-sizing: border-box;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+}
+.hotspot-3d-pin {
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    background: rgba(6, 182, 212, 0.25);
+    border: 2px solid #06b6d4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 14px rgba(6, 182, 212, 0.5);
+    transition: transform 0.2s ease;
+}
+.view-3d-hotspot:hover .hotspot-3d-pin,
+.view-3d-hotspot:focus .hotspot-3d-pin {
+    transform: scale(1.2);
+    border-color: #0891b2;
+}
+.hotspot-3d-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #0891b2;
+}
+.hotspot-3d-card {
+    position: absolute;
+    bottom: 34px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 8px 12px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 30;
+}
+.view-3d-hotspot:hover .hotspot-3d-card,
+.view-3d-hotspot:focus .hotspot-3d-card {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+}
+</style>
 @endpush
 @endsection

@@ -102,18 +102,23 @@
                             315 => 'https://images.unsplash.com/photo-1558981285-6f0c94958bb6?auto=format&fit=crop&w=1400&q=85',
                         ];
                     }
+                    $glbModelUrl = !empty($bike->model_3d_path)
+                        ? $bike->model_3d_path
+                        : 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb';
                 @endphp
 
-                {{-- ═══ CARD 1: 360° VIRTUAL STUDIO TURNTABLE & GALLERY ═══ --}}
+                {{-- ═══ CARD 1: 360° VIRTUAL STUDIO TURNTABLE & 3D GLB ORBIT ═══ --}}
                 <div class="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 overflow-hidden shadow-xs space-y-5"
                      x-data="{
                          mode: '{{ $has360Viewer ? '360' : 'gallery' }}',
+                         studioView: '{{ $bike->viewer_type === 'gltf_model' || !empty($bike->model_3d_path) ? 'glb' : 'glb' }}',
                          currentAngle: 0,
                          isDragging: false,
                          startX: 0,
                          startAngle: 0,
                          autoSpinInterval: null,
                          isAutoSpinning: false,
+                         glbAutoRotate: true,
                          selectedGalleryPhoto: '{{ $bike->primary_image_url }}',
                          angles: [0, 45, 90, 135, 180, 225, 270, 315],
                          get angleText() {
@@ -167,6 +172,31 @@
                          stopAutoSpin() {
                              this.isAutoSpinning = false;
                              clearInterval(this.autoSpinInterval);
+                         },
+                         toggleGlbAutoRotate() {
+                             const mv = document.getElementById('bike-model-viewer');
+                             if (!mv) return;
+                             this.glbAutoRotate = !this.glbAutoRotate;
+                             mv.autoRotate = this.glbAutoRotate;
+                         },
+                         resetGlbCamera() {
+                             const mv = document.getElementById('bike-model-viewer');
+                             if (mv) {
+                                 mv.cameraOrbit = '0deg 75deg 105%';
+                                 mv.jumpCameraToGoal();
+                             }
+                         },
+                         setGlbOrbit(orbit) {
+                             const mv = document.getElementById('bike-model-viewer');
+                             if (mv) {
+                                 mv.cameraOrbit = orbit;
+                             }
+                         },
+                         zoomGlb(delta) {
+                             const mv = document.getElementById('bike-model-viewer');
+                             if (mv) {
+                                 mv.zoom(delta);
+                             }
                          }
                      }">
 
@@ -178,7 +208,7 @@
                                         @click="mode = '360'"
                                         :class="mode === '360' ? 'bg-gradient-to-r from-slate-900 via-rose-600 to-[#FF6B00] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
                                         class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 cursor-pointer">
-                                    <svg class="w-4 h-4" :class="isAutoSpinning ? 'animate-spin-slow' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <svg class="w-4 h-4" :class="isAutoSpinning || (studioView === 'glb' && glbAutoRotate) ? 'animate-spin-slow' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                     <span>Interactive 360° Studio</span>
                                 </button>
 
@@ -191,125 +221,265 @@
                                 </button>
                             </div>
 
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                                {{-- 3D GLB vs Turntable Sub-Switcher --}}
+                                <div class="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200" x-show="mode === '360'">
+                                    <button type="button" @click="studioView = 'glb'"
+                                            :class="studioView === 'glb' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
+                                            class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
+                                            title="Interactive 3D WebGL Model Orbit">
+                                        <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                                        <span>3D GLB Orbit</span>
+                                    </button>
+                                    <button type="button" @click="studioView = 'turntable'"
+                                            :class="studioView === 'turntable' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
+                                            class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
+                                            title="Sequential Turntable Photos">
+                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span>Turntable</span>
+                                    </button>
+                                </div>
+
                                 <a href="{{ route('showrooms.bikes.360', [$showroom, $bike]) }}"
                                    class="text-xs font-bold text-cyan-700 hover:text-cyan-900 transition flex items-center gap-1">
                                     <span>Fullscreen 360</span>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 </a>
 
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200" x-show="studioView === 'turntable'">
                                     <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
                                     <span x-text="angleText"></span>
                                 </span>
                             </div>
                         </div>
 
-                        {{-- ═══ MODE 1: INTERACTIVE 360° TURNTABLE PODIUM ═══ --}}
+                        {{-- ═══ MODE 1: INTERACTIVE 360° STUDIO ═══ --}}
                         <div x-show="mode === '360'" class="space-y-4">
-                            <div class="relative aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/90 border border-slate-200 overflow-hidden cursor-grab active:cursor-grabbing select-none flex items-center justify-center shadow-inner"
-                                 @mousedown="startDrag($event)"
-                                 @mousemove="onDrag($event)"
-                                 @mouseup="stopDrag()"
-                                 @mouseleave="stopDrag()"
-                                 @touchstart="startDrag($event)"
-                                 @touchmove="onDrag($event)"
-                                 @touchend="stopDrag()">
 
-                                {{-- Studio Stage Ambient Lighting Elements --}}
-                                <div class="absolute inset-0 bg-radial from-white via-transparent to-slate-900/10 pointer-events-none"></div>
-                                <div class="absolute bottom-6 inset-x-12 h-16 bg-slate-900/20 blur-xl rounded-full pointer-events-none"></div>
-                                <div class="absolute bottom-8 inset-x-20 h-10 bg-slate-900/30 blur-md rounded-full pointer-events-none"></div>
+                            {{-- ── SUB-MODE A: 3D GLB WEBGL ORBIT VIEWER (GLOBE / 3D MODEL) ── --}}
+                            <div x-show="studioView === 'glb'" class="space-y-4">
+                                <div class="relative aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/90 border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
 
-                                {{-- 360 Turntable Frames Preloaded in DOM for Zero Lag --}}
-                                @if($allFrames->isNotEmpty())
-                                    @foreach($allFrames as $idx => $frame)
-                                        <img src="{{ $frame->image_url }}"
-                                             alt="{{ $frame->alt_text }}"
-                                             x-show="activeFrameIndex === {{ $idx }}"
-                                             class="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-75">
-                                    @endforeach
-                                @else
-                                    @foreach($fallbackUrls as $deg => $fUrl)
-                                        @php $fIdx = array_search($deg, [0, 45, 90, 135, 180, 225, 270, 315]); @endphp
-                                        <img src="{{ $fUrl }}"
-                                             alt="{{ $bike->name }} {{ $deg }} degree"
-                                             x-show="activeFrameIndex === {{ $fIdx }}"
-                                             class="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-75">
-                                    @endforeach
-                                @endif
+                                    {{-- Ambient Studio Stage Lighting Elements --}}
+                                    <div class="absolute inset-0 bg-radial from-white via-transparent to-slate-900/10 pointer-events-none"></div>
+                                    <div class="absolute bottom-4 inset-x-12 h-20 bg-slate-900/20 blur-2xl rounded-full pointer-events-none"></div>
 
-                                {{-- Top HUD Overlays --}}
-                                <div class="absolute top-4 left-4 flex items-center gap-2 pointer-events-none">
-                                    <span class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white shadow-xs">
-                                        {{ $bike->category->label() }}
-                                    </span>
-                                    <span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-white/90 text-slate-800 border border-slate-200/80 shadow-xs">
-                                        360° Studio Active
-                                    </span>
-                                </div>
+                                    {{-- Concentric Turntable Circular Stage Floor Graphic --}}
+                                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[70%] h-24 rounded-[100%] border-2 border-cyan-400/40 bg-gradient-to-t from-cyan-100/30 to-transparent pointer-events-none transform -rotate-x-60"></div>
+                                    <div class="absolute bottom-9 left-1/2 -translate-x-1/2 w-[52%] h-16 rounded-[100%] border border-cyan-500/30 pointer-events-none transform -rotate-x-60"></div>
 
-                                <div class="absolute top-4 right-4 pointer-events-none">
-                                    <span class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-white/90 text-slate-700 border border-slate-200 shadow-xs">
-                                        Drag to spin 360°
-                                    </span>
-                                </div>
+                                    {{-- Google Model-Viewer WebGL 3D Component --}}
+                                    <model-viewer
+                                        id="bike-model-viewer"
+                                        src="{{ $glbModelUrl }}"
+                                        alt="{{ $bike->name }} 3D WebGL Model"
+                                        camera-controls
+                                        touch-action="pan-y"
+                                        auto-rotate
+                                        rotation-per-second="25deg"
+                                        shadow-intensity="1.6"
+                                        shadow-softness="0.8"
+                                        exposure="1.05"
+                                        camera-orbit="0deg 75deg 105%"
+                                        min-camera-orbit="auto auto 40%"
+                                        max-camera-orbit="auto auto 220%"
+                                        loading="lazy"
+                                        ar
+                                        ar-modes="webxr scene-viewer quick-look"
+                                        class="w-full h-full cursor-grab active:cursor-grabbing z-10"
+                                        style="width: 100%; height: 100%; outline: none;"
+                                    >
+                                        {{-- 3D Hotspot Annotations on Model --}}
+                                        @foreach($bike->hotspots_list as $sIdx => $spot)
+                                            <button class="view-3d-hotspot" slot="hotspot-{{ $sIdx }}"
+                                                    data-position="{{ (($spot['x_pct'] ?? 50) - 50) / 40 }} 0.75 {{ ((50 - ($spot['y_pct'] ?? 50))) / 40 }}"
+                                                    data-normal="0 1 0">
+                                                <div class="hotspot-3d-pin">
+                                                    <div class="hotspot-3d-dot"></div>
+                                                    <div class="hotspot-3d-card">
+                                                        <span class="font-bold text-cyan-800 text-xs block">{{ $spot['title'] }}</span>
+                                                        @if(!empty($spot['description']))
+                                                            <span class="text-[10px] text-slate-500 block">{{ $spot['description'] }}</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        @endforeach
 
-                                {{-- Interactive Hotspot Inspection Pins --}}
-                                <div class="absolute inset-0 pointer-events-none z-20">
-                                    @foreach($bike->hotspots_list as $spot)
-                                        <div class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto group cursor-pointer"
-                                             style="left: {{ $spot['x_pct'] }}%; top: {{ $spot['y_pct'] }}%;">
-                                            <div class="w-7 h-7 rounded-full bg-cyan-500/25 border-2 border-cyan-500 flex items-center justify-center shadow-lg animate-pulse">
-                                                <div class="w-2.5 h-2.5 rounded-full bg-cyan-500"></div>
-                                            </div>
-                                            {{-- Tooltip --}}
-                                            <div class="absolute bottom-9 left-1/2 -translate-x-1/2 w-52 p-3 rounded-2xl bg-white border border-slate-200 text-slate-900 text-xs shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30 space-y-1">
-                                                <p class="font-black text-cyan-800 leading-tight">{{ $spot['title'] }}</p>
-                                                <p class="text-[11px] text-slate-600 leading-normal">{{ $spot['description'] }}</p>
-                                            </div>
+                                        {{-- Loading Poster --}}
+                                        <div slot="poster" class="flex flex-col items-center justify-center w-full h-full bg-slate-50 text-slate-600 font-bold text-xs gap-2">
+                                            <svg class="w-7 h-7 animate-spin text-rose-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span>Loading 3D WebGL Model &amp; Studio Lighting...</span>
                                         </div>
-                                    @endforeach
+                                    </model-viewer>
+
+                                    {{-- Top HUD Overlays --}}
+                                    <div class="absolute top-4 left-4 flex items-center gap-2 pointer-events-none z-20">
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white shadow-xs">
+                                            {{ $bike->category->label() }}
+                                        </span>
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-white/90 text-cyan-800 border border-cyan-200/80 shadow-xs flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-cyan-500 animate-ping"></span>
+                                            <span>3D GLB Orbit Active</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="absolute top-4 right-4 pointer-events-none z-20">
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-white/90 text-slate-700 border border-slate-200 shadow-xs">
+                                            Drag to orbit 360° &bull; Pinch to zoom
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- 3D GLB Orbit Controls Bar --}}
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                                        <div class="flex items-center gap-2">
+                                            <button type="button"
+                                                    @click="toggleGlbAutoRotate()"
+                                                    :class="glbAutoRotate ? 'bg-cyan-700 text-white' : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-100'"
+                                                    class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                                                <span x-text="glbAutoRotate ? '⏸ Pause Auto-Orbit' : '▶ Play Auto-Orbit'"></span>
+                                            </button>
+
+                                            <button type="button"
+                                                    @click="resetGlbCamera()"
+                                                    class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                                                    title="Reset camera to default front view">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                <span>Reset Angle</span>
+                                            </button>
+                                        </div>
+
+                                        {{-- Zoom In / Out Controls --}}
+                                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-2xs">
+                                            <span class="text-[10px] text-slate-400 font-bold px-1.5 uppercase">Zoom</span>
+                                            <button type="button" @click="zoomGlb(15)" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs" title="Zoom in">+</button>
+                                            <button type="button" @click="zoomGlb(-15)" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs" title="Zoom out">&minus;</button>
+                                        </div>
+                                    </div>
+
+                                    {{-- Fast 3D Preset Angle Buttons --}}
+                                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 pt-1 border-t border-slate-200/60">
+                                        <button type="button" @click="setGlbOrbit('0deg 75deg 105%')" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200">0° Front</button>
+                                        <button type="button" @click="setGlbOrbit('45deg 75deg 105%')" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200">45° Dynamic</button>
+                                        <button type="button" @click="setGlbOrbit('90deg 75deg 105%')" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200">90° Flank</button>
+                                        <button type="button" @click="setGlbOrbit('180deg 75deg 105%')" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200">180° Exhaust</button>
+                                        <button type="button" @click="setGlbOrbit('270deg 75deg 105%')" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer bg-white hover:bg-slate-100 text-slate-700 border border-slate-200">270° Left</button>
+                                        <button type="button" @click="setGlbOrbit('0deg 25deg 120%')" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200">Top Cockpit</button>
+                                    </div>
                                 </div>
                             </div>
 
-                            {{-- ═══ 360 TURNTABLE CONTROLS BAR ═══ --}}
-                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                                <div class="flex items-center justify-between gap-4">
-                                    <button type="button"
-                                            @click="toggleAutoSpin()"
-                                            :class="isAutoSpinning ? 'bg-rose-600 text-white' : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-100'"
-                                            class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-2xs cursor-pointer">
-                                        <span x-text="isAutoSpinning ? '⏸ Pause Auto-Spin' : '▶ Play Auto-Spin'"></span>
-                                    </button>
+                            {{-- ── SUB-MODE B: SEQUENTIAL TURNTABLE FRAMES ── --}}
+                            <div x-show="studioView === 'turntable'" class="space-y-4">
+                                <div class="relative aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/90 border border-slate-200 overflow-hidden cursor-grab active:cursor-grabbing select-none flex items-center justify-center shadow-inner"
+                                     @mousedown="startDrag($event)"
+                                     @mousemove="onDrag($event)"
+                                     @mouseup="stopDrag()"
+                                     @mouseleave="stopDrag()"
+                                     @touchstart="startDrag($event)"
+                                     @touchmove="onDrag($event)"
+                                     @touchend="stopDrag()">
 
-                                    {{-- Continuous Degree Slider --}}
-                                    <div class="flex-1 flex items-center gap-3">
-                                        <span class="text-[11px] font-mono text-slate-400 font-bold">0°</span>
-                                        <input type="range"
-                                               min="0"
-                                               max="360"
-                                               step="5"
-                                               x-model="currentAngle"
-                                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#FF6B00]">
-                                        <span class="text-[11px] font-mono text-slate-400 font-bold">360°</span>
+                                    {{-- Ambient Studio Stage Lighting Elements --}}
+                                    <div class="absolute inset-0 bg-radial from-white via-transparent to-slate-900/10 pointer-events-none"></div>
+                                    <div class="absolute bottom-6 inset-x-12 h-16 bg-slate-900/20 blur-xl rounded-full pointer-events-none"></div>
+                                    <div class="absolute bottom-8 inset-x-20 h-10 bg-slate-900/30 blur-md rounded-full pointer-events-none"></div>
+
+                                    {{-- Concentric Turntable Circular Stage Floor Graphic --}}
+                                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[70%] h-24 rounded-[100%] border-2 border-rose-400/30 bg-gradient-to-t from-rose-100/20 to-transparent pointer-events-none transform -rotate-x-60"></div>
+
+                                    {{-- 360 Turntable Frames Preloaded in DOM for Zero Lag --}}
+                                    @if($allFrames->isNotEmpty())
+                                        @foreach($allFrames as $idx => $frame)
+                                            <img src="{{ $frame->image_url }}"
+                                                 alt="{{ $frame->alt_text }}"
+                                                 x-show="activeFrameIndex === {{ $idx }}"
+                                                 class="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-75">
+                                        @endforeach
+                                    @else
+                                        @foreach($fallbackUrls as $deg => $fUrl)
+                                            @php $fIdx = array_search($deg, [0, 45, 90, 135, 180, 225, 270, 315]); @endphp
+                                            <img src="{{ $fUrl }}"
+                                                 alt="{{ $bike->name }} {{ $deg }} degree"
+                                                 x-show="activeFrameIndex === {{ $fIdx }}"
+                                                 class="absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-75">
+                                        @endforeach
+                                    @endif
+
+                                    {{-- Top HUD Overlays --}}
+                                    <div class="absolute top-4 left-4 flex items-center gap-2 pointer-events-none">
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white shadow-xs">
+                                            {{ $bike->category->label() }}
+                                        </span>
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-white/90 text-slate-800 border border-slate-200/80 shadow-xs">
+                                            Turntable Studio Active
+                                        </span>
                                     </div>
 
-                                    <span class="font-mono font-bold text-xs text-slate-800 px-2.5 py-1 bg-white rounded-lg border border-slate-200 shrink-0">
-                                        <span x-text="currentAngle"></span>°
-                                    </span>
+                                    <div class="absolute top-4 right-4 pointer-events-none">
+                                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-white/90 text-slate-700 border border-slate-200 shadow-xs">
+                                            Drag horizontally to spin 360°
+                                        </span>
+                                    </div>
+
+                                    {{-- Interactive Hotspot Inspection Pins --}}
+                                    <div class="absolute inset-0 pointer-events-none z-20">
+                                        @foreach($bike->hotspots_list as $spot)
+                                            <div class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto group cursor-pointer"
+                                                 style="left: {{ $spot['x_pct'] }}%; top: {{ $spot['y_pct'] }}%;">
+                                                <div class="w-7 h-7 rounded-full bg-cyan-500/25 border-2 border-cyan-500 flex items-center justify-center shadow-lg animate-pulse">
+                                                    <div class="w-2.5 h-2.5 rounded-full bg-cyan-500"></div>
+                                                </div>
+                                                {{-- Tooltip --}}
+                                                <div class="absolute bottom-9 left-1/2 -translate-x-1/2 w-52 p-3 rounded-2xl bg-white border border-slate-200 text-slate-900 text-xs shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30 space-y-1">
+                                                    <p class="font-black text-cyan-800 leading-tight">{{ $spot['title'] }}</p>
+                                                    <p class="text-[11px] text-slate-600 leading-normal">{{ $spot['description'] }}</p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
 
-                                {{-- Fast Angle Preset Buttons --}}
-                                <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 pt-1 border-t border-slate-200/60">
-                                    <button type="button" @click="setAngle(0)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 0 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">0° Front</button>
-                                    <button type="button" @click="setAngle(45)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 1 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">45° Front-R</button>
-                                    <button type="button" @click="setAngle(90)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 2 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">90° Flank</button>
-                                    <button type="button" @click="setAngle(135)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 3 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">135° Rear-R</button>
-                                    <button type="button" @click="setAngle(180)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 4 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">180° Tail</button>
-                                    <button type="button" @click="setAngle(225)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 5 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">225° Rear-L</button>
-                                    <button type="button" @click="setAngle(270)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 6 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">270° Left</button>
-                                    <button type="button" @click="setAngle(315)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 7 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">315° Front-L</button>
+                                {{-- Turntable Controls Bar --}}
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                                    <div class="flex items-center justify-between gap-4">
+                                        <button type="button"
+                                                @click="toggleAutoSpin()"
+                                                :class="isAutoSpinning ? 'bg-rose-600 text-white' : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-100'"
+                                                class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-2xs cursor-pointer">
+                                            <span x-text="isAutoSpinning ? '⏸ Pause Auto-Spin' : '▶ Play Auto-Spin'"></span>
+                                        </button>
+
+                                        {{-- Continuous Degree Slider --}}
+                                        <div class="flex-1 flex items-center gap-3">
+                                            <span class="text-[11px] font-mono text-slate-400 font-bold">0°</span>
+                                            <input type="range"
+                                                   min="0"
+                                                   max="360"
+                                                   step="5"
+                                                   x-model="currentAngle"
+                                                   class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#FF6B00]">
+                                            <span class="text-[11px] font-mono text-slate-400 font-bold">360°</span>
+                                        </div>
+
+                                        <span class="font-mono font-bold text-xs text-slate-800 px-2.5 py-1 bg-white rounded-lg border border-slate-200 shrink-0">
+                                            <span x-text="currentAngle"></span>°
+                                        </span>
+                                    </div>
+
+                                    {{-- Fast Angle Preset Buttons --}}
+                                    <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 pt-1 border-t border-slate-200/60">
+                                        <button type="button" @click="setAngle(0)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 0 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">0° Front</button>
+                                        <button type="button" @click="setAngle(45)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 1 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">45° Front-R</button>
+                                        <button type="button" @click="setAngle(90)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 2 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">90° Flank</button>
+                                        <button type="button" @click="setAngle(135)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 3 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">135° Rear-R</button>
+                                        <button type="button" @click="setAngle(180)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 4 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">180° Tail</button>
+                                        <button type="button" @click="setAngle(225)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 5 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">225° Rear-L</button>
+                                        <button type="button" @click="setAngle(270)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 6 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">270° Left</button>
+                                        <button type="button" @click="setAngle(315)" class="py-1.5 rounded-lg text-[10px] font-bold transition text-center cursor-pointer" :class="activeFrameIndex === 7 ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'">315° Front-L</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1044,4 +1214,74 @@
     {{-- Motorcycle Showroom Footer --}}
     @include('showrooms.partials.footer')
 </div>
+
+{{-- Google WebGL 3D Model-Viewer Library --}}
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+<style>
+model-viewer#bike-model-viewer {
+    width: 100%;
+    height: 100%;
+    min-height: 440px;
+    --poster-color: transparent;
+    outline: none;
+}
+model-viewer#bike-model-viewer::part(default-ar-button) {
+    background-color: #0F172A;
+    border-radius: 12px;
+    color: white;
+}
+.view-3d-hotspot {
+    background: transparent;
+    border: none;
+    box-sizing: border-box;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+}
+.hotspot-3d-pin {
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    background: rgba(6, 182, 212, 0.25);
+    border: 2px solid #06b6d4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 14px rgba(6, 182, 212, 0.5);
+    transition: transform 0.2s ease;
+}
+.view-3d-hotspot:hover .hotspot-3d-pin,
+.view-3d-hotspot:focus .hotspot-3d-pin {
+    transform: scale(1.2);
+    border-color: #0891b2;
+}
+.hotspot-3d-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #0891b2;
+}
+.hotspot-3d-card {
+    position: absolute;
+    bottom: 34px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 8px 12px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 30;
+}
+.view-3d-hotspot:hover .hotspot-3d-card,
+.view-3d-hotspot:focus .hotspot-3d-card {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+}
+</style>
 @endsection

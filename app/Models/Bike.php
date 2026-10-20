@@ -142,11 +142,11 @@ class Bike extends Model
             return false;
         }
 
-        if (in_array($this->viewer_type, ['gltf_model', 'external_embed', 'video_loop'], true) && ! empty($this->model_3d_path)) {
+        if (in_array($this->viewer_type, ['gltf_model', 'external_embed', 'video_loop'], true)) {
             return true;
         }
 
-        return $this->frames360()->exists();
+        return $this->frames360()->exists() || ! empty($this->primary_image_url);
     }
 
     /**
