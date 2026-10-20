@@ -428,6 +428,7 @@
                         </div>
 
                         <label class="inline-flex items-center gap-2 cursor-pointer select-none shrink-0 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs hover:border-slate-300 transition">
+                            <input type="hidden" name="has_360_view" value="0">
                             <input type="checkbox" name="has_360_view" value="1" {{ old('has_360_view', $bike->has_360_view) ? 'checked' : '' }} class="w-4 h-4 rounded text-slate-900 focus:ring-slate-900 border-slate-300">
                             <span class="text-xs font-semibold text-slate-800">Enable 360° View</span>
                         </label>

@@ -588,10 +588,12 @@
 
                                     {{-- 360 + Wishlist --}}
                                     <div class="absolute top-3 right-3 flex gap-1.5 z-10">
-                                        <a href="{{ route('showrooms.bikes.360', [$showroom, $fBike]) }}"
-                                           class="px-2 py-1 rounded-lg text-[10px] font-mono font-black bg-slate-900/85 text-cyan-400 border border-cyan-500/30 hover:scale-105 transition-transform backdrop-blur-sm">
-                                            360°
-                                        </a>
+                                        @if($showroom->canAccessFeature('has_360_viewer') && $fBike->has360View())
+                                            <a href="{{ route('showrooms.bikes.360', [$showroom, $fBike]) }}"
+                                               class="px-2 py-1 rounded-lg text-[10px] font-mono font-black bg-slate-900/85 text-cyan-400 border border-cyan-500/30 hover:scale-105 transition-transform backdrop-blur-sm">
+                                                360°
+                                            </a>
+                                        @endif
                                         <button type="button"
                                                 class="w-8 h-8 rounded-full bg-white/90 text-slate-400 hover:scale-110 flex items-center justify-center transition-all cursor-pointer shadow-sm">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $bike->name . ' — Purchase & 360° Studio — ' . $showroom->name)
+@section('title', $bike->name . ($has360Viewer ? ' — Purchase & 360° Studio — ' : ' — Purchase & Gallery — ') . $showroom->name)
 
 @section('content')
 <div class="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans selection:bg-rose-500 selection:text-white"
@@ -420,7 +420,7 @@
 
                                     <div class="absolute top-4 right-4 pointer-events-none">
                                         <span class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-white/90 text-slate-700 border border-slate-200 shadow-xs">
-                                            Drag horizontally to spin 360°
+                                            Drag to spin 360°
                                         </span>
                                     </div>
 
@@ -1215,6 +1215,7 @@
     @include('showrooms.partials.footer')
 </div>
 
+@if($has360Viewer)
 {{-- Google WebGL 3D Model-Viewer Library --}}
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
@@ -1284,4 +1285,5 @@ model-viewer#bike-model-viewer::part(default-ar-button) {
     transform: translateX(-50%) translateY(-2px);
 }
 </style>
+@endif
 @endsection

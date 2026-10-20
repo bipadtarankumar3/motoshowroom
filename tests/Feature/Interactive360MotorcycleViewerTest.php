@@ -518,4 +518,48 @@ class Interactive360MotorcycleViewerTest extends TestCase
         // allImages() should return all 5
         $this->assertSame(5, $this->bikeA->allImages()->count());
     }
+
+    public function test_unchecking_360_view_in_manage_edit_disables_360_and_hides_360_section_on_public_view(): void
+    {
+        // Initially Bike A has has_360_view = true and 3D model
+        $this->assertTrue($this->bikeA->has_360_view);
+
+        // Submit motorcycle update with has_360_view = 0 (simulating unchecked checkbox)
+        $response = $this->actingAs($this->ownerA)
+            ->put(route('showrooms.manage.bikes.update', [$this->showroomA, $this->bikeA]), [
+                'name' => $this->bikeA->name,
+                'sku' => $this->bikeA->sku,
+                'brand' => $this->bikeA->brand,
+                'model_year' => $this->bikeA->model_year,
+                'category' => $this->bikeA->category->value,
+                'price' => $this->bikeA->price,
+                'fuel_type' => 'petrol',
+                'status' => 'in_stock',
+                'is_published' => 1,
+                'has_360_view' => 0, // unchecked
+                'viewer_type' => 'gltf_model',
+                'model_3d_path' => 'https://cdn.example.com/bike.glb',
+            ]);
+
+        $response->assertRedirect(route('showrooms.manage.bikes.index', $this->showroomA));
+
+        $this->bikeA->refresh();
+        $this->assertFalse($this->bikeA->has_360_view);
+        $this->assertFalse($this->bikeA->has360View());
+
+        // Visiting public bike view should NOT show Interactive 360 Studio section or buttons
+        $viewResponse = $this->get(route('showrooms.bikes.show', [$this->showroomA, $this->bikeA]));
+        $viewResponse->assertStatus(200);
+        $viewResponse->assertDontSee('Interactive 360° Studio');
+        $viewResponse->assertDontSee('Fullscreen 360');
+        $viewResponse->assertDontSee('3D GLB Orbit');
+        $viewResponse->assertDontSee('Turntable');
+        $viewResponse->assertDontSee('model-viewer.min.js');
+
+        // Showroom bikes index should not show 360 Studio pill for this bike
+        $indexResponse = $this->get(route('showrooms.bikes.index', $this->showroomA));
+        $indexResponse->assertStatus(200);
+        $indexResponse->assertDontSee('#studio360');
+    }
 }
+

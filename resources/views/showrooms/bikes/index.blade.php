@@ -183,10 +183,12 @@
 
                                 <div class="flex items-center gap-1.5">
                                     {{-- 360 Available Pill --}}
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-cyan-600 text-white shadow-xs">
-                                        <svg class="w-3.5 h-3.5 animate-spin-slow text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                        <span>360° Studio</span>
-                                    </span>
+                                    @if($showroom->canAccessFeature('has_360_viewer') && $bike->has360View())
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-cyan-600 text-white shadow-xs">
+                                            <svg class="w-3.5 h-3.5 animate-spin-slow text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            <span>360° Studio</span>
+                                        </span>
+                                    @endif
 
                                     @if($bike->is_featured)
                                         <span class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-amber-400 text-amber-950 shadow-xs">
@@ -272,11 +274,19 @@
 
                                 {{-- Dual Actions: View 360 & Book / Buy --}}
                                 <div class="grid grid-cols-2 gap-2 pt-1">
-                                    <a href="{{ route('showrooms.bikes.show', [$showroom, $bike]) }}#studio360"
-                                       class="py-2.5 px-3 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-xs transition border border-cyan-200 flex items-center justify-center gap-1.5 shadow-2xs">
-                                        <svg class="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                        <span>360° Studio</span>
-                                    </a>
+                                    @if($showroom->canAccessFeature('has_360_viewer') && $bike->has360View())
+                                        <a href="{{ route('showrooms.bikes.show', [$showroom, $bike]) }}#studio360"
+                                           class="py-2.5 px-3 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-xs transition border border-cyan-200 flex items-center justify-center gap-1.5 shadow-2xs">
+                                            <svg class="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            <span>360° Studio</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('showrooms.bikes.show', [$showroom, $bike]) }}"
+                                           class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition border border-slate-200 flex items-center justify-center gap-1.5 shadow-2xs">
+                                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            <span>View Details</span>
+                                        </a>
+                                    @endif
 
                                     <a href="{{ route('showrooms.bikes.show', [$showroom, $bike]) }}#reserve"
                                        class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs uppercase tracking-wider transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5">

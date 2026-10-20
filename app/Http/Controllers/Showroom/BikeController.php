@@ -202,11 +202,7 @@ class BikeController extends Controller
         $viewerType = $request->input('viewer_type', 'image_sequence');
         $model3dPath = $request->input('model_3d_path');
 
-        $has360View = $request->boolean('has_360_view')
-            || $request->hasFile('frames_360')
-            || $request->hasFile('model_3d_file')
-            || $request->hasFile('video_360_file')
-            || ! empty($model3dPath);
+        $has360View = $request->boolean('has_360_view');
 
         $bike = DB::transaction(function () use ($request, $showroom, $validated, $slug, $sku, $specifications, $categoryId, $categoryValue, $has360View, $viewerType, $model3dPath) {
             $bike = $showroom->bikes()->create([
@@ -477,9 +473,7 @@ class BikeController extends Controller
             $model3dPath = Storage::disk('public')->url($path);
         }
 
-        $has360View = $request->has('has_360_view')
-            ? $request->boolean('has_360_view')
-            : ($bike->has_360_view || $request->hasFile('frames_360') || ! empty($model3dPath));
+        $has360View = $request->boolean('has_360_view');
 
         DB::transaction(function () use ($request, $bike, $showroom, $validated, $specifications, $categoryId, $categoryValue, $has360View, $viewerType, $model3dPath) {
             $bike->update([

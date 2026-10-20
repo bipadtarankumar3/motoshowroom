@@ -255,6 +255,7 @@
                                 <span class="text-[11px] text-slate-500">Display interactive 360 view on the public motorcycle profile.</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="hidden" name="has_360_view" value="0">
                                 <input type="checkbox" name="has_360_view" value="1" {{ old('has_360_view', $bike->has_360_view) ? 'checked' : '' }}
                                        @disabled(! $hasFeature)
                                        class="sr-only peer">
