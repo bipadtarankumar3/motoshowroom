@@ -238,40 +238,21 @@
                             </div>
 
                             <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                {{-- 3D GLB vs Turntable vs Video Sub-Switcher --}}
-                                <div class="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200" x-show="mode === '360'">
-                                    <button type="button" @click="studioView = 'turntable'"
-                                            :class="studioView === 'turntable' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
-                                            class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
-                                            title="Sequential Turntable Photos">
-                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                        <span>Turntable</span>
-                                        @if($bike->viewer_type === 'image_sequence')
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500" title="Active Admin Mode"></span>
-                                        @endif
-                                    </button>
-
-                                    <button type="button" @click="studioView = 'glb'"
-                                            :class="studioView === 'glb' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
-                                            class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
-                                            title="Interactive 3D WebGL Model Orbit">
+                                {{-- Active Media Mode Indicator (Only the active 1 is shown) --}}
+                                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 shadow-2xs" x-show="mode === '360'">
+                                    @if($defaultStudioView === 'glb')
                                         <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                        <span>3D GLB Orbit</span>
-                                        @if($bike->viewer_type === 'gltf_model')
-                                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500" title="Active Admin Mode"></span>
-                                        @endif
-                                    </button>
-
-                                    <button type="button" @click="studioView = 'video'"
-                                            :class="studioView === 'video' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
-                                            class="px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
-                                            title="Turntable Video Loop">
+                                        <span class="text-xs font-bold text-slate-900">3D GLB Orbit</span>
+                                        <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+                                    @elseif($defaultStudioView === 'turntable')
+                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span class="text-xs font-bold text-slate-900">Turntable</span>
+                                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                                    @elseif($defaultStudioView === 'video')
                                         <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                        <span>Video Loop</span>
-                                        @if($bike->viewer_type === 'video_loop')
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500" title="Active Admin Mode"></span>
-                                        @endif
-                                    </button>
+                                        <span class="text-xs font-bold text-slate-900">Video Loop</span>
+                                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                                    @endif
                                 </div>
 
                                 <a href="{{ route('showrooms.bikes.360', [$showroom, $bike]) }}"
@@ -280,26 +261,21 @@
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 </a>
 
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200" x-show="studioView === 'turntable'">
-                                    <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
-                                    <span x-text="angleText"></span>
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200" x-show="studioView === 'glb'">
-                                    <span class="w-2 h-2 rounded-full bg-cyan-500 animate-ping"></span>
-                                    <span>WebGL 3D Orbit</span>
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200" x-show="studioView === 'video'">
-                                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                                    <span>360° Video</span>
-                                </span>
+                                @if($defaultStudioView === 'turntable')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200" x-show="mode === '360'">
+                                        <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+                                        <span x-text="angleText"></span>
+                                    </span>
+                                @endif
                             </div>
                         </div>
 
                         {{-- ═══ MODE 1: INTERACTIVE 360° STUDIO ═══ --}}
                         <div x-show="mode === '360'" class="space-y-4">
 
-                            {{-- ── SUB-MODE A: 3D GLB WEBGL ORBIT VIEWER (GLOBE / 3D MODEL) ── --}}
-                            <div x-show="studioView === 'glb'" class="space-y-4">
+                            @if($defaultStudioView === 'glb')
+                                {{-- ── ONLY 3D GLB WEBGL ORBIT VIEWER (ACTIVE SELECTION) ── --}}
+                                <div class="space-y-4">
                                 <div class="relative aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/90 border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
 
                                     {{-- Ambient Studio Stage Lighting Elements --}}
@@ -412,9 +388,9 @@
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- ── SUB-MODE B: SEQUENTIAL TURNTABLE FRAMES ── --}}
-                            <div x-show="studioView === 'turntable'" class="space-y-4">
+                            @elseif($defaultStudioView === 'turntable')
+                                {{-- ── ONLY SEQUENTIAL TURNTABLE FRAMES (ACTIVE SELECTION) ── --}}
+                                <div class="space-y-4">
                                 <div class="relative aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/90 border border-slate-200 overflow-hidden cursor-grab active:cursor-grabbing select-none flex items-center justify-center shadow-inner"
                                      @mousedown="startDrag($event)"
                                      @mousemove="onDrag($event)"
@@ -524,9 +500,9 @@
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- ── SUB-MODE C: TURNTABLE VIDEO LOOP ── --}}
-                            <div x-show="studioView === 'video'" class="space-y-4">
+                            @elseif($defaultStudioView === 'video')
+                                {{-- ── ONLY TURNTABLE VIDEO LOOP (ACTIVE SELECTION) ── --}}
+                                <div class="space-y-4">
                                 <div class="relative aspect-[16/10] rounded-2xl bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/90 border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
 
                                     {{-- Ambient Studio Stage Lighting Elements --}}
@@ -604,6 +580,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                         </div>
                     @endif
 
@@ -919,57 +896,7 @@
 
                 </div>
 
-                {{-- ═══ 2. INTERACTIVE EMI & FINANCE CALCULATOR ═══ --}}
-                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                        <h3 class="text-xs font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span>Finance & EMI Calculator</span>
-                        </h3>
-                        <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold font-mono">8.5% APR</span>
-                    </div>
 
-                    {{-- Dynamic EMI Result Display --}}
-                    <div class="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between">
-                        <div>
-                            <span class="text-[11px] text-slate-400 font-medium block">Estimated Monthly EMI</span>
-                            <span class="text-xs text-slate-300">Based on Selected Down Payment</span>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-2xl font-black font-mono text-emerald-400">
-                                ₹<span x-text="monthlyEmi.toLocaleString('en-IN')"></span>
-                            </p>
-                            <span class="text-[10px] text-slate-400">/ month</span>
-                        </div>
-                    </div>
-
-                    {{-- Down Payment Slider --}}
-                    <div class="space-y-1.5 text-xs">
-                        <div class="flex justify-between font-semibold">
-                            <span class="text-slate-500">Down Payment:</span>
-                            <span class="font-mono text-slate-900 font-bold">
-                                ₹<span x-text="downPaymentAmount.toLocaleString('en-IN')"></span> (<span x-text="downPaymentPct"></span>%)
-                            </span>
-                        </div>
-                        <input type="range"
-                               min="10"
-                               max="50"
-                               step="5"
-                               x-model="downPaymentPct"
-                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#FF6B00]">
-                    </div>
-
-                    {{-- Tenure Buttons --}}
-                    <div class="space-y-1.5 text-xs">
-                        <span class="text-slate-500 font-semibold block">Loan Tenure (Months):</span>
-                        <div class="grid grid-cols-4 gap-1.5">
-                            <button type="button" @click="loanTenureMonths = 12" :class="loanTenureMonths === 12 ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 font-medium'" class="py-1.5 rounded-lg text-xs transition cursor-pointer">12m</button>
-                            <button type="button" @click="loanTenureMonths = 24" :class="loanTenureMonths === 24 ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 font-medium'" class="py-1.5 rounded-lg text-xs transition cursor-pointer">24m</button>
-                            <button type="button" @click="loanTenureMonths = 36" :class="loanTenureMonths === 36 ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 font-medium'" class="py-1.5 rounded-lg text-xs transition cursor-pointer">36m</button>
-                            <button type="button" @click="loanTenureMonths = 48" :class="loanTenureMonths === 48 ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700 font-medium'" class="py-1.5 rounded-lg text-xs transition cursor-pointer">48m</button>
-                        </div>
-                    </div>
-                </div>
 
                 {{-- ═══ 3. BUYER PROTECTION ASSURANCES ═══ --}}
                 <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3 text-xs">
