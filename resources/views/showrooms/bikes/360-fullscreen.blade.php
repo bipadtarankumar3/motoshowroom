@@ -60,7 +60,7 @@
             @php
                 $glbModelUrl = !empty($bike->model_3d_path)
                     ? $bike->model_3d_path
-                    : 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb';
+                    : asset('models/motorcycle.glb');
             @endphp
             <div class="relative w-full h-full flex items-center justify-center">
                 <model-viewer

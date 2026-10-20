@@ -555,8 +555,9 @@
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Or Enter 3D Model CDN / Storage URL</label>
-                            <input type="url" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'gltf_model' ? $bike->model_3d_path : '') }}"
-                                   placeholder="https://cdn.example.com/models/motorcycle.glb"
+                            <input type="text" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'gltf_model' ? $bike->model_3d_path : '') }}"
+                                   :disabled="viewerType !== 'gltf_model'"
+                                   placeholder="e.g. /models/motorcycle.glb or https://cdn.example.com/models/motorcycle.glb"
                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500">
                         </div>
                     </div>
@@ -565,7 +566,8 @@
                     <div x-show="viewerType === 'external_embed'" class="space-y-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
                         <div>
                             <label class="block text-xs font-bold text-slate-800 mb-1.5">External 360° Virtual Tour or Viewer URL</label>
-                            <input type="url" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'external_embed' ? $bike->model_3d_path : '') }}"
+                            <input type="text" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'external_embed' ? $bike->model_3d_path : '') }}"
+                                   :disabled="viewerType !== 'external_embed'"
                                    placeholder="https://spincar.com/view/... or https://sirv.com/... or https://my.matterport.com/show/?m=..."
                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500">
                             <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
@@ -599,7 +601,8 @@
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Or Provide 360 Video Stream URL</label>
-                            <input type="url" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'video_loop' ? $bike->model_3d_path : '') }}"
+                            <input type="text" name="model_3d_path" value="{{ old('model_3d_path', $bike->viewer_type === 'video_loop' ? $bike->model_3d_path : '') }}"
+                                   :disabled="viewerType !== 'video_loop'"
                                    placeholder="https://cdn.example.com/videos/turntable-360.mp4"
                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-500">
                         </div>

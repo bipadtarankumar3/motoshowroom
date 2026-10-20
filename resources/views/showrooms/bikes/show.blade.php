@@ -104,7 +104,7 @@
                     }
                     $glbModelUrl = !empty($bike->model_3d_path)
                         ? $bike->model_3d_path
-                        : 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb';
+                        : asset('models/motorcycle.glb');
                 @endphp
 
                 {{-- ═══ CARD 1: 360° VIRTUAL STUDIO TURNTABLE & 3D GLB ORBIT ═══ --}}
