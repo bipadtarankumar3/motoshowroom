@@ -162,50 +162,18 @@
                         @endphp
 
                         <!-- 1. Character Avatar Section -->
-                        <div id="section-avatar-settings" class="p-4 sm:p-5 rounded-2xl border transition-all duration-200 space-y-4 {{ $isPresenterAvatar ? 'bg-white border-rose-300 shadow-xs' : 'bg-slate-50/70 border-slate-200' }}">
-                            <div class="flex items-center justify-between gap-3">
+                        <div id="section-avatar-settings" class="p-4 sm:p-5 rounded-2xl border transition-all duration-200 space-y-4 bg-white border-rose-300 shadow-xs {{ $isPresenterAvatar ? '' : 'hidden' }}">
+                            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs font-black uppercase tracking-wider text-slate-900 block truncate">Option 1: AI Character Avatar</span>
-                                        <span id="tag-avatar-status" class="px-2 py-0.5 rounded-full text-[10px] font-black {{ $isPresenterAvatar ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-200 text-slate-600' }}">
-                                            {{ $isPresenterAvatar ? '● ON' : '○ OFF' }}
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            ● Active
                                         </span>
                                     </div>
                                     <span class="text-[11px] text-slate-500 block mt-0.5">2D authentic human cutout with natural breathing and interactive voice greeting.</span>
                                 </div>
-
-                                <!-- Interactive ON/OFF Switch -->
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <span id="label-avatar-switch" class="text-[11px] font-black uppercase {{ $isPresenterAvatar ? 'text-rose-600' : 'text-slate-400' }}">
-                                        {{ $isPresenterAvatar ? 'ON' : 'OFF' }}
-                                    </span>
-                                    <button type="button"
-                                            id="switch-mode-avatar"
-                                            onclick="selectPresenterMode('avatar')"
-                                            role="switch"
-                                            aria-checked="{{ $isPresenterAvatar ? 'true' : 'false' }}"
-                                            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $isPresenterAvatar ? 'bg-rose-600' : 'bg-slate-300' }}">
-                                        <span class="sr-only">Toggle AI Character Avatar</span>
-                                        <span id="knob-mode-avatar"
-                                              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out {{ $isPresenterAvatar ? 'translate-x-5' : 'translate-x-0' }}"></span>
-                                    </button>
-                                </div>
                             </div>
-
-                            <!-- OFF State Notice Banner -->
-                            <div id="notice-avatar-off" class="{{ $isPresenterAvatar ? 'hidden' : '' }} p-3.5 bg-slate-100/80 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div>
-                                    <span class="text-xs font-bold text-slate-800 block">Option 1 is currently OFF</span>
-                                    <span class="text-[11px] text-slate-500">Character avatar and synthetic voice are paused while Welcome Video mode is active.</span>
-                                </div>
-                                <button type="button" onclick="selectPresenterMode('avatar')"
-                                        class="px-3 py-1.5 rounded-lg bg-white border border-rose-300 text-rose-700 hover:bg-rose-50 font-bold text-xs shadow-2xs transition shrink-0 cursor-pointer">
-                                    Turn ON Option 1
-                                </button>
-                            </div>
-
-                            <!-- Option 1 Settings Body -->
-                            <div id="body-avatar-settings" class="{{ $isPresenterAvatar ? '' : 'hidden' }} space-y-4">
 
                             <div class="grid grid-cols-2 gap-3">
                                 <!-- TVS Male Advisor -->
@@ -360,55 +328,21 @@
                                        class="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200">
                             </div>
                         </div>
-
-                            </div>
                         </div>
 
                         <!-- 2. 🎬 AI Welcome Video (Gemini Veo / Upload / Direct Link) -->
-                        <div id="section-video-settings" class="p-4 sm:p-5 rounded-2xl border transition-all duration-200 space-y-4 {{ $isPresenterVideo ? 'bg-white border-indigo-300 shadow-xs' : 'bg-slate-50/70 border-slate-200' }}">
-                            <div class="flex items-center justify-between gap-3">
+                        <div id="section-video-settings" class="p-4 sm:p-5 rounded-2xl border transition-all duration-200 space-y-4 bg-white border-indigo-300 shadow-xs {{ $isPresenterVideo ? '' : 'hidden' }}">
+                            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs font-black uppercase tracking-wider text-slate-900 block truncate">Option 2: Photorealistic Welcome Video</span>
-                                        <span id="tag-video-status" class="px-2 py-0.5 rounded-full text-[10px] font-black {{ $isPresenterVideo ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-200 text-slate-600' }}">
-                                            {{ $isPresenterVideo ? '● ON' : '○ OFF' }}
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                            ● Active
                                         </span>
                                     </div>
                                     <span class="text-[11px] text-slate-500 block mt-0.5">High-definition AI video generated with Gemini, uploaded, or linked.</span>
                                 </div>
-
-                                <!-- Interactive ON/OFF Switch -->
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <span id="label-video-switch" class="text-[11px] font-black uppercase {{ $isPresenterVideo ? 'text-indigo-600' : 'text-slate-400' }}">
-                                        {{ $isPresenterVideo ? 'ON' : 'OFF' }}
-                                    </span>
-                                    <button type="button"
-                                            id="switch-mode-video"
-                                            onclick="selectPresenterMode('video')"
-                                            role="switch"
-                                            aria-checked="{{ $isPresenterVideo ? 'true' : 'false' }}"
-                                            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $isPresenterVideo ? 'bg-indigo-600' : 'bg-slate-300' }}">
-                                        <span class="sr-only">Toggle Welcome Video</span>
-                                        <span id="knob-mode-video"
-                                              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out {{ $isPresenterVideo ? 'translate-x-5' : 'translate-x-0' }}"></span>
-                                    </button>
-                                </div>
                             </div>
-
-                            <!-- OFF State Notice Banner -->
-                            <div id="notice-video-off" class="{{ $isPresenterVideo ? 'hidden' : '' }} p-3.5 bg-slate-100/80 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div>
-                                    <span class="text-xs font-bold text-slate-800 block">Option 2 is currently OFF</span>
-                                    <span class="text-[11px] text-slate-500">Video presenter is paused while AI Character Avatar mode is active.</span>
-                                </div>
-                                <button type="button" onclick="selectPresenterMode('video')"
-                                        class="px-3 py-1.5 rounded-lg bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 font-bold text-xs shadow-2xs transition shrink-0 cursor-pointer">
-                                    Turn ON Option 2
-                                </button>
-                            </div>
-
-                            <!-- Option 2 Settings Body -->
-                            <div id="body-video-settings" class="{{ $isPresenterVideo ? '' : 'hidden' }} space-y-4">
 
                             @if($setting->has_welcome_video)
                                 <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
@@ -564,7 +498,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
                         <button type="submit" @disabled(! $hasFeature)
                                 class="w-full py-3 rounded-xl btn-brand-primary font-bold text-xs transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
@@ -779,23 +712,8 @@ function selectPresenterMode(mode) {
     const cardVideo = document.getElementById('card-mode-video');
     const badgeAvatar = document.getElementById('badge-mode-avatar');
     const badgeVideo = document.getElementById('badge-mode-video');
-
     const sectionAvatar = document.getElementById('section-avatar-settings');
     const sectionVideo = document.getElementById('section-video-settings');
-    const tagAvatarStatus = document.getElementById('tag-avatar-status');
-    const tagVideoStatus = document.getElementById('tag-video-status');
-    const switchAvatar = document.getElementById('switch-mode-avatar');
-    const knobAvatar = document.getElementById('knob-mode-avatar');
-    const labelAvatarSwitch = document.getElementById('label-avatar-switch');
-    const noticeAvatar = document.getElementById('notice-avatar-off');
-    const bodyAvatar = document.getElementById('body-avatar-settings');
-
-    const switchVideo = document.getElementById('switch-mode-video');
-    const knobVideo = document.getElementById('knob-mode-video');
-    const labelVideoSwitch = document.getElementById('label-video-switch');
-    const noticeVideo = document.getElementById('notice-video-off');
-    const bodyVideo = document.getElementById('body-video-settings');
-
     const previewCharContainer = document.getElementById('preview-character-container');
     const previewVideoContainer = document.getElementById('preview-video-container');
     const previewStatusText = document.getElementById('preview-status-text');
@@ -816,51 +734,9 @@ function selectPresenterMode(mode) {
         if (badgeAvatar) badgeAvatar.classList.remove('hidden');
         if (badgeVideo) badgeVideo.classList.add('hidden');
 
-        // Option 1 -> ON
-        if (sectionAvatar) {
-            sectionAvatar.classList.remove('border-slate-200', 'bg-slate-50/70');
-            sectionAvatar.classList.add('border-rose-300', 'bg-white', 'shadow-xs');
-        }
-        if (tagAvatarStatus) {
-            tagAvatarStatus.textContent = '● ON';
-            tagAvatarStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200';
-        }
-        if (switchAvatar) {
-            switchAvatar.className = 'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-rose-600';
-            switchAvatar.setAttribute('aria-checked', 'true');
-        }
-        if (knobAvatar) {
-            knobAvatar.className = 'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out translate-x-5';
-        }
-        if (labelAvatarSwitch) {
-            labelAvatarSwitch.textContent = 'ON';
-            labelAvatarSwitch.className = 'text-[11px] font-black uppercase text-rose-600';
-        }
-        if (noticeAvatar) noticeAvatar.classList.add('hidden');
-        if (bodyAvatar) bodyAvatar.classList.remove('hidden');
-
-        // Option 2 -> OFF
-        if (sectionVideo) {
-            sectionVideo.classList.remove('border-indigo-300', 'bg-white', 'shadow-xs');
-            sectionVideo.classList.add('border-slate-200', 'bg-slate-50/70');
-        }
-        if (tagVideoStatus) {
-            tagVideoStatus.textContent = '○ OFF';
-            tagVideoStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-200 text-slate-600';
-        }
-        if (switchVideo) {
-            switchVideo.className = 'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-slate-300';
-            switchVideo.setAttribute('aria-checked', 'false');
-        }
-        if (knobVideo) {
-            knobVideo.className = 'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out translate-x-0';
-        }
-        if (labelVideoSwitch) {
-            labelVideoSwitch.textContent = 'OFF';
-            labelVideoSwitch.className = 'text-[11px] font-black uppercase text-slate-400';
-        }
-        if (noticeVideo) noticeVideo.classList.remove('hidden');
-        if (bodyVideo) bodyVideo.classList.add('hidden');
+        // Show Option 1 box, Hide Option 2 box
+        if (sectionAvatar) sectionAvatar.classList.remove('hidden');
+        if (sectionVideo) sectionVideo.classList.add('hidden');
 
         // Stage preview
         if (previewCharContainer) previewCharContainer.classList.remove('hidden');
@@ -886,55 +762,17 @@ function selectPresenterMode(mode) {
         if (badgeVideo) badgeVideo.classList.remove('hidden');
         if (badgeAvatar) badgeAvatar.classList.add('hidden');
 
-        // Option 2 -> ON
-        if (sectionVideo) {
-            sectionVideo.classList.remove('border-slate-200', 'bg-slate-50/70');
-            sectionVideo.classList.add('border-indigo-300', 'bg-white', 'shadow-xs');
-        }
-        if (tagVideoStatus) {
-            tagVideoStatus.textContent = '● ON';
-            tagVideoStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200';
-        }
-        if (switchVideo) {
-            switchVideo.className = 'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-indigo-600';
-            switchVideo.setAttribute('aria-checked', 'true');
-        }
-        if (knobVideo) {
-            knobVideo.className = 'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out translate-x-5';
-        }
-        if (labelVideoSwitch) {
-            labelVideoSwitch.textContent = 'ON';
-            labelVideoSwitch.className = 'text-[11px] font-black uppercase text-indigo-600';
-        }
-        if (noticeVideo) noticeVideo.classList.add('hidden');
-        if (bodyVideo) bodyVideo.classList.remove('hidden');
-
-        // Option 1 -> OFF
-        if (sectionAvatar) {
-            sectionAvatar.classList.remove('border-rose-300', 'bg-white', 'shadow-xs');
-            sectionAvatar.classList.add('border-slate-200', 'bg-slate-50/70');
-        }
-        if (tagAvatarStatus) {
-            tagAvatarStatus.textContent = '○ OFF';
-            tagAvatarStatus.className = 'px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-200 text-slate-600';
-        }
-        if (switchAvatar) {
-            switchAvatar.className = 'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-slate-300';
-            switchAvatar.setAttribute('aria-checked', 'false');
-        }
-        if (knobAvatar) {
-            knobAvatar.className = 'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out translate-x-0';
-        }
-        if (labelAvatarSwitch) {
-            labelAvatarSwitch.textContent = 'OFF';
-            labelAvatarSwitch.className = 'text-[11px] font-black uppercase text-slate-400';
-        }
-        if (noticeAvatar) noticeAvatar.classList.remove('hidden');
-        if (bodyAvatar) bodyAvatar.classList.add('hidden');
+        // Hide Option 1 box, Show Option 2 box
+        if (sectionAvatar) sectionAvatar.classList.add('hidden');
+        if (sectionVideo) sectionVideo.classList.remove('hidden');
 
         // Stage preview
         if (previewCharContainer) previewCharContainer.classList.add('hidden');
-        if (previewVideoContainer) previewVideoContainer.classList.remove('hidden');
+        if (previewVideoContainer) {
+            previewVideoContainer.classList.remove('hidden');
+            const videoElem = previewVideoContainer.querySelector('video');
+            if (videoElem) videoElem.play().catch(e => console.log('Video autoplay error', e));
+        }
         if (previewStatusText) previewStatusText.textContent = 'AI Video Presenter';
     }
 }
