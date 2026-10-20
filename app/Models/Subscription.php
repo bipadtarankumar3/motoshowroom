@@ -165,6 +165,18 @@ class Subscription extends Model
     }
 
     /**
+     * Get the effective numerical limit for a feature or quota.
+     */
+    public function getLimit(string $limitKey): ?int
+    {
+        if (! empty($this->feature_overrides) && is_array($this->feature_overrides) && isset($this->feature_overrides[$limitKey]) && is_numeric($this->feature_overrides[$limitKey])) {
+            return (int) $this->feature_overrides[$limitKey];
+        }
+
+        return isset($this->plan->$limitKey) ? (int) $this->plan->$limitKey : null;
+    }
+
+    /**
      * Evaluate if a quantitative limit has been reached or exceeded.
      * Administrative custom limit overrides take precedence.
      * During trial, generous testing headroom is provided.

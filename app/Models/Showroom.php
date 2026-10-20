@@ -700,4 +700,29 @@ class Showroom extends Model
 
         return $luminance > 165 ? '#0f172a' : '#ffffff';
     }
+
+    /**
+     * Maximum number of staff accounts allowed under showroom's subscription plan.
+     */
+    public function getMaxStaffAccounts(): int
+    {
+        if ($this->subscription) {
+            $overrideLimit = $this->subscription->getLimit('max_staff_accounts');
+            if ($overrideLimit !== null) {
+                return $overrideLimit;
+            }
+        }
+
+        return (int) ($this->subscription?->plan?->max_staff_accounts ?? $this->max_staff_accounts ?? 5);
+    }
+
+    /**
+     * Check if showroom has reached its plan staff capacity limit.
+     */
+    public function hasReachedStaffLimit(): bool
+    {
+        $currentCount = $this->memberships()->count();
+
+        return $currentCount >= $this->getMaxStaffAccounts();
+    }
 }

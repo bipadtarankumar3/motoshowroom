@@ -21,6 +21,11 @@ class ShowroomMembership extends Model
         'role',
         'permissions',
         'status',
+        'availability_status',
+        'department',
+        'designation',
+        'shift',
+        'notes',
     ];
 
     /**

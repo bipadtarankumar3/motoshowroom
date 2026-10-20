@@ -322,9 +322,15 @@
                         <h2 class="text-lg font-bold font-display text-slate-900">Dealership Personnel</h2>
                         <p class="text-xs text-slate-500 mt-0.5">Staff members authorized to manage this showroom.</p>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                        {{ $showroom->memberships->count() }} Authorized Staff
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            {{ $showroom->memberships->count() }} Authorized Staff
+                        </span>
+                        <a href="{{ route('showrooms.manage.staff.index', $showroom) }}" class="px-3 py-1 rounded-xl text-xs font-bold bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 transition inline-flex items-center gap-1">
+                            <span>Staff Desk & Attendance</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto rounded-xl border border-slate-200">

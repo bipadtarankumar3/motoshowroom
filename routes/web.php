@@ -35,6 +35,7 @@ use App\Http\Controllers\Showroom\SettingController;
 use App\Http\Controllers\Showroom\ShowroomAnalyticsController;
 use App\Http\Controllers\Showroom\ShowroomProfileController;
 use App\Http\Controllers\Showroom\ShowroomServicePackageController;
+use App\Http\Controllers\Showroom\StaffController;
 use App\Http\Controllers\Showroom\SupportController;
 use App\Http\Controllers\Showroom\WebsiteBuilderController;
 use App\Http\Controllers\SocialAuthController;
@@ -369,6 +370,13 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         // Analytics & Business Intelligence Reports
         Route::get('/manage/analytics', [ShowroomAnalyticsController::class, 'index'])->name('showrooms.manage.analytics.index');
         Route::get('/manage/analytics/export', [ShowroomAnalyticsController::class, 'export'])->name('showrooms.manage.analytics.export');
+
+        // Dealership Staff & Personnel Directory (Duty & Availability Status)
+        Route::get('/manage/staff', [StaffController::class, 'index'])->name('showrooms.manage.staff.index');
+        Route::post('/manage/staff', [StaffController::class, 'store'])->name('showrooms.manage.staff.store');
+        Route::put('/manage/staff/{staff}', [StaffController::class, 'update'])->name('showrooms.manage.staff.update');
+        Route::patch('/manage/staff/{staff}/status', [StaffController::class, 'updateStatus'])->name('showrooms.manage.staff.status');
+        Route::delete('/manage/staff/{staff}', [StaffController::class, 'destroy'])->name('showrooms.manage.staff.destroy');
 
         // Showroom Settings & Profile
         Route::get('/manage/settings', [SettingController::class, 'edit'])->name('showrooms.manage.settings');
