@@ -153,6 +153,7 @@ class BikeController extends Controller
             'video_360_file' => ['nullable', 'file', 'mimes:mp4,webm,mov', 'max:51200'],
             'frames_360' => ['nullable', 'array'],
             'frames_360.*' => ['file', 'image', 'max:10240'],
+            'frames_360_urls' => ['nullable', 'string'],
             'variants' => ['nullable', 'array'],
             'variants.*.name' => ['required_with:variants', 'string', 'max:100'],
             'variants.*.color_name' => ['required_with:variants', 'string', 'max:100'],
@@ -318,6 +319,30 @@ class BikeController extends Controller
                 }
             }
 
+            // Append 360-degree turntable frames from bulk URLs
+            if ($request->filled('frames_360_urls')) {
+                $lines = preg_split('/\r\n|\r|\n/', trim($request->input('frames_360_urls')));
+                $validUrls = array_values(array_filter(array_map('trim', $lines ?: [])));
+
+                if (! empty($validUrls)) {
+                    $totalUrls = count($validUrls);
+                    $step = 360 / $totalUrls;
+
+                    foreach ($validUrls as $index => $url) {
+                        $angle = (int) round($index * $step);
+                        $bike->allImages()->create([
+                            'tenant_id' => $showroom->id,
+                            'image_url' => $url,
+                            'alt_text' => "{$bike->name} 360 Frame {$angle}°",
+                            'is_primary' => false,
+                            'is_360_frame' => true,
+                            'frame_angle' => $angle,
+                            'sort_order' => $index,
+                        ]);
+                    }
+                }
+            }
+
             // Save variants
             if (! empty($validated['variants'])) {
                 foreach ($validated['variants'] as $varData) {
@@ -427,6 +452,9 @@ class BikeController extends Controller
             'video_360_file' => ['nullable', 'file', 'mimes:mp4,webm,mov', 'max:51200'],
             'frames_360' => ['nullable', 'array'],
             'frames_360.*' => ['file', 'image', 'max:10240'],
+            'frames_360_urls' => ['nullable', 'string'],
+            'delete_frames' => ['nullable', 'array'],
+            'delete_frames.*' => ['integer'],
             'variants' => ['nullable', 'array'],
             'variants.*.id' => ['nullable', 'integer'],
             'variants.*.name' => ['required_with:variants', 'string', 'max:100'],
@@ -578,6 +606,35 @@ class BikeController extends Controller
                         'sort_order' => $fIdx,
                     ]);
                 }
+            }
+
+            // Append 360-degree turntable frames from bulk URLs
+            if ($request->filled('frames_360_urls')) {
+                $lines = preg_split('/\r\n|\r|\n/', trim($request->input('frames_360_urls')));
+                $validUrls = array_values(array_filter(array_map('trim', $lines ?: [])));
+
+                if (! empty($validUrls)) {
+                    $totalUrls = count($validUrls);
+                    $step = 360 / $totalUrls;
+
+                    foreach ($validUrls as $index => $url) {
+                        $angle = (int) round($index * $step);
+                        $bike->allImages()->create([
+                            'tenant_id' => $showroom->id,
+                            'image_url' => $url,
+                            'alt_text' => "{$bike->name} 360 Frame {$angle}°",
+                            'is_primary' => false,
+                            'is_360_frame' => true,
+                            'frame_angle' => $angle,
+                            'sort_order' => $index,
+                        ]);
+                    }
+                }
+            }
+
+            // Delete removed 360 frames
+            if ($request->has('delete_frames')) {
+                $bike->frames360()->whereIn('id', (array) $request->input('delete_frames'))->delete();
             }
 
             // Sync variants

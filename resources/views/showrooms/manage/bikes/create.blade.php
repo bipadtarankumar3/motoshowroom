@@ -265,9 +265,15 @@
                 thumbnail: null,
                 files: [],
                 frames360: [],
+                frameInputMode: 'upload',
+                bulkFrameUrls: '',
                 viewerType: 'image_sequence',
                 model3dName: '',
                 video360Name: '',
+                get bulkFrameUrlsCount() {
+                    if (!this.bulkFrameUrls) return 0;
+                    return this.bulkFrameUrls.split('\n').filter(l => l.trim().length > 0).length;
+                },
                 handleThumbnailSelect(event) {
                     const file = event.target.files[0];
                     if (file) {
@@ -496,44 +502,88 @@
                     <!-- Hidden input to submit selected viewer_type -->
                     <input type="hidden" name="viewer_type" :value="viewerType">
 
-                    <!-- TYPE 1 VIEW: Multi-Frame Turntable Sequence -->
-                    <div x-show="viewerType === 'image_sequence'" class="space-y-3">
-                        <div class="p-6 rounded-2xl bg-white border-2 border-dashed border-slate-300 hover:border-slate-400 transition group text-center cursor-pointer shadow-2xs">
-                            <label for="frames_360" class="cursor-pointer block">
-                                <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-100 text-slate-900 flex items-center justify-center mb-2.5 group-hover:scale-105 transition shadow-2xs">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <!-- TYPE 1 VIEW: Multi-Frame Turntable Sequence & Bulk URLs -->
+                    <div x-show="viewerType === 'image_sequence'" class="space-y-4">
+                        <div class="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3.5">
+                            <div class="flex items-center justify-between flex-wrap gap-2 pb-2.5 border-b border-slate-100">
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Add 360° Turntable Frames</h4>
+                                    <p class="text-[11px] text-slate-500">Upload sequential photos or paste direct image URLs (ordered clockwise 0° to 360°).</p>
                                 </div>
-                                <span class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-700 block">Select 360° turntable frame images</span>
-                                <span class="text-[11px] text-slate-500 block mt-0.5">Select sequential photos (e.g. 16, 24, 36, or 72 frames) ordered clockwise (0° to 360°)</span>
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-semibold border border-slate-200">
-                                    JPG, PNG, WebP up to 10MB per frame
-                                </span>
-                            </label>
-                            <input type="file" name="frames_360[]" id="frames_360" multiple accept="image/*" @change="handleFramesSelect($event)" class="hidden">
-                        </div>
 
-                        <!-- 360 Frames Preview -->
-                        <template x-if="frames360.length > 0">
-                            <div class="mt-3 pt-3 border-t border-slate-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-xs font-bold text-slate-900" x-text="frames360.length + ' sequential 360° frames loaded'"></span>
-                                    <span class="text-[11px] text-emerald-600 font-semibold">Angles auto-calculated clockwise</span>
-                                </div>
-                                <div class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1.5 bg-white rounded-xl border border-slate-200">
-                                    <template x-for="(frame, idx) in frames360" :key="idx">
-                                        <div class="relative rounded-lg border border-slate-200 overflow-hidden bg-white shadow-2xs text-center group">
-                                            <img :src="frame.preview" class="w-full h-14 object-cover">
-                                            <button type="button" @click="removeFrame(idx)"
-                                                    class="absolute top-1 right-1 w-4 h-4 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center text-[10px] transition shadow-2xs"
-                                                    title="Remove frame">
-                                                &times;
-                                            </button>
-                                            <div class="text-[9px] font-bold text-slate-800 py-0.5 bg-slate-100" x-text="frame.angle"></div>
-                                        </div>
-                                    </template>
+                                <div class="inline-flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200">
+                                    <button type="button" @click="frameInputMode = 'upload'"
+                                            :class="frameInputMode === 'upload' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
+                                            class="px-3 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span>Upload Files</span>
+                                    </button>
+                                    <button type="button" @click="frameInputMode = 'urls'"
+                                            :class="frameInputMode === 'urls' ? 'bg-white text-slate-900 font-bold shadow-2xs border border-slate-200/80' : 'text-slate-600 hover:text-slate-900'"
+                                            class="px-3 py-1 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                        <span>Paste URLs</span>
+                                    </button>
                                 </div>
                             </div>
-                        </template>
+
+                            <!-- Mode A: File Upload Dropzone -->
+                            <div x-show="frameInputMode === 'upload'" class="space-y-3">
+                                <div class="p-6 rounded-2xl bg-slate-50/60 border-2 border-dashed border-slate-300 hover:border-slate-400 transition group text-center cursor-pointer shadow-2xs">
+                                    <label for="frames_360" class="cursor-pointer block">
+                                        <div class="w-12 h-12 mx-auto rounded-2xl bg-white text-slate-900 flex items-center justify-center mb-2.5 group-hover:scale-105 transition shadow-2xs border border-slate-200">
+                                            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        </div>
+                                        <span class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-700 block">Click to select 360° turntable frame images</span>
+                                        <span class="text-[11px] text-slate-500 block mt-0.5">Select sequential photos (e.g. 16, 24, 36, or 72 frames) ordered clockwise (0° to 360°)</span>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 mt-2.5 rounded-full bg-white text-slate-600 text-[10px] font-semibold border border-slate-200">
+                                            JPG, PNG, WebP up to 10MB per frame
+                                        </span>
+                                    </label>
+                                    <input type="file" name="frames_360[]" id="frames_360" multiple accept="image/*" @change="handleFramesSelect($event)" class="hidden">
+                                </div>
+
+                                <!-- 360 Frames Preview -->
+                                <template x-if="frames360.length > 0">
+                                    <div class="mt-3 pt-3 border-t border-slate-200">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-xs font-bold text-slate-900" x-text="frames360.length + ' sequential 360° frames loaded'"></span>
+                                            <span class="text-[11px] text-emerald-600 font-semibold">Angles auto-calculated clockwise</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1.5 bg-white rounded-xl border border-slate-200">
+                                            <template x-for="(frame, idx) in frames360" :key="idx">
+                                                <div class="relative rounded-lg border border-slate-200 overflow-hidden bg-white shadow-2xs text-center group">
+                                                    <img :src="frame.preview" class="w-full h-14 object-cover">
+                                                    <button type="button" @click="removeFrame(idx)"
+                                                            class="absolute top-1 right-1 w-4 h-4 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center text-[10px] transition shadow-2xs cursor-pointer"
+                                                            title="Remove frame">
+                                                        &times;
+                                                    </button>
+                                                    <div class="text-[9px] font-bold text-slate-800 py-0.5 bg-slate-100" x-text="frame.angle"></div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Mode B: Bulk URLs Textarea -->
+                            <div x-show="frameInputMode === 'urls'" class="space-y-3">
+                                <div>
+                                    <label for="frames_360_urls" class="block text-xs font-bold text-slate-800 mb-1">
+                                        Paste Frame Image URLs (one per line)
+                                    </label>
+                                    <textarea name="frames_360_urls" id="frames_360_urls" rows="5"
+                                              x-model="bulkFrameUrls"
+                                              placeholder="https://cdn.example.com/bike-360-00.jpg&#10;https://cdn.example.com/bike-360-01.jpg&#10;https://cdn.example.com/bike-360-02.jpg"
+                                              class="w-full text-xs font-mono rounded-xl border border-slate-300 p-3 text-slate-900 focus:border-slate-900 focus:ring-slate-900 bg-white placeholder-slate-400"></textarea>
+                                </div>
+                                <div class="flex items-center justify-between text-[11px] text-slate-500">
+                                    <span>Angles will be distributed evenly across 360° in the order listed.</span>
+                                    <span class="font-bold text-slate-700" x-text="bulkFrameUrlsCount + ' URLs detected'"></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- TYPE 2 VIEW: 3D WebGL CAD Model (.GLB / .GLTF) -->

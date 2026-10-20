@@ -7,6 +7,7 @@ use App\Models\Bike;
 use App\Models\BikeImage;
 use App\Models\Showroom;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -176,7 +177,7 @@ class Bike360ViewerController extends Controller
     /**
      * Delete an individual 360-degree frame.
      */
-    public function deleteFrame(Showroom $showroom, Bike $bike, BikeImage $image): RedirectResponse
+    public function deleteFrame(Showroom $showroom, Bike $bike, BikeImage $image): RedirectResponse|JsonResponse
     {
         abort_if($bike->tenant_id !== $showroom->id || $image->bike_id !== $bike->id || $image->tenant_id !== $showroom->id, 404);
 
@@ -185,6 +186,10 @@ class Bike360ViewerController extends Controller
         }
 
         $image->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()
             ->route('showrooms.manage.bikes.360', [$showroom, $bike])

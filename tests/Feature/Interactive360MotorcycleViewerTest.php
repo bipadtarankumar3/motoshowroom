@@ -561,5 +561,45 @@ class Interactive360MotorcycleViewerTest extends TestCase
         $indexResponse->assertStatus(200);
         $indexResponse->assertDontSee('#studio360');
     }
-}
 
+    public function test_staff_can_add_360_frame_urls_and_delete_frames_via_bike_edit_form(): void
+    {
+        // 1. Add an existing frame to bike A
+        $existingFrame = BikeImage::create([
+            'tenant_id' => $this->showroomA->id,
+            'bike_id' => $this->bikeA->id,
+            'image_url' => 'https://cdn.example.com/existing-00.jpg',
+            'is_360_frame' => true,
+            'frame_angle' => 0,
+            'sort_order' => 0,
+        ]);
+
+        $this->assertSame(1, $this->bikeA->frames360()->count());
+
+        // 2. Submit edit form with bulk frame URLs AND delete existing frame
+        $bulkUrls = "https://cdn.example.com/new-01.jpg\nhttps://cdn.example.com/new-02.jpg\nhttps://cdn.example.com/new-03.jpg";
+
+        $response = $this->actingAs($this->ownerA)
+            ->put(route('showrooms.manage.bikes.update', [$this->showroomA, $this->bikeA]), [
+                'name' => $this->bikeA->name,
+                'sku' => $this->bikeA->sku,
+                'brand' => $this->bikeA->brand,
+                'model_year' => $this->bikeA->model_year,
+                'category' => $this->bikeA->category->value,
+                'price' => $this->bikeA->price,
+                'fuel_type' => 'petrol',
+                'status' => 'in_stock',
+                'is_published' => 1,
+                'has_360_view' => 1,
+                'viewer_type' => 'image_sequence',
+                'frames_360_urls' => $bulkUrls,
+                'delete_frames' => [$existingFrame->id],
+            ]);
+
+        $response->assertRedirect(route('showrooms.manage.bikes.index', $this->showroomA));
+
+        // 3. Verify old frame is deleted and 3 new frames exist
+        $this->assertDatabaseMissing('bike_images', ['id' => $existingFrame->id]);
+        $this->assertSame(3, $this->bikeA->frames360()->count());
+    }
+}
