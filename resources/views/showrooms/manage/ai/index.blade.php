@@ -266,7 +266,28 @@
                                         <span id="check-voice-female" class="text-amber-600 text-xs font-black {{ old('voice_gender', $setting->effective_voice_gender) === 'female' ? '' : 'hidden' }}">✓</span>
                                     </label>
                                 </div>
-                                <input type="hidden" name="voice_pitch" id="input_voice_pitch" value="{{ old('voice_pitch', $setting->effective_voice_pitch) }}">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-amber-200/50">
+                                    <div>
+                                        <label for="input_voice_pitch" class="block text-xs font-bold uppercase text-slate-700 mb-1">Human Voice Pitch & Timbre</label>
+                                        <select name="voice_pitch" id="input_voice_pitch" @disabled(! $hasFeature)
+                                                class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                            <option value="1.00" {{ (float)old('voice_pitch', $setting->voice_pitch ?? 1.00) == 1.00 ? 'selected' : '' }}>Natural Human Voice (1.00x - Recommended)</option>
+                                            <option value="0.95" {{ (float)old('voice_pitch', $setting->voice_pitch) == 0.95 ? 'selected' : '' }}>Warm & Deep (0.95x)</option>
+                                            <option value="1.05" {{ (float)old('voice_pitch', $setting->voice_pitch) == 1.05 ? 'selected' : '' }}>Crisp & Bright (1.05x)</option>
+                                        </select>
+                                        <span class="text-[10px] text-slate-500 mt-0.5 block">Natural 1.00x pitch preserves human vocal warmth without metallic distortion.</span>
+                                    </div>
+                                    <div>
+                                        <label for="voice_speed_preset" class="block text-xs font-bold uppercase text-slate-700 mb-1">Speaking Rate & Cadence</label>
+                                        <select id="voice_speed_preset" @disabled(! $hasFeature)
+                                                class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
+                                            <option value="0.94" selected>Welcoming Showroom Pace (0.94x - Recommended)</option>
+                                            <option value="1.00">Standard Natural Pace (1.00x)</option>
+                                            <option value="0.88">Gentle & Relaxed (0.88x)</option>
+                                        </select>
+                                        <span class="text-[10px] text-slate-500 mt-0.5 block">Gentle, relaxed cadence sounds hospitable and friendly to showroom visitors.</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Voice Language & Specific Voice Dropdown -->
@@ -285,24 +306,39 @@
                                     <label for="voice_name" class="block text-xs font-bold uppercase text-slate-700 mb-1">Browser Voice Model</label>
                                     <select name="voice_name" id="voice_name" @disabled(! $hasFeature)
                                             class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20">
-                                        <option value="">Auto-matched to Gender</option>
+                                        <option value="">Auto-matched to Gender (Natural Pitch 1.00)</option>
                                     </select>
                                 </div>
                             </div>
 
                             <!-- Spoken Welcome Text -->
                             <div>
-                                <div class="flex items-center justify-between mb-1">
+                                <div class="flex items-center justify-between mb-1.5 flex-wrap gap-2">
                                     <label for="voice_welcome_text" class="block text-xs font-bold uppercase text-slate-700">Spoken Voice Greeting</label>
-                                    <button type="button" id="btn-test-voice" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shadow-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
-                                        <svg class="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-                                        <span>▶️ Test Selected Voice</span>
-                                    </button>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" id="btn-convert-hindi" onclick="convertHinglishToHindi()"
+                                                class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-[11px] shadow-2xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
+                                                title="Convert English letters (Hinglish) to authentic Hindi script (देवनागरी)">
+                                            <span>✨ Convert to Hindi Script (देवनागरी)</span>
+                                        </button>
+                                        <button type="button" id="btn-test-voice" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] shadow-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
+                                            <svg class="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                                            <span>▶️ Test Selected Voice</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <textarea name="voice_welcome_text" id="voice_welcome_text" rows="2" @disabled(! $hasFeature)
                                           placeholder="e.g. नमस्ते! सवरंती टीवीएस में आपका स्वागत है। बताइए आज मैं आपकी क्या सहायता कर सकता हूँ?"
                                           class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 leading-relaxed">{{ old('voice_welcome_text', $setting->voice_welcome_text) }}</textarea>
-                                <span class="text-[10px] text-slate-500 mt-0.5 block">Leave blank to use the smart default greeting for this showroom.</span>
+
+                                <!-- Real Human Voice Guidance Banner -->
+                                <div class="mt-1.5 p-2.5 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-start gap-2 text-[11px] text-emerald-950 leading-relaxed">
+                                    <span class="text-sm shrink-0">✨</span>
+                                    <div class="flex-1">
+                                        <span class="font-bold text-emerald-900">For 100% Real Human Hindi Voice:</span> Hindi speech synthesizers speak natively and fluently when text is written in Hindi script (देवनागरी जैसे <span class="font-semibold text-emerald-900">"नमस्ते..."</span>). If written in English letters (<span class="italic text-slate-600">"Namaste..."</span>), it may sound robotic. Click <strong class="text-indigo-700 underline cursor-pointer" onclick="convertHinglishToHindi()">"Convert to Hindi Script"</strong> above to auto-convert your Roman text in 1 tap!
+                                    </div>
+                                </div>
+                                <span class="text-[10px] text-slate-500 mt-1 block">Leave blank to use the smart default greeting for this showroom.</span>
                             </div>
 
                             <!-- Optional Custom Audio Recording -->
@@ -1003,7 +1039,9 @@ function selectVoiceGender(gender) {
         }
         if (checkFemale) checkFemale.classList.remove('hidden');
         if (checkMale) checkMale.classList.add('hidden');
-        if (pitchInput) pitchInput.value = '1.22';
+        if (pitchInput && (!pitchInput.value || pitchInput.value === '0.88' || pitchInput.value === '1.22')) {
+            pitchInput.value = '1.00';
+        }
         if (genderLabel) genderLabel.textContent = 'Female (Sweet)';
     } else {
         if (radioMale) radioMale.checked = true;
@@ -1017,11 +1055,20 @@ function selectVoiceGender(gender) {
         }
         if (checkMale) checkMale.classList.remove('hidden');
         if (checkFemale) checkFemale.classList.add('hidden');
-        if (pitchInput) pitchInput.value = '0.88';
+        if (pitchInput && (!pitchInput.value || pitchInput.value === '0.88' || pitchInput.value === '1.22')) {
+            pitchInput.value = '1.00';
+        }
         if (genderLabel) genderLabel.textContent = 'Male (TVS Advisor)';
     }
 
     updateAvailableVoices();
+}
+
+function isNaturalVoice(name) {
+    const n = name.toLowerCase();
+    return n.includes('natural') || n.includes('online') || n.includes('google') ||
+           n.includes('neural') || n.includes('premium') || n.includes('enhanced') ||
+           n.includes('siri');
 }
 
 function isFemaleVoiceName(name) {
@@ -1031,7 +1078,7 @@ function isFemaleVoiceName(name) {
            n.includes('samantha') || n.includes('zira') || n.includes('kavya') ||
            n.includes('priya') || n.includes('aditi') || n.includes('heera') ||
            n.includes('kalpana') || n.includes('geeta') || n.includes('victoria') ||
-           n.includes('karen') || n.includes('susan');
+           n.includes('karen') || n.includes('susan') || n.includes('neerja');
 }
 
 function isMaleVoiceName(name) {
@@ -1039,7 +1086,111 @@ function isMaleVoiceName(name) {
     return n.includes('male') || n.includes('man') || n.includes('boy') ||
            n.includes('rishi') || n.includes('daniel') || n.includes('george') ||
            n.includes('madhav') || n.includes('hemant') || n.includes('david') ||
-           n.includes('ravi') || n.includes('alex') || n.includes('fred');
+           n.includes('ravi') || n.includes('alex') || n.includes('fred') ||
+           n.includes('prabhat');
+}
+
+// Showroom Hinglish-to-Hindi Fallback Dictionary
+function transliterateHinglishFallback(text) {
+    if (!text || !/[a-zA-Z]/.test(text)) return text;
+
+    const DICT = {
+        'namaste': 'नमस्ते', 'namaskar': 'नमस्कार', 'pranam': 'प्रणाम',
+        'royal': 'रॉयल', 'bike': 'बाइक', 'bikes': 'बाइक्स', 'motor': 'मोटर', 'motors': 'मोटर्स',
+        'tvs': 'टीवीएस', 'honda': 'होंडा', 'hero': 'हीरो', 'yamaha': 'यामाहा', 'bajaj': 'बजाज',
+        'suzuki': 'सुजुकी', 'bullet': 'बुलेट', 'rider': 'राइडर', 'raider': 'रेडर', 'apache': 'अपाचे',
+        'jupiter': 'जुपिटर', 'scooter': 'स्कूटर', 'scooty': 'स्कूटी', 'gaadi': 'गाड़ी', 'gadi': 'गाड़ी',
+        'apka': 'आपका', 'aapka': 'आपका', 'aapke': 'आपके', 'apke': 'आपके', 'aapki': 'आपकी', 'apki': 'आपकी',
+        'hamare': 'हमारे', 'hamaare': 'हमारे', 'humare': 'हमारे', 'hamara': 'हमारा', 'hamaari': 'हमारी',
+        'swagat': 'स्वागत', 'hai': 'है', 'hain': 'हैं', 'ish': 'इस', 'is': 'इस', 'ye': 'ये', 'yeh': 'यह',
+        'showroom': 'शोरूम', 'sorum': 'शोरूम', 'me': 'में', 'mein': 'में', 'parr': 'पर', 'par': 'पर', 'pe': 'पे',
+        'sabse': 'सबसे', 'badiya': 'बढ़िया', 'badhiya': 'बढ़िया', 'achha': 'अच्छा', 'accha': 'अच्छा', 'achhi': 'अच्छी',
+        'bataiye': 'बताइए', 'batao': 'बताओ', 'aaj': 'आज', 'hum': 'हम', 'kya': 'क्या', 'kaise': 'कैसे',
+        'sahayata': 'सहायता', 'madad': 'मदद', 'kar': 'कर', 'sakta': 'सकता', 'sakti': 'सकती', 'sakte': 'सकते',
+        'hu': 'हूँ', 'hoon': 'हूँ', 'ho': 'हो', 'dhanyawad': 'धन्यवाद', 'dhanyavad': 'धन्यवाद', 'shukriya': 'शुक्रिया',
+        'offer': 'ऑफर', 'offers': 'ऑफ़र्स', 'discount': 'डिस्काउंट', 'deal': 'डील', 'deals': 'डील्स',
+        'finance': 'फाइनेंस', 'emi': 'ईएमआई', 'price': 'प्राइस', 'rate': 'रेट', 'booking': 'बुकिंग',
+        'test': 'टेस्ट', 'ride': 'राइड', 'karo': 'करो', 'kariye': 'करिए', 'dekhiye': 'देखिए',
+        'chahiye': 'चाहिए', 'lena': 'लेना', 'kharidna': 'खरीदना', 'service': 'सर्विस'
+    };
+
+    return text.replace(/\b[a-zA-Z]+\b/g, (match) => {
+        const lower = match.toLowerCase();
+        return DICT[lower] || match;
+    });
+}
+
+async function convertHinglishToHindi() {
+    const textInput = document.getElementById('voice_welcome_text');
+    const btn = document.getElementById('btn-convert-hindi');
+    if (!textInput) return;
+
+    const rawText = textInput.value.trim();
+    if (!rawText) {
+        textInput.value = "नमस्ते! रॉयल बाइक में आपका स्वागत है। बताइए आज मैं आपकी क्या सहायता कर सकता हूँ?";
+        return;
+    }
+
+    const originalBtnHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = `
+            <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            <span>Converting...</span>
+        `;
+        btn.disabled = true;
+    }
+
+    try {
+        const response = await fetch("{{ route('showrooms.manage.ai.transliterate', $showroom) }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || "{{ csrf_token() }}",
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ text: rawText })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.transliterated) {
+                textInput.value = result.transliterated;
+                const bubble = document.getElementById('preview-welcome-bubble-text');
+                if (bubble) bubble.textContent = `"${result.transliterated}"`;
+
+                if (btn) {
+                    btn.innerHTML = '<span>✓ Converted to Hindi!</span>';
+                    btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'border-indigo-200');
+                    btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                    setTimeout(() => {
+                        btn.innerHTML = originalBtnHtml;
+                        btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                        btn.classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-200');
+                        btn.disabled = false;
+                    }, 2500);
+                }
+                return;
+            }
+        }
+    } catch (e) {
+        console.error('Transliteration API error:', e);
+    }
+
+    // Client-side fallback dictionary for instant conversion
+    const fallbackConverted = transliterateHinglishFallback(rawText);
+    textInput.value = fallbackConverted;
+    const bubble = document.getElementById('preview-welcome-bubble-text');
+    if (bubble) bubble.textContent = `"${fallbackConverted}"`;
+    if (btn) {
+        btn.innerHTML = '<span>✓ Converted!</span>';
+        setTimeout(() => {
+            btn.innerHTML = originalBtnHtml;
+            btn.disabled = false;
+        }, 2000);
+    }
 }
 
 function updateAvailableVoices() {
@@ -1056,29 +1207,69 @@ function updateAvailableVoices() {
     }
 
     const voices = window.speechSynthesis.getVoices();
-    const langPrefix = targetLang.substring(0, 2);
-
-    const relevantVoices = voices.filter(v => v.lang === targetLang || v.lang.replace('_', '-').startsWith(langPrefix));
     const previousSelection = voiceSelect.value || savedVoiceName;
     voiceSelect.innerHTML = '';
 
     const autoOpt = document.createElement('option');
     autoOpt.value = '';
-    autoOpt.textContent = `Auto-matched (${currentVoiceGender === 'female' ? 'Female Sweet Pitch 1.22' : 'Male Advisor Pitch 0.88'})`;
+    autoOpt.textContent = `✨ Auto-matched Real Human Voice (${currentVoiceGender === 'female' ? 'Female Priya' : 'Male Rohit'} - Natural Pitch 1.00)`;
     voiceSelect.appendChild(autoOpt);
 
-    relevantVoices.forEach(v => {
+    const hindiVoices = voices.filter(v => v.lang === 'hi-IN' || v.lang.replace('_', '-').startsWith('hi'));
+    const indianEnglishVoices = voices.filter(v => v.lang === 'en-IN' || v.lang.replace('_', '-').startsWith('en-IN') || v.lang === 'en_IN');
+    const targetVoices = voices.filter(v => v.lang === targetLang || v.lang.replace('_', '-').startsWith(targetLang.substring(0, 2)));
+
+    const naturalHindiGroup = document.createElement('optgroup');
+    naturalHindiGroup.label = '🌟 Natural Hindi Voices (Authentic Devanagari)';
+
+    const indianAccentGroup = document.createElement('optgroup');
+    indianAccentGroup.label = '🇮🇳 Natural Indian Accent Voices (Great for Hinglish)';
+
+    const standardGroup = document.createElement('optgroup');
+    standardGroup.label = '🖥️ Standard Voices';
+
+    const addedVoiceNames = new Set();
+
+    function addVoiceOption(v, group, badge = '') {
+        if (addedVoiceNames.has(v.name)) return;
+        addedVoiceNames.add(v.name);
         const opt = document.createElement('option');
         opt.value = v.name;
         const isF = isFemaleVoiceName(v.name);
         const isM = isMaleVoiceName(v.name);
         const genderTag = isF ? ' (Female)' : (isM ? ' (Male)' : '');
-        opt.textContent = `${v.name}${genderTag} [${v.lang}]`;
+        opt.textContent = `${badge ? badge + ' ' : ''}${v.name}${genderTag} [${v.lang}]`;
         if (v.name === previousSelection) {
             opt.selected = true;
         }
-        voiceSelect.appendChild(opt);
+        group.appendChild(opt);
+    }
+
+    // 1. Natural Hindi voices
+    hindiVoices.forEach(v => {
+        if (isNaturalVoice(v.name)) {
+            addVoiceOption(v, naturalHindiGroup, '🌟');
+        }
     });
+
+    // 2. Natural Indian English voices (Rishi, Veena, etc.)
+    indianEnglishVoices.forEach(v => {
+        addVoiceOption(v, indianAccentGroup, isNaturalVoice(v.name) ? '🌟' : '🇮🇳');
+    });
+
+    // 3. Other Hindi voices
+    hindiVoices.forEach(v => {
+        addVoiceOption(v, standardGroup);
+    });
+
+    // 4. Other target voices
+    targetVoices.forEach(v => {
+        addVoiceOption(v, standardGroup);
+    });
+
+    if (naturalHindiGroup.children.length > 0) voiceSelect.appendChild(naturalHindiGroup);
+    if (indianAccentGroup.children.length > 0) voiceSelect.appendChild(indianAccentGroup);
+    if (standardGroup.children.length > 0) voiceSelect.appendChild(standardGroup);
 }
 
 function findBestVoice(lang, gender, preferredName) {
@@ -1091,18 +1282,46 @@ function findBestVoice(lang, gender, preferredName) {
         if (named) return named;
     }
 
-    const langPrefix = lang.substring(0, 2);
-    const matchingLangVoices = voices.filter(v => v.lang === lang || v.lang.replace('_', '-').startsWith(langPrefix));
+    const hindiVoices = voices.filter(v => v.lang === 'hi-IN' || v.lang.replace('_', '-').startsWith('hi'));
+    const indianVoices = voices.filter(v => v.lang === 'en-IN' || v.lang.replace('_', '-').startsWith('en-IN') || v.lang === 'en_IN');
 
     if (gender === 'female') {
-        const femaleVoice = matchingLangVoices.find(v => isFemaleVoiceName(v.name));
-        if (femaleVoice) return femaleVoice;
-    } else {
-        const maleVoice = matchingLangVoices.find(v => isMaleVoiceName(v.name));
-        if (maleVoice) return maleVoice;
-    }
+        // Natural Hindi Female (Google हिन्दी, Microsoft Swara)
+        const naturalHindi = hindiVoices.find(v => isFemaleVoiceName(v.name) && isNaturalVoice(v.name));
+        if (naturalHindi) return naturalHindi;
 
-    return matchingLangVoices[0] || voices[0];
+        const anyHindiFemale = hindiVoices.find(v => isFemaleVoiceName(v.name));
+        if (anyHindiFemale) return anyHindiFemale;
+
+        // Natural Indian English Female (Veena, Neerja)
+        const naturalIndian = indianVoices.find(v => isFemaleVoiceName(v.name) && isNaturalVoice(v.name));
+        if (naturalIndian) return naturalIndian;
+
+        const anyIndianFemale = indianVoices.find(v => isFemaleVoiceName(v.name));
+        if (anyIndianFemale) return anyIndianFemale;
+
+        return hindiVoices[0] || indianVoices[0] || voices[0];
+    } else {
+        // Natural Hindi Male (Microsoft Madhur, etc.)
+        const naturalHindiMale = hindiVoices.find(v => isMaleVoiceName(v.name) && isNaturalVoice(v.name));
+        if (naturalHindiMale) return naturalHindiMale;
+
+        const anyHindiMale = hindiVoices.find(v => isMaleVoiceName(v.name));
+        if (anyHindiMale) return anyHindiMale;
+
+        // Natural Indian Male (Rishi on macOS, Prabhat, Google Indian English)
+        const naturalIndianMale = indianVoices.find(v => isMaleVoiceName(v.name) && isNaturalVoice(v.name));
+        if (naturalIndianMale) return naturalIndianMale;
+
+        const anyIndianMale = indianVoices.find(v => isMaleVoiceName(v.name));
+        if (anyIndianMale) return anyIndianMale;
+
+        // If no male Indian/Hindi voice exists, return best Hindi voice at natural pitch 1.0 (do not pitch-shift down!)
+        const naturalHindi = hindiVoices.find(v => isNaturalVoice(v.name));
+        if (naturalHindi) return naturalHindi;
+
+        return hindiVoices[0] || indianVoices[0] || voices[0];
+    }
 }
 
 function setSpeakingUIState(isSpeaking) {
@@ -1206,18 +1425,26 @@ function playVoiceTest() {
     }
 
     if ('speechSynthesis' in window) {
-        const text = (textInput && textInput.value.trim()) ? textInput.value.trim() : "{{ addslashes($setting->voice_welcome_text_or_default) }}";
+        let text = (textInput && textInput.value.trim()) ? textInput.value.trim() : "{{ addslashes($setting->voice_welcome_text_or_default) }}";
         const lang = langSelect ? langSelect.value : 'hi-IN';
         const chosenVoiceName = voiceSelect ? voiceSelect.value : '';
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = lang;
-
-        const isFemale = currentVoiceGender === 'female';
-        utterance.pitch = isFemale ? 1.22 : 0.88;
-        utterance.rate = isFemale ? 0.98 : 0.94;
-
         const bestVoice = findBestVoice(lang, currentVoiceGender, chosenVoiceName);
+
+        // If speaking with Hindi voice and text is written in English/Roman alphabet,
+        // auto-convert so the voice speaks native Hindi syllables rather than robotic spelling!
+        if (lang.startsWith('hi') && /[a-zA-Z]/.test(text) && (!bestVoice || bestVoice.lang.startsWith('hi'))) {
+            text = transliterateHinglishFallback(text);
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = bestVoice ? bestVoice.lang : lang;
+
+        const pitchInput = document.getElementById('input_voice_pitch');
+        const speedInput = document.getElementById('voice_speed_preset');
+        utterance.pitch = pitchInput ? (parseFloat(pitchInput.value) || 1.00) : 1.00;
+        utterance.rate = speedInput ? (parseFloat(speedInput.value) || 0.94) : 0.94;
+
         if (bestVoice) {
             utterance.voice = bestVoice;
         }

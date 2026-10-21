@@ -23,49 +23,44 @@
 @if($aiAvailable && $aiSetting->is_enabled)
 <!-- AI Character & Real-Time Audio Lip-Sync Styles -->
 <style>
-    @keyframes avatarLifeBreathe {
-        0%, 100% {
-            transform: translateY(0) scale(1);
-        }
-        50% {
-            transform: translateY(-8px) scale(1.015);
-        }
+    @keyframes rgbSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 
-    @keyframes auraRadialPulse {
+    @keyframes rgbGlowRotate {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+    }
+
+    @keyframes rgbPulse {
         0%, 100% {
             transform: scale(0.96);
-            opacity: 0.45;
+            opacity: 0.65;
         }
         50% {
             transform: scale(1.08);
-            opacity: 0.85;
+            opacity: 0.95;
         }
     }
 
-    @keyframes naturalEyelidBlink {
-        0%, 94%, 100% { opacity: 0; }
-        96%, 98% { opacity: 0.95; }
+    @keyframes subtleBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
     }
 
-    @keyframes soundBarRealtime {
-        0%, 100% { height: 4px; }
-        50% { height: 16px; }
+    .avatar-rgb-halo {
+        background: conic-gradient(from 0deg at 50% 50%, #ff0055, #ff5500, #ffbe00, #00ff88, #00d4ff, #7a00ff, #ff00c8, #ff0055);
+        animation: rgbSpin 5s linear infinite, rgbGlowRotate 7s linear infinite;
     }
 
-    .animate-avatar-life {
-        animation: avatarLifeBreathe 4.5s ease-in-out infinite;
+    .avatar-rgb-ambient {
+        background: conic-gradient(from 0deg at 50% 50%, #ff0055, #ff5500, #ffbe00, #00ff88, #00d4ff, #7a00ff, #ff00c8, #ff0055);
+        animation: rgbSpin 7s linear infinite, rgbPulse 3.5s ease-in-out infinite;
     }
 
-    .animate-aura-glow {
-        animation: auraRadialPulse 3.5s ease-in-out infinite;
-    }
-
-    /* Real-time lip-sync overlay — driven by JS, not CSS animation */
-    #ai-lip-sync-overlay {
-        transition: opacity 0.12s ease;
-        transform-origin: center;
-        transform: translate(-50%, -50%);
+    .animate-bounce-subtle {
+        animation: subtleBounce 2.5s ease-in-out infinite;
     }
 
     .sound-bar {
@@ -79,34 +74,27 @@
 <div id="ai-speech-root" class="font-sans" style="font-family: inherit;">
 
     <!-- ===================================================================
-         1. CENTER WELCOME STAGE: Prominently shown in the middle on first visit
+         1. CENTER WELCOME STAGE: Fullscreen Blur with Frameless Avatar Hero
          =================================================================== -->
     <div id="ai-center-modal"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md transition-all duration-500 opacity-100">
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-2xl transition-all duration-500 opacity-100 overflow-y-auto">
 
-        <!-- Outer Card Box: Pure Premium Light Theme -->
-        <div class="relative w-full max-w-xl bg-white rounded-3xl border border-slate-200/80 shadow-2xl p-6 sm:p-8 flex flex-col items-center text-center overflow-hidden transform transition-all duration-500 scale-100">
+        <!-- Stage Container: Frameless & Centered (No Box) -->
+        <div id="ai-center-stage" class="relative flex flex-col items-center justify-center w-full max-w-2xl my-auto transition-all duration-500">
 
-            <!-- Top Close/Skip button -->
+            <!-- Top Close/Skip button (Subtle Glass Pill) -->
             <button type="button" id="ai-center-skip-btn"
-                    class="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition z-20 cursor-pointer"
+                    class="absolute -top-2 right-2 sm:right-6 p-2 rounded-full bg-white/20 hover:bg-white/40 text-white backdrop-blur-md border border-white/30 transition shadow-lg z-30 cursor-pointer"
                     title="Skip to Showroom">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
-            <!-- Showroom Welcome Badge -->
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider mb-2">
-                <span>🙏 Namaste</span>
-                <span class="w-1 h-1 rounded-full bg-rose-400"></span>
-                <span>Welcome to {{ $showroom->name }}</span>
-            </div>
-
             <!-- =========================================================
-                 REALISTIC AI PRESENTER (VIDEO OR CUTOUT AVATAR)
+                 REALISTIC AI PRESENTER (LARGE & FRAMELESS WITH RGB AURA)
                  ========================================================= -->
             @if($hasWelcomeVideo)
                 <!-- Photorealistic AI Welcome Video (Google AI Studio / Veo / ElevenLabs) -->
-                <div class="relative w-full max-w-[440px] aspect-video my-3 rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-2xl flex items-center justify-center">
+                <div class="relative w-full max-w-[520px] aspect-video my-3 rounded-3xl overflow-hidden bg-slate-900 border-2 border-white/40 shadow-2xl flex items-center justify-center z-10">
                     <video id="ai-welcome-video-player"
                            src="{{ $welcomeVideoUrl }}"
                            class="w-full h-full object-cover"
@@ -115,59 +103,30 @@
                            controls></video>
                 </div>
             @else
-                <!-- Interactive 3D GLB Presenter: Namaste Greeting Pose & Real-Time Lip-Sync Speech -->
-                <div id="ai-living-character" class="relative w-full max-w-[360px] h-[380px] sm:h-[420px] my-2 flex items-center justify-center select-none overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50/50 via-white to-slate-50/80 border border-slate-200/80 shadow-md">
-                    <!-- Soft Warm Halo Ambient Background -->
-                    <div class="absolute inset-0 m-auto w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-tr from-amber-200/35 via-rose-200/20 to-sky-200/25 blur-3xl pointer-events-none"></div>
+                <!-- Interactive 3D GLB Presenter: Large Frameless Avatar with RGB Glowing Halo -->
+                <div id="ai-living-character" class="relative w-[340px] sm:w-[440px] md:w-[480px] h-[460px] sm:h-[540px] md:h-[600px] flex items-center justify-center select-none z-10 pointer-events-none">
+                    <!-- Dynamic RGB Ambient Aura Glow behind avatar -->
+                    <div class="absolute inset-0 m-auto w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] md:w-[430px] md:h-[430px] rounded-full avatar-rgb-ambient blur-3xl opacity-80 pointer-events-none"></div>
 
-                    <!-- 3D WebGL Avatar Canvas Mount -->
-                    <div id="ai-3d-avatar-canvas" class="relative w-full h-full flex items-center justify-center z-10"></div>
+                    <!-- Glowing RGB Base Ring / Podium -->
+                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-52 sm:w-72 h-10 rounded-full avatar-rgb-halo blur-lg opacity-70 pointer-events-none"></div>
+
+                    <!-- 3D WebGL Avatar Canvas Mount (Transparent, High-Res, Frameless) -->
+                    <div id="ai-3d-avatar-canvas" class="relative w-full h-full flex items-center justify-center z-20 filter drop-shadow-[0_16px_32px_rgba(0,0,0,0.45)]"></div>
                 </div>
             @endif
 
-            <!-- Speech Audio Waves Status Indicator -->
-            <div id="ai-speech-status-bar" class="flex items-center gap-2 mb-2">
-                <div id="ai-bars-visualizer" class="hidden flex items-center gap-1 h-4">
-                    <span class="sound-bar"></span>
-                    <span class="sound-bar"></span>
-                    <span class="sound-bar"></span>
-                    <span class="sound-bar"></span>
-                </div>
-                <span id="ai-status-label" class="text-xs font-bold text-amber-700 uppercase tracking-wide">
-                    Speaking Welcome Greeting
-                </span>
-            </div>
-
-            <!-- Spoken Subtitle Text Bubble -->
-            <p id="ai-speech-caption"
-               class="text-xs sm:text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200/90 rounded-2xl p-3.5 max-w-lg shadow-inner leading-relaxed mb-4">
-                "{{ $voiceGreeting }}"
-            </p>
-
-            <!-- 1-Tap Play / Autoplay Blocked Fallback Action -->
-            <div id="ai-one-tap-action-box" class="w-full mb-3 {{ $voiceEnabled ? '' : 'hidden' }}">
-                <button type="button" id="ai-tap-listen-btn"
-                        class="w-full py-3 px-5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 active:scale-98 cursor-pointer">
-                    <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-                    <span>🔊 सुनने के लिए टैप करें / Tap to Listen</span>
-                </button>
-            </div>
-
-            <!-- Navigation Actions -->
-            <div class="flex items-center gap-2.5 w-full">
-                <!-- Replay Speech -->
-                <button type="button" id="ai-center-replay-btn"
-                        class="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    <span>Replay</span>
-                </button>
-
-                <!-- Explore Showroom / Minimize to corner -->
+            <!-- Explore the Website Button: Revealed smoothly only when avatar completes speaking -->
+            <div id="ai-explore-action-container"
+                 class="hidden opacity-0 translate-y-6 pointer-events-none mt-4 flex items-center justify-center z-30 transition-all duration-500">
                 <button type="button" id="ai-explore-btn"
-                        class="flex-1 py-2.5 px-4 rounded-xl text-white font-bold text-xs transition shadow-md hover:brightness-110 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                        class="group relative py-3.5 px-8 rounded-full text-white font-extrabold text-sm sm:text-base shadow-2xl hover:shadow-rose-500/40 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer overflow-hidden animate-bounce-subtle"
                         style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $accentColor }});">
-                    <span>Explore Showroom / शोरूम देखें</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <span class="absolute inset-0 rounded-full avatar-rgb-halo opacity-50 blur-sm group-hover:opacity-90 transition"></span>
+                    <span class="relative z-10 flex items-center gap-2 tracking-wide">
+                        <span>Explore the Website</span>
+                        <svg class="w-5 h-5 group-hover:translate-x-1.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
                 </button>
             </div>
 
@@ -176,23 +135,29 @@
 
 
     <!-- ===================================================================
-         2. MINIMIZED FLOATING AVATAR: Bottom-right corner trigger pill
+         2. MINIMIZED FLOATING AVATAR: Bottom-Right Corner with RGB Glow Ring
          =================================================================== -->
     <div id="ai-floating-pill"
-         class="hidden fixed bottom-6 right-4 sm:right-6 z-40">
+         class="hidden fixed bottom-6 right-4 sm:right-6 z-40 transition-all duration-400 opacity-0 scale-75">
         <button type="button" id="ai-pill-trigger-btn"
-                class="group relative flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none cursor-pointer">
-            <!-- Namaste Avatar Pill Icon -->
-            <div class="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-to-tr from-amber-100 to-rose-50 border border-amber-300 shadow-xs flex items-center justify-center shrink-0">
-                <span class="text-lg select-none">🙏</span>
-                <span class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse"></span>
+                class="group relative flex items-center gap-3 p-1.5 pr-4 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none cursor-pointer">
+            <!-- Avatar with RGB Halo Border -->
+            <div class="relative p-0.5 rounded-full avatar-rgb-halo shrink-0 shadow-lg">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden bg-slate-900 border-2 border-white flex items-center justify-center">
+                    <img src="{{ $avatarUrl }}" alt="{{ $showroom->name }} AI Advisor" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                </div>
+                <!-- Pulsing online status indicator -->
+                <span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
             </div>
             <div class="text-left hidden sm:block">
-                <span class="text-xs font-black text-slate-900 block leading-tight">🙏 3D AI Advisor</span>
-                <span class="text-[10px] text-amber-700 font-semibold block">Tap to hear welcome voice</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-black text-slate-900 leading-tight">AI Advisor</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-100 text-rose-700">Namaste</span>
+                </div>
+                <span class="text-[10px] text-slate-500 font-semibold block">Tap to chat & ask prices</span>
             </div>
-            <span class="w-7 h-7 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+            <span class="w-8 h-8 rounded-full bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-700 shrink-0 group-hover:bg-amber-100 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
             </span>
         </button>
     </div>
@@ -203,9 +168,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const centerModal = document.getElementById('ai-center-modal');
+    const centerStage = document.getElementById('ai-center-stage');
     const floatingPill = document.getElementById('ai-floating-pill');
     const pillTriggerBtn = document.getElementById('ai-pill-trigger-btn');
     const exploreBtn = document.getElementById('ai-explore-btn');
+    const exploreActionContainer = document.getElementById('ai-explore-action-container');
     const skipBtn = document.getElementById('ai-center-skip-btn');
     const replayBtn = document.getElementById('ai-center-replay-btn');
     const tapListenBtn = document.getElementById('ai-tap-listen-btn');
@@ -216,6 +183,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const avatarCanvasContainer = document.getElementById('ai-3d-avatar-canvas');
     const model3DUrl = "{{ $advisorModelUrl }}";
 
+    let currentActiveSpokenText = "{{ addslashes($voiceGreeting) }}";
+
     // ── Mount 3D GLB Avatar with Namaste Pose ────────────────────────────
     function initShowroom3DAvatar() {
         if (!avatarCanvasContainer || window.showroom3DAvatar) return;
@@ -225,8 +194,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 modelUrl: model3DUrl,
                 interactive: true,
                 cameraFov: 28,
-                onLoad: function() {
+                onLoad: function(avatar) {
                     console.log('[Showroom 3D] Namaste GLB Advisor mounted successfully');
+                    if (isSpeaking && currentActiveSpokenText && avatar && typeof avatar.startSpeech === 'function') {
+                        avatar.startSpeech(currentActiveSpokenText, 0.94);
+                    }
                 }
             });
         } else {
@@ -302,29 +274,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.showroom3DAvatar.setSpeaking(true, amplitude, analyser ? 'audio' : 'speech');
             }
 
-            // Animate 2D fallback mouth cavity
-            const openY = 12 + amplitude * 20;       // 12 (closed) … 32 (wide open)
-            const tongueRy = amplitude * 5;           // 0 (closed) … 5 (open)
-            const scaleX = 1 + amplitude * 0.18;      // slight horizontal stretch
-
-            if (mouthCavityPath) {
-                mouthCavityPath.setAttribute('d', `M 5 12 Q 25 ${openY.toFixed(1)} 45 12 Z`);
-                mouthCavityPath.style.transform = `scaleX(${scaleX.toFixed(3)})`;
-                mouthCavityPath.style.transformOrigin = 'center';
-            }
-            if (mouthTongueEl) {
-                mouthTongueEl.setAttribute('ry', tongueRy.toFixed(1));
-            }
-
-            // Drive the visualizer bars with real amplitude
-            if (visualizerBars) {
-                const bars = visualizerBars.querySelectorAll('.sound-bar');
-                bars.forEach((bar, i) => {
-                    const h = 4 + amplitude * 14 * (0.6 + 0.4 * Math.sin(Date.now() / 120 + i));
-                    bar.style.height = Math.round(h) + 'px';
-                });
-            }
-
             lipSyncRafId = requestAnimationFrame(loop);
         };
         lipSyncRafId = requestAnimationFrame(loop);
@@ -335,12 +284,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (speechSynthRafId) { cancelAnimationFrame(speechSynthRafId); speechSynthRafId = null; }
         if (window.showroom3DAvatar) {
             window.showroom3DAvatar.setSpeaking(false, 0);
-        }
-        // Reset mouth to closed position
-        if (mouthCavityPath) mouthCavityPath.setAttribute('d', 'M 5 12 Q 25 12 45 12 Z');
-        if (mouthTongueEl)  mouthTongueEl.setAttribute('ry', '0');
-        if (visualizerBars) {
-            visualizerBars.querySelectorAll('.sound-bar').forEach(b => b.style.height = '4px');
         }
     }
 
@@ -374,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
                n.includes('lekha') || n.includes('swara') || n.includes('veena') ||
                n.includes('samantha') || n.includes('zira') || n.includes('kavya') ||
                n.includes('priya') || n.includes('aditi') || n.includes('heera') ||
-               n.includes('kalpana') || n.includes('geeta');
+               n.includes('kalpana') || n.includes('geeta') || n.includes('neerja');
     }
 
     function isMaleVoice(name) {
@@ -382,7 +325,41 @@ document.addEventListener('DOMContentLoaded', function () {
         return n.includes('male') || n.includes('man') || n.includes('boy') ||
                n.includes('rishi') || n.includes('daniel') || n.includes('george') ||
                n.includes('madhav') || n.includes('hemant') || n.includes('david') ||
-               n.includes('ravi');
+               n.includes('ravi') || n.includes('prabhat');
+    }
+
+    function isNaturalVoice(name) {
+        const n = name.toLowerCase();
+        return n.includes('natural') || n.includes('online') || n.includes('google') ||
+               n.includes('neural') || n.includes('premium') || n.includes('enhanced') ||
+               n.includes('siri');
+    }
+
+    function transliterateHinglishFallback(text) {
+        if (!text || !/[a-zA-Z]/.test(text)) return text;
+        const DICT = {
+            'namaste': 'नमस्ते', 'namaskar': 'नमस्कार', 'pranam': 'प्रणाम',
+            'royal': 'रॉयल', 'bike': 'बाइक', 'bikes': 'बाइक्स', 'motor': 'मोटर', 'motors': 'मोटर्स',
+            'tvs': 'टीवीएस', 'honda': 'होंडा', 'hero': 'हीरो', 'yamaha': 'यामाहा', 'bajaj': 'बजाज',
+            'suzuki': 'सुजुकी', 'bullet': 'बुलेट', 'rider': 'राइडर', 'raider': 'रेडर', 'apache': 'अपाचे',
+            'jupiter': 'जुपिटर', 'scooter': 'स्कूटर', 'scooty': 'स्कूटी', 'gaadi': 'गाड़ी', 'gadi': 'गाड़ी',
+            'apka': 'आपका', 'aapka': 'आपका', 'aapke': 'आपके', 'apke': 'आपके', 'aapki': 'आपकी', 'apki': 'आपकी',
+            'hamare': 'हमारे', 'hamaare': 'हमारे', 'humare': 'हमारे', 'hamara': 'हमारा', 'hamaari': 'हमारी',
+            'swagat': 'स्वागत', 'hai': 'है', 'hain': 'हैं', 'ish': 'इस', 'is': 'इस', 'ye': 'ये', 'yeh': 'यह',
+            'showroom': 'शोरूम', 'sorum': 'शोरूम', 'me': 'में', 'mein': 'में', 'parr': 'पर', 'par': 'पर', 'pe': 'पे',
+            'sabse': 'सबसे', 'badiya': 'बढ़िया', 'badhiya': 'बढ़िया', 'achha': 'अच्छा', 'accha': 'अच्छा', 'achhi': 'अच्छी',
+            'bataiye': 'बताइए', 'batao': 'बताओ', 'aaj': 'आज', 'hum': 'हम', 'kya': 'क्या', 'kaise': 'कैसे',
+            'sahayata': 'सहायता', 'madad': 'मदद', 'kar': 'कर', 'sakta': 'सकता', 'sakti': 'सकती', 'sakte': 'सकते',
+            'hu': 'हूँ', 'hoon': 'हूँ', 'ho': 'हो', 'dhanyawad': 'धन्यवाद', 'dhanyavad': 'धन्यवाद', 'shukriya': 'शुक्रिया',
+            'offer': 'ऑफर', 'offers': 'ऑफ़र्स', 'discount': 'डिस्काउंट', 'deal': 'डील', 'deals': 'डील्स',
+            'finance': 'फाइनेंस', 'emi': 'ईएमआई', 'price': 'प्राइस', 'rate': 'रेट', 'booking': 'बुकिंग',
+            'test': 'टेस्ट', 'ride': 'राइड', 'karo': 'करो', 'kariye': 'करिए', 'dekhiye': 'देखिए',
+            'chahiye': 'चाहिए', 'lena': 'लेना', 'kharidna': 'खरीदना', 'service': 'सर्विस'
+        };
+        return text.replace(/\b[a-zA-Z]+\b/g, (match) => {
+            const lower = match.toLowerCase();
+            return DICT[lower] || match;
+        });
     }
 
     function resolveVoice(voices) {
@@ -392,49 +369,79 @@ document.addEventListener('DOMContentLoaded', function () {
             if (exact) return exact;
         }
 
-        const langPrefix = voiceLang.substring(0, 2);
-        const matchingLangVoices = voices.filter(v => v.lang === voiceLang || v.lang.replace('_', '-').startsWith(langPrefix));
+        const hindiVoices = voices.filter(v => v.lang === 'hi-IN' || v.lang.replace('_', '-').startsWith('hi'));
+        const indianVoices = voices.filter(v => v.lang === 'en-IN' || v.lang.replace('_', '-').startsWith('en-IN') || v.lang === 'en_IN');
 
         if (voiceGender === 'female') {
-            const fVoice = matchingLangVoices.find(v => isFemaleVoice(v.name));
-            if (fVoice) return fVoice;
-        } else {
-            const mVoice = matchingLangVoices.find(v => isMaleVoice(v.name));
-            if (mVoice) return mVoice;
-        }
+            const naturalHindi = hindiVoices.find(v => isFemaleVoice(v.name) && isNaturalVoice(v.name));
+            if (naturalHindi) return naturalHindi;
 
-        return matchingLangVoices[0] || voices[0];
+            const anyHindiFemale = hindiVoices.find(v => isFemaleVoice(v.name));
+            if (anyHindiFemale) return anyHindiFemale;
+
+            const naturalIndian = indianVoices.find(v => isFemaleVoice(v.name) && isNaturalVoice(v.name));
+            if (naturalIndian) return naturalIndian;
+
+            const anyIndianFemale = indianVoices.find(v => isFemaleVoice(v.name));
+            if (anyIndianFemale) return anyIndianFemale;
+
+            return hindiVoices[0] || indianVoices[0] || voices[0];
+        } else {
+            const naturalHindiMale = hindiVoices.find(v => isMaleVoice(v.name) && isNaturalVoice(v.name));
+            if (naturalHindiMale) return naturalHindiMale;
+
+            const anyHindiMale = hindiVoices.find(v => isMaleVoice(v.name));
+            if (anyHindiMale) return anyHindiMale;
+
+            const naturalIndianMale = indianVoices.find(v => isMaleVoice(v.name) && isNaturalVoice(v.name));
+            if (naturalIndianMale) return naturalIndianMale;
+
+            const anyIndianMale = indianVoices.find(v => isMaleVoice(v.name));
+            if (anyIndianMale) return anyIndianMale;
+
+            const naturalHindi = hindiVoices.find(v => isNaturalVoice(v.name));
+            if (naturalHindi) return naturalHindi;
+
+            return hindiVoices[0] || indianVoices[0] || voices[0];
+        }
+    }
+
+    function onSpeakingCompleted() {
+        if (statusLabel) {
+            statusLabel.textContent = "Welcome to {{ addslashes($showroom->name) }}";
+            statusLabel.classList.remove('text-amber-800');
+            statusLabel.classList.add('text-emerald-700');
+        }
+        if (exploreActionContainer) {
+            exploreActionContainer.classList.remove('hidden', 'opacity-0', 'translate-y-6', 'pointer-events-none');
+            exploreActionContainer.classList.add('flex', 'opacity-100', 'translate-y-0', 'pointer-events-auto');
+        }
+        if (tapActionBox) {
+            tapActionBox.classList.add('hidden');
+        }
     }
 
     // Synchronize Mouth Lip-Sync with Speech State
     function setLipSyncState(speaking, source) {
         isSpeaking = speaking;
         if (speaking) {
-            if (lipSyncOverlay) {
-                lipSyncOverlay.classList.remove('opacity-0');
-                lipSyncOverlay.classList.add('opacity-100');
-            }
             if (visualizerBars) visualizerBars.classList.remove('hidden');
             if (statusLabel) {
                 statusLabel.textContent = (source === 'video') ? "Playing AI Welcome Video..." : "Speaking Welcome Greeting...";
-                statusLabel.classList.remove('text-slate-500');
-                statusLabel.classList.add('text-amber-700');
+                statusLabel.classList.remove('text-slate-500', 'text-emerald-700');
+                statusLabel.classList.add('text-amber-800');
+            }
+            if (exploreActionContainer) {
+                exploreActionContainer.classList.add('hidden', 'opacity-0', 'translate-y-6', 'pointer-events-none');
+                exploreActionContainer.classList.remove('flex', 'opacity-100', 'translate-y-0', 'pointer-events-auto');
             }
             // Start the real-time render loop
             if (source !== 'video') startSyntheticAmplitudeLoop();
             startLipSyncLoop();
         } else {
-            if (lipSyncOverlay) {
-                lipSyncOverlay.classList.remove('opacity-100');
-                lipSyncOverlay.classList.add('opacity-0');
-            }
             if (visualizerBars) visualizerBars.classList.add('hidden');
-            if (statusLabel) {
-                statusLabel.textContent = "AI Showroom Welcome";
-                statusLabel.classList.remove('text-amber-700');
-                statusLabel.classList.add('text-slate-500');
-            }
             stopLipSyncLoop();
+            onSpeakingCompleted();
         }
     }
 
@@ -480,6 +487,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 audioElement.crossOrigin = 'anonymous';
                 audioElement.addEventListener('play', () => {
                     setLipSyncState(true, 'audio');
+                    if (window.showroom3DAvatar && typeof window.showroom3DAvatar.startSpeech === 'function') {
+                        window.showroom3DAvatar.startSpeech(voiceText, 0.94);
+                    }
                     // Connect analyser node for real amplitude data
                     if (audioCtx) {
                         try {
@@ -490,7 +500,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                 });
-                audioElement.addEventListener('ended', () => setLipSyncState(false));
+                audioElement.addEventListener('ended', () => {
+                    if (window.showroom3DAvatar && typeof window.showroom3DAvatar.stopSpeech === 'function') {
+                        window.showroom3DAvatar.stopSpeech();
+                    }
+                    setLipSyncState(false);
+                });
                 audioElement.addEventListener('pause', () => setLipSyncState(false));
                 audioElement.addEventListener('error', () => setLipSyncState(false));
             }
@@ -512,20 +527,26 @@ document.addEventListener('DOMContentLoaded', function () {
         if ('speechSynthesis' in window) {
             try {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(voiceText);
-                utterance.lang = voiceLang;
-
-                const isFemale = voiceGender === 'female';
-                utterance.pitch = voicePitch || (isFemale ? 1.22 : 0.88);
-                utterance.rate = isFemale ? 0.98 : 0.94;
-
                 const voices = window.speechSynthesis.getVoices();
                 const matchedVoice = resolveVoice(voices);
+
+                let spokenText = voiceText;
+                if (voiceLang.startsWith('hi') && /[a-zA-Z]/.test(spokenText) && (!matchedVoice || matchedVoice.lang.startsWith('hi'))) {
+                    spokenText = transliterateHinglishFallback(spokenText);
+                }
+                currentActiveSpokenText = spokenText;
+
+                const utterance = new SpeechSynthesisUtterance(spokenText);
+                utterance.lang = matchedVoice ? matchedVoice.lang : voiceLang;
+                utterance.pitch = (voicePitch && voicePitch >= 0.9 && voicePitch <= 1.1) ? voicePitch : 1.00;
+                utterance.rate = 0.94;
                 if (matchedVoice) utterance.voice = matchedVoice;
 
                 utterance.onstart = () => {
                     hasPlayedOnce = true;
-                    // Web Speech API doesn't expose audio stream — use synthetic amplitude loop
+                    if (window.showroom3DAvatar && typeof window.showroom3DAvatar.startSpeech === 'function') {
+                        window.showroom3DAvatar.startSpeech(spokenText, utterance.rate || 0.94);
+                    }
                     setLipSyncState(true, 'speech');
                     if (tapActionBox) tapActionBox.classList.add('hidden');
                 };
@@ -533,13 +554,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (event.name === 'word') {
                         const text = utterance.text;
                         const word = text.slice(event.charIndex).split(/\s+/)[0] || '';
-                        if (window.showroom3DAvatar) {
-                            window.showroom3DAvatar.pulseWord(word);
+                        if (window.showroom3DAvatar && typeof window.showroom3DAvatar.pulseWord === 'function') {
+                            window.showroom3DAvatar.pulseWord(word, event.charIndex);
                         }
                     }
                 };
-                utterance.onend = () => setLipSyncState(false);
-                utterance.onerror = () => setLipSyncState(false);
+                utterance.onend = () => {
+                    if (window.showroom3DAvatar && typeof window.showroom3DAvatar.stopSpeech === 'function') {
+                        window.showroom3DAvatar.stopSpeech();
+                    }
+                    setLipSyncState(false);
+                };
+                utterance.onerror = () => {
+                    if (window.showroom3DAvatar && typeof window.showroom3DAvatar.stopSpeech === 'function') {
+                        window.showroom3DAvatar.stopSpeech();
+                    }
+                    setLipSyncState(false);
+                };
 
                 window.speechSynthesis.speak(utterance);
 
@@ -556,47 +587,88 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Open Center Welcome Screen
     function openCenterModal(triggerAudio = true) {
-        if (floatingPill) floatingPill.classList.add('hidden');
+        if (floatingPill) {
+            floatingPill.classList.remove('opacity-100', 'scale-100');
+            floatingPill.classList.add('opacity-0', 'scale-75');
+            setTimeout(() => floatingPill.classList.add('hidden'), 200);
+        }
+        if (centerStage) {
+            centerStage.style.transform = '';
+            centerStage.style.opacity = '';
+        }
         centerModal.classList.remove('hidden');
         setTimeout(() => {
             centerModal.classList.remove('opacity-0');
             centerModal.classList.add('opacity-100');
         }, 10);
 
-        if (triggerAudio) {
+        if (exploreActionContainer) {
+            exploreActionContainer.classList.add('hidden', 'opacity-0', 'translate-y-6', 'pointer-events-none');
+            exploreActionContainer.classList.remove('flex', 'opacity-100', 'translate-y-0', 'pointer-events-auto');
+        }
+
+        if (triggerAudio && voiceEnabled) {
             startVoiceSpeech(false);
+            // Safety timeout: if speech was blocked and user didn't tap, reveal button after 9s so user can proceed
+            setTimeout(() => {
+                if (!isSpeaking && !hasPlayedOnce) onSpeakingCompleted();
+            }, 9000);
+        } else {
+            onSpeakingCompleted();
         }
     }
 
     // Minimize to Bottom-Right Floating Avatar
     function minimizeCenterModal() {
-        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        if (audioElement) audioElement.pause();
-        if (welcomeVideo) welcomeVideo.pause();
-        setLipSyncState(false);
+        try {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (audioElement) audioElement.pause();
+            if (welcomeVideo) welcomeVideo.pause();
+            if (window.showroom3DAvatar && typeof window.showroom3DAvatar.stopSpeech === 'function') {
+                window.showroom3DAvatar.stopSpeech();
+            }
+            stopLipSyncLoop();
+        } catch (err) {
+            console.warn('[AI Assistant] Cleanup error:', err);
+        }
 
+        // Animate the center avatar smoothly shrinking down towards the bottom-right corner
+        if (centerStage) {
+            centerStage.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+            centerStage.style.transform = 'translate(36vw, 36vh) scale(0.12)';
+            centerStage.style.opacity = '0';
+        }
         centerModal.classList.remove('opacity-100');
         centerModal.classList.add('opacity-0');
 
         setTimeout(() => {
             centerModal.classList.add('hidden');
-            if (floatingPill) floatingPill.classList.remove('hidden');
-        }, 300);
+            if (centerStage) {
+                centerStage.style.transition = '';
+                centerStage.style.transform = '';
+                centerStage.style.opacity = '';
+            }
+            if (floatingPill) {
+                floatingPill.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    floatingPill.classList.remove('opacity-0', 'scale-75');
+                    floatingPill.classList.add('opacity-100', 'scale-100');
+                });
+            }
+        }, 460);
     }
 
     // Event Handlers
-    if (exploreBtn) exploreBtn.addEventListener('click', minimizeCenterModal);
-    if (skipBtn) skipBtn.addEventListener('click', minimizeCenterModal);
-
-    if (replayBtn) {
-        replayBtn.addEventListener('click', function () {
-            startVoiceSpeech(true);
+    if (exploreBtn) {
+        exploreBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            minimizeCenterModal();
         });
     }
-
-    if (tapListenBtn) {
-        tapListenBtn.addEventListener('click', function () {
-            startVoiceSpeech(true);
+    if (skipBtn) {
+        skipBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            minimizeCenterModal();
         });
     }
 
@@ -607,15 +679,29 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Single Tap Anywhere on Center Modal starts speech if browser had blocked autoplay
-    centerModal.addEventListener('click', function (e) {
+    // Tap anywhere on blurred center modal starts/resumes speech if browser blocked autoplay
+    function userInteractionSpeechTrigger(e) {
         if (e.target.closest('#ai-center-skip-btn') || e.target.closest('#ai-explore-btn')) return;
-        if (!hasPlayedOnce && voiceEnabled) {
+        if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+        }
+        if (!isSpeaking && voiceEnabled) {
             startVoiceSpeech(true);
         }
-    }, { once: true });
+    }
+    centerModal.addEventListener('click', userInteractionSpeechTrigger);
+    centerModal.addEventListener('touchstart', userInteractionSpeechTrigger, { passive: true });
 
-    // Initial Appearance in the Middle for First-Time Visitor (or QR scan ?welcome=1)
+    // Handle asynchronous voice loading in Chrome / Safari
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = function() {
+            if (!hasPlayedOnce && voiceEnabled && !isSpeaking) {
+                startVoiceSpeech(false);
+            }
+        };
+    }
+
+    // Initial Appearance in the Middle for Visitor
     setTimeout(() => {
         openCenterModal(true);
     }, 400);

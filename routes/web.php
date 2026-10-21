@@ -366,6 +366,7 @@ Route::middleware('tenant')->prefix('showrooms/{showroom}')->group(function () {
         Route::put('/manage/ai/settings', [AiAssistantManagementController::class, 'updateSettings'])->name('showrooms.manage.ai.settings');
         Route::post('/manage/ai/generate-video', [AiAssistantManagementController::class, 'generateGeminiVideo'])->name('showrooms.manage.ai.generate-video');
         Route::post('/manage/ai/check-video', [AiAssistantManagementController::class, 'checkGeminiVideo'])->name('showrooms.manage.ai.check-video');
+        Route::post('/manage/ai/transliterate', [AiAssistantManagementController::class, 'transliterateHindi'])->name('showrooms.manage.ai.transliterate');
         Route::get('/manage/ai/conversations/{conversation}', [AiAssistantManagementController::class, 'showConversation'])->name('showrooms.manage.ai.conversations.show');
         Route::delete('/manage/ai/conversations/{conversation}', [AiAssistantManagementController::class, 'destroyConversation'])->name('showrooms.manage.ai.conversations.destroy');
 

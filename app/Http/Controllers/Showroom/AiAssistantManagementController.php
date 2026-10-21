@@ -433,6 +433,51 @@ class AiAssistantManagementController extends Controller
     }
 
     /**
+     * Transliterate Romanized Hindi (Hinglish) into native Devanagari Hindi script.
+     */
+    public function transliterateHindi(Request $request, Showroom $showroom): JsonResponse
+    {
+        $text = trim((string) $request->input('text', ''));
+        if ($text === '') {
+            return response()->json([
+                'status' => 'empty',
+                'transliterated' => '',
+            ]);
+        }
+
+        try {
+            $response = Http::timeout(4)->get('https://inputtools.google.com/request', [
+                'text' => $text,
+                'itc' => 'hi-t-i0-und',
+                'num' => 1,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                if (is_array($data) && isset($data[0]) && $data[0] === 'SUCCESS' && isset($data[1]) && is_array($data[1])) {
+                    $combined = '';
+                    foreach ($data[1] as $chunk) {
+                        $combined .= $chunk[1][0] ?? ($chunk[0] ?? '');
+                    }
+                    if (trim($combined) !== '') {
+                        return response()->json([
+                            'status' => 'success',
+                            'transliterated' => trim($combined),
+                        ]);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Gracefully handle timeout or external network issues
+        }
+
+        return response()->json([
+            'status' => 'fallback',
+            'transliterated' => $text,
+        ]);
+    }
+
+    /**
      * Delete an individual customer chat conversation.
      */
     public function destroyConversation(Showroom $showroom, AiConversation $conversation): RedirectResponse

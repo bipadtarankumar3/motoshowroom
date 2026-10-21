@@ -393,26 +393,298 @@ export class Avatar3DViewer {
     }
 
     /**
-     * Syllable burst triggered on Web Speech API word boundary
+     * Start speech timeline synchronized with spoken text (Hindi Devanagari or English)
      */
-    pulseWord(word) {
-        const w = (word || '').toLowerCase().replace(/[^a-z]/g, '');
-        if (!w) return;
+    startSpeech(text, rate = 0.94) {
+        this.isSpeaking = true;
+        this.spokenText = text || '';
+        this.speechRate = rate || 0.94;
+        this.speechTimeline = this.buildPhonemeTimeline(this.spokenText, this.speechRate);
+        this.speechStartTime = performance.now();
+        this.currentWordBurst = null;
+    }
 
-        let primaryViseme = 'viseme_aa';
-        if (w.includes('o') || w.includes('u')) {
-            primaryViseme = 'viseme_O';
-        } else if (w.includes('i') || w.includes('e')) {
-            primaryViseme = 'viseme_I';
-        } else if (w.includes('m') || w.includes('p') || w.includes('b')) {
-            primaryViseme = 'viseme_PP';
+    stopSpeech() {
+        this.isSpeaking = false;
+        this.speechTimeline = null;
+        this.currentWordBurst = null;
+        this.speechAmplitude = 0;
+    }
+
+    /**
+     * Decomposes Hindi Devanagari or English text into a sequence of timed phonetic viseme targets
+     */
+    buildPhonemeTimeline(text, rate = 0.94) {
+        if (!text || typeof text !== 'string') return null;
+        const words = text.trim().split(/\s+/);
+        if (!words.length) return null;
+
+        const phonemes = [];
+        // Base duration per phoneme in milliseconds (~115ms at rate 1.0)
+        const baseUnit = Math.max(75, Math.min(220, Math.round(115 / (rate || 0.94))));
+        let currentTime = 0;
+
+        words.forEach((rawWord, wIdx) => {
+            const clean = rawWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'–—]/g, '');
+            if (!clean) return;
+
+            const chars = Array.from(clean);
+            for (let i = 0; i < chars.length; i++) {
+                const ch = chars[i];
+                let p = null;
+
+                // 1. Bilabials (Lips touch and close firmly) -> viseme_PP
+                // Hindi: म (ma), प (pa), ब (ba), भ (bha), फ (pha)
+                // English: m, p, b
+                if (/[मपबभफmpbMPB]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_PP',
+                        jawOpen: 0.04,
+                        mouthOpen: 0.05,
+                        mouthClose: 0.60,
+                        mouthPucker: 0.15,
+                        mouthFunnel: 0,
+                        mouthSmile: 0.08,
+                        duration: Math.round(baseUnit * 0.9),
+                    };
+                }
+                // 2. Open vowels (Wide jaw drop) -> viseme_aa
+                // Hindi: आ, ा, अ, ऑ, ॉ, ऐ, ै
+                // English: a, A
+                else if (/[आाअऑॉaA]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_aa',
+                        jawOpen: 0.62,
+                        mouthOpen: 0.58,
+                        mouthClose: 0,
+                        mouthFunnel: 0.1,
+                        mouthPucker: 0,
+                        mouthSmile: 0.05,
+                        duration: Math.round(baseUnit * 1.25),
+                    };
+                }
+                // 3. Rounded / Back vowels (Funnel / Pucker) -> viseme_O, viseme_U
+                // Hindi: ओ, ो, औ, ौ, उ, ु, ऊ, ू
+                // English: o, u, w
+                else if (/[ओोऔौoOwW]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_O',
+                        jawOpen: 0.38,
+                        mouthOpen: 0.36,
+                        mouthClose: 0,
+                        mouthFunnel: 0.55,
+                        mouthPucker: 0.35,
+                        mouthSmile: 0.02,
+                        duration: Math.round(baseUnit * 1.2),
+                    };
+                }
+                else if (/[उुऊूuU]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_U',
+                        jawOpen: 0.28,
+                        mouthOpen: 0.26,
+                        mouthClose: 0,
+                        mouthFunnel: 0.45,
+                        mouthPucker: 0.45,
+                        mouthSmile: 0.02,
+                        duration: Math.round(baseUnit * 1.15),
+                    };
+                }
+                // 4. Front vowels (Wider horizontal spread) -> viseme_I, viseme_E
+                // Hindi: इ, ि, ई, ी, ए, े
+                // English: i, e, y
+                else if (/[इिईीiIyY]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_I',
+                        jawOpen: 0.26,
+                        mouthOpen: 0.24,
+                        mouthClose: 0,
+                        mouthFunnel: 0,
+                        mouthPucker: 0,
+                        mouthSmile: 0.30,
+                        duration: Math.round(baseUnit * 1.05),
+                    };
+                }
+                else if (/[एेeE]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_E',
+                        jawOpen: 0.32,
+                        mouthOpen: 0.30,
+                        mouthClose: 0,
+                        mouthFunnel: 0,
+                        mouthPucker: 0,
+                        mouthSmile: 0.22,
+                        duration: Math.round(baseUnit * 1.1),
+                    };
+                }
+                // 5. Sibilants / Dentals (Teeth align) -> viseme_SS, viseme_DD, viseme_TH
+                // Hindi: स, श, ष, त, थ, द, ध, न
+                // English: s, z, t, d, n
+                else if (/[सशषszSZ]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_SS',
+                        jawOpen: 0.16,
+                        mouthOpen: 0.15,
+                        mouthClose: 0,
+                        mouthFunnel: 0,
+                        mouthPucker: 0,
+                        mouthSmile: 0.18,
+                        duration: Math.round(baseUnit * 0.95),
+                    };
+                }
+                else if (/[तथदधनtdnTDN]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_DD',
+                        jawOpen: 0.22,
+                        mouthOpen: 0.20,
+                        mouthClose: 0,
+                        mouthFunnel: 0,
+                        mouthPucker: 0,
+                        mouthSmile: 0.12,
+                        duration: Math.round(baseUnit * 0.88),
+                    };
+                }
+                // 6. Velars / Palatals -> viseme_kk, viseme_CH
+                // Hindi: क, ख, ग, घ, च, छ, ज, झ
+                // English: k, g, c, q, j
+                else if (/[कखगघkgcqKGCQ]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_kk',
+                        jawOpen: 0.34,
+                        mouthOpen: 0.30,
+                        mouthClose: 0,
+                        mouthFunnel: 0,
+                        mouthPucker: 0,
+                        mouthSmile: 0.10,
+                        duration: Math.round(baseUnit * 0.9),
+                    };
+                }
+                else if (/[चछजझjJ]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_CH',
+                        jawOpen: 0.26,
+                        mouthOpen: 0.24,
+                        mouthClose: 0,
+                        mouthFunnel: 0.15,
+                        mouthPucker: 0,
+                        mouthSmile: 0.14,
+                        duration: Math.round(baseUnit * 0.9),
+                    };
+                }
+                // 7. Labiodentals -> viseme_FF
+                // English: f, v
+                else if (/[fvFV]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_FF',
+                        jawOpen: 0.18,
+                        mouthOpen: 0.16,
+                        mouthClose: 0,
+                        mouthFunnel: 0,
+                        mouthPucker: 0.1,
+                        mouthSmile: 0.12,
+                        duration: Math.round(baseUnit * 0.88),
+                    };
+                }
+                // 8. Liquids & Nasals -> viseme_RR
+                // Hindi: र, ल, ह
+                // English: r, l, h
+                else if (/[रलहrlhRLH]/.test(ch)) {
+                    p = {
+                        viseme: 'viseme_RR',
+                        jawOpen: 0.28,
+                        mouthOpen: 0.25,
+                        mouthClose: 0,
+                        mouthFunnel: 0,
+                        mouthPucker: 0,
+                        mouthSmile: 0.12,
+                        duration: Math.round(baseUnit * 0.9),
+                    };
+                }
+
+                if (p) {
+                    p.word = rawWord;
+                    p.wordIndex = wIdx;
+                    p.startTime = currentTime;
+                    p.endTime = currentTime + p.duration;
+                    currentTime = p.endTime;
+                    phonemes.push(p);
+                }
+            }
+
+            // Natural closure / pause between words
+            const gapDuration = Math.round(baseUnit * 0.7);
+            phonemes.push({
+                viseme: 'viseme_sil',
+                jawOpen: 0.03,
+                mouthOpen: 0.02,
+                mouthClose: 0.1,
+                mouthFunnel: 0,
+                mouthPucker: 0,
+                mouthSmile: 0.15,
+                duration: gapDuration,
+                word: ' ',
+                wordIndex: wIdx,
+                startTime: currentTime,
+                endTime: currentTime + gapDuration,
+            });
+            currentTime += gapDuration;
+        });
+
+        return {
+            phonemes,
+            totalDuration: currentTime,
+        };
+    }
+
+    /**
+     * Syllable burst or word boundary synchronization
+     */
+    pulseWord(word, charIndex = -1) {
+        if (!word) return;
+        const cleanWord = word.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'–—]/g, '');
+        if (!cleanWord) return;
+
+        // If we have a speech timeline, resync timeline to this word
+        if (this.speechTimeline && this.speechTimeline.phonemes.length) {
+            const match = this.speechTimeline.phonemes.find(p =>
+                p.word && (p.word === cleanWord || cleanWord.includes(p.word) || p.word.includes(cleanWord))
+            );
+            if (match) {
+                this.speechStartTime = performance.now() - match.startTime;
+                this.isSpeaking = true;
+                return;
+            }
         }
 
-        const duration = Math.min(420, Math.max(180, w.length * 65));
+        // Fallback burst: detects Hindi or English phonemes
+        let primaryViseme = 'viseme_aa';
+        let jaw = 0.55;
+        let funnel = 0;
+        let close = 0;
+
+        if (/[मपबभफmpbMPB]/.test(cleanWord)) {
+            primaryViseme = 'viseme_PP';
+            jaw = 0.05;
+            close = 0.6;
+        } else if (/[ओोऔौउुऊूouOUwW]/.test(cleanWord)) {
+            primaryViseme = 'viseme_O';
+            jaw = 0.38;
+            funnel = 0.5;
+        } else if (/[इिईीएेiIeEyY]/.test(cleanWord)) {
+            primaryViseme = 'viseme_I';
+            jaw = 0.28;
+        } else if (/[सशषतथदधनstzndSTZND]/.test(cleanWord)) {
+            primaryViseme = 'viseme_SS';
+            jaw = 0.18;
+        }
+
+        const duration = Math.min(380, Math.max(160, cleanWord.length * 60));
 
         this.currentWordBurst = {
-            word: w,
             viseme: primaryViseme,
+            jawOpen: jaw,
+            mouthFunnel: funnel,
+            mouthClose: close,
             startTime: performance.now(),
             duration: duration,
         };
@@ -425,6 +697,7 @@ export class Avatar3DViewer {
         this.speechSource = source;
         if (!isSpeaking) {
             this.currentWordBurst = null;
+            this.speechTimeline = null;
         }
     }
 
@@ -490,10 +763,11 @@ export class Avatar3DViewer {
             let headYaw = rest.y + idleWanderY + this.currentLook.x * 0.15;
             let headRoll = rest.z + idleTilt + this.currentLook.x * 0.03;
 
-            // Subtle conversational head nod on vocal emphasis
-            if (this.isSpeaking && (this.speechAmplitude > 0.08 || this.currentWordBurst)) {
-                const nod = Math.sin(time * 9.0) * 0.025;
+            // Subtle conversational head nod on vocal cadence
+            if (this.isSpeaking) {
+                const nod = Math.sin(time * 8.2) * 0.022;
                 headPitch += nod;
+                headYaw += Math.sin(time * 3.4) * 0.012;
             }
 
             head.rotation.x = headPitch;
@@ -501,61 +775,96 @@ export class Avatar3DViewer {
             head.rotation.z = headRoll;
         }
 
-        // 4. Accurate Syllable-Driven Lip-Sync
-        let mouthOpenAmount = 0;
-        let activeVisemeKey = 'viseme_aa';
+        // 4. Accurate Syllable-Driven Lip-Sync Engine
+        let targetJaw = 0;
+        let targetMouthOpen = 0;
+        let targetFunnel = 0;
+        let targetPucker = 0;
+        let targetClose = 0;
+        let targetSmile = 0.15;
+        let activeViseme = null;
+        let visemeWeight = 0;
 
-        if (this.currentWordBurst) {
-            const elapsed = now - this.currentWordBurst.startTime;
-            const progress = elapsed / this.currentWordBurst.duration;
-            if (progress <= 1.0) {
-                // Syllable opening bell curve
-                mouthOpenAmount = Math.sin(progress * Math.PI) * 0.85;
-                activeVisemeKey = this.currentWordBurst.viseme;
-            } else {
-                this.currentWordBurst = null;
+        if (this.isSpeaking) {
+            // Priority A: Speech Timeline (Text phoneme sequence matching Hindi or English)
+            if (this.speechTimeline && this.speechTimeline.phonemes.length) {
+                const elapsed = now - this.speechStartTime;
+                const current = this.speechTimeline.phonemes.find(p => elapsed >= p.startTime && elapsed < p.endTime);
+                if (current) {
+                    activeViseme = current.viseme;
+                    const pProgress = (elapsed - current.startTime) / current.duration;
+                    const curve = Math.sin(pProgress * Math.PI);
+                    targetJaw = current.jawOpen * (0.6 + 0.4 * curve);
+                    targetMouthOpen = (current.mouthOpen || current.jawOpen) * (0.6 + 0.4 * curve);
+                    targetFunnel = (current.mouthFunnel || 0) * curve;
+                    targetPucker = (current.mouthPucker || 0) * curve;
+                    targetClose = (current.mouthClose || 0) * curve;
+                    targetSmile = (current.mouthSmile !== undefined ? current.mouthSmile : 0.08);
+                    visemeWeight = 0.75 * curve;
+                } else if (elapsed >= this.speechTimeline.totalDuration) {
+                    // Timeline reached end — rest mouth closed until speech completes
+                    targetJaw = 0;
+                    targetMouthOpen = 0;
+                    targetSmile = 0.15;
+                }
             }
-        } else if (this.isSpeaking && this.speechAmplitude > 0.04) {
-            // Audio frequency amplitude fallback
-            mouthOpenAmount = Math.min(0.9, Math.pow(this.speechAmplitude * 1.6, 0.85));
-            activeVisemeKey = 'viseme_aa';
+            // Priority B: Word Burst fallback
+            else if (this.currentWordBurst) {
+                const elapsed = now - this.currentWordBurst.startTime;
+                const progress = elapsed / this.currentWordBurst.duration;
+                if (progress <= 1.0) {
+                    const curve = Math.sin(progress * Math.PI);
+                    activeViseme = this.currentWordBurst.viseme;
+                    targetJaw = this.currentWordBurst.jawOpen * curve;
+                    targetMouthOpen = this.currentWordBurst.jawOpen * 0.9 * curve;
+                    targetFunnel = (this.currentWordBurst.mouthFunnel || 0) * curve;
+                    targetClose = (this.currentWordBurst.mouthClose || 0) * curve;
+                    targetSmile = 0.08;
+                    visemeWeight = 0.8 * curve;
+                } else {
+                    this.currentWordBurst = null;
+                }
+            }
+            // Priority C: Conversational syllable rhythm cadence (~4.2 Hz)
+            else {
+                const amp = Math.max(this.speechAmplitude, 0.35);
+                const syllableCycle = Math.sin(time * 26.0);
+                const openCurve = Math.max(0, syllableCycle) * amp;
+                targetJaw = openCurve * 0.48;
+                targetMouthOpen = openCurve * 0.52;
+                activeViseme = (syllableCycle > 0.4) ? 'viseme_aa' : 'viseme_O';
+                visemeWeight = openCurve * 0.7;
+                targetSmile = 0.08;
+            }
         }
 
-        if (mouthOpenAmount > 0.02) {
-            // Apply balanced mouth opening (jaw + lips)
-            this.targetMorphs['jawOpen'] = mouthOpenAmount * 0.55;
-            this.targetMorphs['mouthOpen'] = mouthOpenAmount * 0.65;
+        // Reset all visemes to 0
+        const allVisemes = [
+            'viseme_sil', 'viseme_PP', 'viseme_FF', 'viseme_TH', 'viseme_DD',
+            'viseme_kk', 'viseme_CH', 'viseme_SS', 'viseme_nn', 'viseme_RR',
+            'viseme_aa', 'viseme_E', 'viseme_I', 'viseme_O', 'viseme_U'
+        ];
+        allVisemes.forEach(v => { this.targetMorphs[v] = 0; });
 
-            // Reset other visemes
-            this.targetMorphs['viseme_aa'] = 0;
-            this.targetMorphs['viseme_O'] = 0;
-            this.targetMorphs['viseme_I'] = 0;
-            this.targetMorphs['viseme_U'] = 0;
-            this.targetMorphs['viseme_PP'] = 0;
-            this.targetMorphs['viseme_FF'] = 0;
-            this.targetMorphs['viseme_TH'] = 0;
-            this.targetMorphs['viseme_SS'] = 0;
-
-            // Trigger active viseme shape
-            this.targetMorphs[activeVisemeKey] = mouthOpenAmount * 0.8;
-
-            // Eyebrow emphasis
-            this.targetMorphs['browInnerUp'] = 0.08 + mouthOpenAmount * 0.18;
-            this.targetMorphs['mouthSmile'] = 0.05;
+        if (this.isSpeaking && targetJaw > 0.02) {
+            this.targetMorphs['jawOpen'] = targetJaw;
+            this.targetMorphs['mouthOpen'] = targetMouthOpen;
+            this.targetMorphs['mouthFunnel'] = targetFunnel;
+            this.targetMorphs['mouthPucker'] = targetPucker;
+            this.targetMorphs['mouthClose'] = targetClose;
+            this.targetMorphs['mouthSmile'] = targetSmile;
+            if (activeViseme && this.targetMorphs[activeViseme] !== undefined) {
+                this.targetMorphs[activeViseme] = visemeWeight;
+            }
+            this.targetMorphs['browInnerUp'] = 0.06 + targetJaw * 0.16;
         } else {
-            // Closed relaxed mouth with warm advisor smile
             this.targetMorphs['jawOpen'] = 0;
             this.targetMorphs['mouthOpen'] = 0;
-            this.targetMorphs['viseme_aa'] = 0;
-            this.targetMorphs['viseme_O'] = 0;
-            this.targetMorphs['viseme_I'] = 0;
-            this.targetMorphs['viseme_U'] = 0;
-            this.targetMorphs['viseme_PP'] = 0;
-            this.targetMorphs['viseme_FF'] = 0;
-            this.targetMorphs['viseme_TH'] = 0;
-            this.targetMorphs['viseme_SS'] = 0;
+            this.targetMorphs['mouthFunnel'] = 0;
+            this.targetMorphs['mouthPucker'] = 0;
+            this.targetMorphs['mouthClose'] = 0;
+            this.targetMorphs['mouthSmile'] = 0.16;
             this.targetMorphs['browInnerUp'] = 0.03;
-            this.targetMorphs['mouthSmile'] = 0.14;
         }
 
         // 5. Lerp morph targets smoothly (snappy 0.45 while speaking for crisp articulation)

@@ -754,4 +754,44 @@ class AiVirtualShowroomAssistantTest extends TestCase
         $viewAvatar->assertSee('ai-living-character');
         $viewAvatar->assertDontSee('ai-welcome-video-player');
     }
+
+    public function test_showroom_owner_can_transliterate_hinglish_to_hindi(): void
+    {
+        $this->actingAs($this->ownerA);
+
+        Http::fake([
+            'inputtools.google.com/*' => Http::response([
+                'SUCCESS',
+                [
+                    ['Namaste royal bike', ['नमस्ते रॉयल बाइक'], [], ['candidate_type' => [0]]],
+                    [' apka swagat hai', [' आपका स्वागत है'], [], ['candidate_type' => [0]]],
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->postJson(route('showrooms.manage.ai.transliterate', $this->showroomA), [
+            'text' => 'Namaste royal bike apka swagat hai',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'status' => 'success',
+                'transliterated' => 'नमस्ते रॉयल बाइक आपका स्वागत है',
+            ]);
+    }
+
+    public function test_transliterate_hindi_handles_empty_input(): void
+    {
+        $this->actingAs($this->ownerA);
+
+        $response = $this->postJson(route('showrooms.manage.ai.transliterate', $this->showroomA), [
+            'text' => '   ',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'status' => 'empty',
+                'transliterated' => '',
+            ]);
+    }
 }
