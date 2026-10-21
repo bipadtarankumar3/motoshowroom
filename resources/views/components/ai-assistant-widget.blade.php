@@ -116,7 +116,7 @@
                 </div>
             @else
                 <!-- Interactive 3D GLB Presenter: Namaste Greeting Pose & Real-Time Lip-Sync Speech -->
-                <div class="relative w-full max-w-[360px] h-[380px] sm:h-[420px] my-2 flex items-center justify-center select-none overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50/50 via-white to-slate-50/80 border border-slate-200/80 shadow-md">
+                <div id="ai-living-character" class="relative w-full max-w-[360px] h-[380px] sm:h-[420px] my-2 flex items-center justify-center select-none overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50/50 via-white to-slate-50/80 border border-slate-200/80 shadow-md">
                     <!-- Soft Warm Halo Ambient Background -->
                     <div class="absolute inset-0 m-auto w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-tr from-amber-200/35 via-rose-200/20 to-sky-200/25 blur-3xl pointer-events-none"></div>
 
