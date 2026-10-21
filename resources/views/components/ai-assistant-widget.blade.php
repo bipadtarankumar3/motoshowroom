@@ -526,7 +526,9 @@ document.addEventListener('DOMContentLoaded', function () {
         // Web Speech API Synthesis
         if ('speechSynthesis' in window) {
             try {
-                window.speechSynthesis.cancel();
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                }
                 const voices = window.speechSynthesis.getVoices();
                 const matchedVoice = resolveVoice(voices);
 
@@ -565,7 +567,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     setLipSyncState(false);
                 };
-                utterance.onerror = () => {
+                utterance.onerror = (event) => {
+                    console.warn('[AI Assistant] Utterance event error:', event ? event.error : 'unknown');
+                    if (event && (event.error === 'not-allowed' || event.error === 'interrupted')) {
+                        // Browser autoplay policy blocked programmatic speech before user interaction
+                        // Do not cancel or stop speech state; wait for user gesture activation
+                        return;
+                    }
                     if (window.showroom3DAvatar && typeof window.showroom3DAvatar.stopSpeech === 'function') {
                         window.showroom3DAvatar.stopSpeech();
                     }
@@ -573,14 +581,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
 
                 window.speechSynthesis.speak(utterance);
-
-                // Check if browser blocked speech before user click
-                if (!isUserGesture && window.speechSynthesis.paused) {
-                    if (tapActionBox) tapActionBox.classList.remove('hidden');
-                }
             } catch (err) {
-                console.log('Speech error:', err);
-                if (tapActionBox) tapActionBox.classList.remove('hidden');
+                console.warn('Speech error:', err);
             }
         }
     }
@@ -679,9 +681,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Tap anywhere on blurred center modal starts/resumes speech if browser blocked autoplay
-    function userInteractionSpeechTrigger(e) {
-        if (e.target.closest('#ai-center-skip-btn') || e.target.closest('#ai-explore-btn')) return;
+    // Global user gesture activation to unlock speech across all modern browsers
+    function globalUserGestureUnlock(e) {
+        if (!centerModal || centerModal.classList.contains('hidden')) return;
+        if (e.target && (e.target.closest('#ai-center-skip-btn') || e.target.closest('#ai-explore-btn'))) return;
         if ('speechSynthesis' in window && window.speechSynthesis.paused) {
             window.speechSynthesis.resume();
         }
@@ -689,8 +692,10 @@ document.addEventListener('DOMContentLoaded', function () {
             startVoiceSpeech(true);
         }
     }
-    centerModal.addEventListener('click', userInteractionSpeechTrigger);
-    centerModal.addEventListener('touchstart', userInteractionSpeechTrigger, { passive: true });
+    window.addEventListener('click', globalUserGestureUnlock, { capture: true });
+    window.addEventListener('pointerdown', globalUserGestureUnlock, { capture: true });
+    window.addEventListener('touchstart', globalUserGestureUnlock, { capture: true, passive: true });
+    window.addEventListener('keydown', globalUserGestureUnlock, { capture: true });
 
     // Handle asynchronous voice loading in Chrome / Safari
     if ('speechSynthesis' in window) {
